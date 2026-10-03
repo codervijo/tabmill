@@ -1,0 +1,18 @@
+{{marker}}
+# CLAUDE.md — Chrome extensions workspace
+
+Extensions managed by tabmill. Tool code (CLI, packages, templates, CI, skill sources) lives
+in the tabmill repo — never edit it from here, and never edit `.claude/skills/` (installed
+copies; change `tabmill/skills/` and run `tabmill skills sync`).
+
+## Rules
+
+- `extensions/<slug>/extension.yaml` is the source of truth; never hand-edit generated manifests.
+- Node only in the builder container: `make in-docker-<target>` or `make buildsh`. Never on the host.
+- Publishing never runs unattended: stop at "zip built + checks passing + listing drafted"
+  and add `HUMAN: publish <slug>` to TODO.md.
+- Directories at the top level that aren't `extensions/` predate tabmill — leave them alone.
+
+## Skills
+
+{{skills}}

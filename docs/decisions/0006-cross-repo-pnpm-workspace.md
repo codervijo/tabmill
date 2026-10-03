@@ -1,7 +1,7 @@
 ---
 ID: ADR-0006
 Title: cross-repo-pnpm-workspace
-Status: Accepted
+Status: Superseded by ADR-0007
 Date: 2026-10-03
 Supersedes: —
 ---

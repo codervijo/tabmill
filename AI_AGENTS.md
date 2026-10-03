@@ -31,9 +31,9 @@ Never three-level (`v1.A.1`). Commit messages and doc references use `vN.X` only
 Canonical statement: `~/work/projects/sites/portfolio/AI_AGENTS.md` § Versioning.
 
 ## Building info
-Nothing to build yet (v1.A). Planned: `uv sync`, `uv run pytest`, `uv run ruff check`,
-`uv run mypy` in TOOL_DIR; extensions build from WORKSPACE_DIR via `uv run tabmill build <slug>`,
-which calls the builder Makefile (docker).
+TOOL_DIR: `make deps | test | lint | fmt | check | build | run ARGS="init"` — includes the builder
+Makefile (Python stack) with `Makefile.local` overrides (D-018). Workspace (`$TABMILL_WORKSPACE`):
+`make in-docker-<target>` — Node only inside the builder container.
 
 ## Distribution / deployment info
 
@@ -45,7 +45,7 @@ which calls the builder Makefile (docker).
 - **Notes**: CWS credentials in `TOOL_DIR/.env` (never committed) — see `skills/tabmill-release/reference.md`
 
 ## How to run
-Not runnable yet.
+`make run ARGS="init"` · `make run ARGS="skills sync"` (or `uv run tabmill …`).
 
 ## Key conventions
 - TOOL_DIR / WORKSPACE_DIR boundary is absolute (`CLAUDE.md` § Rules).

@@ -1,0 +1,31 @@
+# Recipe: source of truth for the generated extension (ADR-0008).
+name: Save Page as Markdown or PDF
+slug: save-page-pdf-md
+version: 0.1.0
+summary: Save the current page as clean Markdown or a print-ready PDF. Runs locally — nothing is uploaded.
+single_purpose: Save the current web page as clean Markdown or a branded PDF.
+template: popup
+permissions:
+  - name: activeTab
+    justification: Read the current page only after the user clicks Save — no access to any other page or at any other time.
+  - name: scripting
+    justification: Run the article extractor in the current tab when the user clicks Save (allowed by activeTab; no host permissions).
+  - name: storage
+    justification: Pass the extracted article from the popup to the extension's own print page via session storage; deleted as soon as the print page reads it.
+optional_permissions: []
+dependencies:
+  "@mozilla/readability": "^0.6.0"   # DECISIONS.md dependency register
+  turndown: "^7.2.4"
+dev_dependencies:
+  "@types/turndown": "^5.0.6"
+remote_code: false
+portfolio_site: markpdf.dev
+landing_page_url: ""
+target_keywords: [markdown to pdf, save webpage as pdf, webpage to pdf, html to markdown]
+cta_text: Make branded PDFs from Markdown on MarkPDF
+cta_url: https://markpdf.dev
+utm_campaign: save-page-pdf-md
+# Category list isn't in the official docs (checked 2026-10-03); picked in the dashboard at
+# "Add new item".
+store_category: ‹FILL›
+analytics: false

@@ -43,7 +43,8 @@ installed skills. End users of the extensions are not Tabmill users.
 
 ## 5. Versions / phases
 
-Strict two-level versioning: `vN` tier, `vN.X` phase. Kickoff "Phase 0–5" = v1.A–v1.F (D-003).
+Strict two-level versioning: `vN` tier, `vN.X` phase. Kickoff "Phase 0–5" = v1.A–v1.F (D-003);
+reslotted 2026-10-03 for generated extensions (ADR-0008) → v1.A–v1.G.
 
 ### v1 — First extension portfolio
 
@@ -51,12 +52,13 @@ Strict two-level versioning: `vN` tier, `vN.X` phase. Kickoff "Phase 0–5" = v1
 
 | Phase | Status | Title |
 |---|---|---|
-| v1.A | 🔄 in progress | Kickoff / decisions lock — 8 spikes, docs, skill drafts |
-| v1.B | ⏳ planned | `tabmill init` + `skills sync`; workspace; extension #1 save-page-pdf-md |
-| v1.C | ⏳ planned | Extension #2 local-seo-checker; extract packages + schema; CLI new/dev/test/build/zip/lint |
-| v1.D | ⏳ planned | CLI assets/listing/publish; CI release zips on tag |
-| v1.E | ⏳ planned | CLI landing/status; analytics package |
-| v1.F | ⏳ planned | Extensions #3–#5 from installed skills only |
+| v1.A | ✅ done | Kickoff / decisions lock — 8 spikes, docs, skill drafts |
+| v1.B | ✅ done | Tool Makefile; `init` + `skills sync`; `build`; `new` (template + recipe → generated extension); popup template |
+| v1.C | 🔄 in progress | Extension #1 save-page-pdf-md recipe (feature code); 10 real URLs; smoke; zip |
+| v1.D | ⏳ planned | Extension #2 local-seo-checker recipe; shared packages; typed schema; CLI dev/test/zip/lint |
+| v1.E | ⏳ planned | CLI assets/listing/publish; CI release zips on tag |
+| v1.F | ⏳ planned | CLI landing/status; analytics package |
+| v1.G | ⏳ planned | Extensions #3–#5 as recipes |
 
 #### Design notes
 
@@ -64,8 +66,9 @@ See `PLAN.md` (per-phase scope + done criteria) and `NOTES.md` (v1.A spike findi
 
 ## 6. Conformance rules
 
-- Extension code only in WORKSPACE_DIR; tool code (CLI, packages, templates, CI templates,
-  skill sources) only in TOOL_DIR. No tool code copied into the workspace.
+- Extensions are generated (ADR-0008): their source (recipes: extension.yaml + feature code),
+  templates, packages, CLI, CI templates, and skill sources live only in TOOL_DIR;
+  `WORKSPACE_DIR/extensions/` is tabmill output and is never hand-edited.
 - extension.yaml is the source of truth; generated `manifest.json` is never hand-edited.
 - MV3 only. `strict: true`; no `any` without an explanatory comment.
 - Every runtime dependency has a row in `DECISIONS.md` § Dependency register.
@@ -82,12 +85,12 @@ See `PLAN.md` (per-phase scope + done criteria) and `NOTES.md` (v1.A spike findi
 
 1. ~~CLI language~~ — resolved 2026-10-03: Python + uv (ADR-0002).
 2. ~~Where Node runs~~ — resolved 2026-10-03: builder docker only, never host (ADR-0003).
-3. ~~Framework + linking~~ — resolved 2026-10-03: WXT (ADR-0004); cross-repo pnpm workspace (ADR-0006).
+3. ~~Framework + linking~~ — resolved 2026-10-03: WXT (ADR-0004); cross-repo pnpm workspace (ADR-0006, layout superseded by ADR-0007).
 4. ~~Branded PDF via MarkPDF~~ — resolved 2026-10-03: generated locally (D-013).
 5. **Rankmill CTA target** (2026-10-03): placeholder `https://rankmill.example/local-seo-audit`
    until the operator supplies the real URL; release lint blocks while it remains (D-015).
 6. ~~IndexNow for existing sites~~ — resolved 2026-10-03: skipped (D-016).
-7. ~~Repo visibility~~ — resolved 2026-10-03: tabmill is private; workspace CI uses `TABMILL_PAT` (ADR-0006).
+7. ~~Repo visibility~~ — resolved 2026-10-03: tabmill is private; workspace CI uses `TABMILL_PAT` (ADR-0007).
 8. **Publisher cap** (2026-10-03): new publishers get two published extensions; request more
    before #3 (v1.F).
 9. ~~Builder changes~~ — resolved 2026-10-03: workspace `Makefile.local` overrides only (ADR-0005).

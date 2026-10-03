@@ -1,0 +1,37 @@
+# Makefile.local — tabmill overrides of the builder's Python stack (included last, wins).
+# Builder's `build` runs `python -m build` and `run` runs `main.py`; tabmill uses `uv build`
+# and its console script, so those two are overridden (make prints "overriding recipe" for
+# them — expected). Builder's `test` (`uv run python3 -m pytest -v`) is used as-is.
+
+# `make buildsh`: own container (not the builder default `mb1`), plain docker (no sudo).
+# `:=` so values inherited from a parent make/env can't redirect the container.
+CONTAINER_NAME := tabmill-tool
+DOCKER_CMD := docker
+# Builder default 5193 collides with other builder containers (e.g. mb1); the CLI needs no
+# server, this just keeps the published port unique.
+HOST_PORT := 5194
+CONTAINER_PORT := 5194
+export CONTAINER_NAME DOCKER_CMD HOST_PORT CONTAINER_PORT
+
+ARGS ?=
+
+.PHONY: lint fmt check
+
+build: deps
+	@$(UV) build
+	@echo "✓ Build complete (dist/)"
+
+run: deps
+	@$(UV) run tabmill $(ARGS)
+
+lint: deps
+	@$(UV) run ruff check .
+	@$(UV) run ruff format --check .
+	@$(UV) run mypy
+	@echo "✓ Lint complete"
+
+fmt: deps
+	@$(UV) run ruff format .
+	@$(UV) run ruff check --fix .
+
+check: lint test

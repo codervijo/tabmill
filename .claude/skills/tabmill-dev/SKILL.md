@@ -17,9 +17,11 @@ skill is the how-to around them.
 | per-surface starter code | `templates/<popup\|side-panel\|devtools\|context-menu\|maps-overlay>/` |
 | GitHub Actions for the workspace | `ci/` (installed by `tabmill init`) |
 | workspace skills | `skills/<name>/SKILL.md` (+ reference files) |
-| extension source, extension.yaml, registry.json, builds | **WORKSPACE_DIR — never here** |
+| an extension (extension.yaml + feature code) | `recipes/<slug>/` (ADR-0008) |
+| generic surface code | `templates/extension/<template>/` |
+| generated extensions, registry.json, builds | WORKSPACE_DIR — tabmill output only, never hand-edited |
 
-Used by only one extension? It stays inline in that extension. Extract when the second needs
+Used by only one extension? It stays in that recipe. Extract when the second needs
 it — and say which two in the commit/PLAN entry.
 
 ## Before changing code
@@ -51,7 +53,8 @@ it — and say which two in the commit/PLAN entry.
 - Frontmatter at line 1: `name`, `description` (exact trigger conditions; ≤ 1,536 chars).
 - ≤ ~150 lines; long reference material in a sibling file, linked relatively.
 - Facts must be verified against official docs with a date; mark the rest UNVERIFIED.
-- After changing a skill: `tabmill skills sync` *(planned v1.B)*, note the gap that prompted it.
+- After changing a skill or anything in `templates/workspace/managed/` or `ci/`: `make run
+  ARGS="skills sync"`, and note the gap that prompted it. Seed templates only affect new workspaces.
 
 ## Tests
 

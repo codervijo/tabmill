@@ -16,21 +16,33 @@ blocker to `NOTES.md`, mark it BLOCKED, move on.
 - [ ] HUMAN: set real Rankmill CTA URL (placeholder `https://rankmill.example/local-seo-audit`; release lint blocks until replaced)
 - [ ] HUMAN: `git init` TOOL_DIR (+ GitHub repo if wanted)
 
-## v1.B — queued (don't start until v1.A is locked)
+## v1.B — Tool + generator ✅ (2026-10-03; details in docs/shipping-history.md)
 
-- [ ] Plan `tabmill init` + `skills sync` (Python/uv package in `cli/`, config resolution `tabmill.config.json` → `TABMILL_WORKSPACE`)
-- [ ] `templates/workspace/Makefile.local` (ADR-0005): WXT targets, parent-dir `VOLUME_MOUNT`, WXT dev-server port; verify `tabmill dev` HMR container → host Chrome
-- [ ] Workspace CI template (`ci/`) — typecheck, lint, test, build
-- [ ] save-page-pdf-md: extension.yaml (fill CTA / UTM / category with operator)
-- [ ] save-page-pdf-md: runtime deps → DECISIONS.md rows before adding
-- [ ] 10 real test URLs list (operator supplies or approves)
-- [ ] Workspace CI template: second checkout of private tabmill at `.tabmill-ref` with `TABMILL_PAT`
+## v1.C — Extension #1 recipe: save-page-pdf-md (in progress)
+
+Plan (all code in `recipes/save-page-pdf-md/`; workspace only via `tabmill new/build`):
+
+1. [x] extension.yaml: permissions `activeTab` + `scripting` (inject extractor on click) +
+       `storage` (session handoff popup → print page); deps readability + turndown.
+2. [x] `src/entrypoints/extract.content.ts` (registration: runtime): Readability on a document
+       clone → typed `Article` {title, html, byline, siteName, lang, url, fallback}; body fallback.
+3. [x] `src/feature/`: popup UI (Save as Markdown / Save as PDF, status line), `?tabId=` override
+       for tests, readable errors for restricted pages; Markdown via turndown (scripts/styles
+       removed, title + source header) → Blob download; PDF → `storage.session` handoff → print tab.
+4. [x] `src/entrypoints/print/`: allowlist sanitizer (no innerHTML into the extension page),
+       MarkPDF-style print CSS (system font stacks, no remote fonts), auto `window.print()`.
+5. [x] Tests: unit (filename, markdown header, sanitizer allowlist via a minimal DOM if needed);
+       smoke: print page renders a seeded article and strips `<script>`/`on*` attrs.
+6. [x] Build + typecheck + test + smoke in docker; confirm turndown's browser build excludes domino.
+7. [ ] HUMAN: validate on the 10 approved URLs in real Chrome (load `.output/chrome-mv3` unpacked);
+       record results in NOTES.md. Zip via `make in-docker-zip EXT=save-page-pdf-md`.
+
 - [ ] HUMAN (when the workspace repo exists): create a fine-grained PAT, repo access = tabmill only,
       permission Contents: read-only — https://github.com/settings/personal-access-tokens/new — and save
-      it as secret `TABMILL_PAT` in the tabmill-extensions repo (Settings → Secrets and variables → Actions)
+      it as secret `TABMILL_PAT` in the `codervijo/chrome-extension-projects` repo (Settings → Secrets and variables → Actions)
 
-## v1.C — queued
+## v1.D — queued (was v1.C before the reslot)
 
-- [ ] local-seo-checker extension.yaml: `cta_url: https://rankmill.example/local-seo-audit` (placeholder, D-015);
-      copy the `HUMAN: set real Rankmill CTA URL` line into the workspace TODO.md at scaffold
+- [ ] `recipes/local-seo-checker/extension.yaml`: `cta_url: https://rankmill.example/local-seo-audit`
+      (placeholder, D-015); the HUMAN line below stays here (tabmill repo)
 - [ ] `packages/policy` rule `cta-placeholder` (warn; error under `--release`) + per-rule release severity

@@ -9,12 +9,49 @@ Measured from "extension.yaml agreed" to "unpacked build loads in Chrome".
 
 | # | slug | phase | start | first build | elapsed | notes |
 |---|---|---|---|---|---|---|
-| 1 | save-page-pdf-md | v1.B | — | — | — | |
-| 2 | local-seo-checker | v1.C | — | — | — | target: far below #1 |
+| 1 | save-page-pdf-md | v1.C | — | — | — | generator stub built in v1.B (build 4.7 s incl. install) |
+| 2 | local-seo-checker | v1.D | — | — | — | target: far below #1 |
 
 ## Blockers
 
-(none — items needing operator input are open questions in `docs/prd.md` § 7)
+(none)
+
+## v1.C test URLs (approved 2026-10-03)
+
+| # | URL | covers | Markdown | PDF |
+|---|---|---|---|---|
+| 1 | https://en.wikipedia.org/wiki/Markdown | images, references | — | — |
+| 2 | https://daringfireball.net/projects/markdown/syntax | long single doc | — | — |
+| 3 | https://www.paulgraham.com/greatwork.html | plain essay | — | — |
+| 4 | https://martinfowler.com/articles/microservices.html | figures, sidebars | — | — |
+| 5 | https://docs.python.org/3/tutorial/introduction.html | code blocks | — | — |
+| 6 | https://developer.mozilla.org/en-US/docs/Web/HTML/Element/table | tables | — | — |
+| 7 | https://github.com/mozilla/readability | README in app chrome | — | — |
+| 8 | https://developer.chrome.com/docs/extensions/develop/concepts/activeTab | docs site | — | — |
+| 9 | https://react.dev/learn | JS-rendered page | — | — |
+| 10 | https://news.ycombinator.com/ | non-article fallback | — | — |
+
+## Observations
+
+- 2026-10-03 (v1.C, automated, in docker): save-page-pdf-md builds to 61 kB (extractor 37.6 kB,
+  popup 14.3 kB, print 2.7 kB); zip 23.5 kB. Manifest permissions = activeTab, scripting,
+  storage; no host permissions. turndown's browser build excludes `@mixmark-io/domino`
+  (absent from bundle). No `eval` / `new Function` / remote `.js` URLs in output.
+  Unit 6/6, typecheck clean, smoke 3/3 (shell; print page sanitizes `<script>`, `on*`,
+  `javascript:`; handoff consumed). **Not automated:** toolbar click → activeTab →
+  extraction on real pages, Markdown download, print dialog → operator's 10-URL run.
+
+- 2026-10-03: Chrome Web Store category names are not listed on developer.chrome.com
+  (best-listing, discovery, cws-dashboard-listing checked) → `store_category` stays ‹FILL›,
+  picked in the dashboard at "Add new item".
+- 2026-10-03 (v1.B docker verification): builder react image ships pnpm 12.8.1; WXT 0.21.4 +
+  Vite 8.3.2 build in the container (popup bundle 1.9 kB; prod manifest = declared permissions
+  + action only). Container runs as root → `in-docker-*` chowns created files back; pnpm store
+  pinned to `/root/.pnpm-store` (it had landed at the mount root `~/work/projects/.pnpm-store`,
+  removed). Playwright 1.63 Chrome for Testing 153 installed inside the container; smoke 1.2 s.
+
+- 2026-10-03: in `chrome-extension-projects`, pre-existing legacy changes went from unstaged to
+  staged while tabmill init ran; tabmill never runs git in the workspace — staged by someone else.
 
 ---
 

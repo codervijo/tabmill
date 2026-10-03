@@ -1,0 +1,44 @@
+/* MarkPDF-style document typography (after markpdf.dev .doc-preview), system font stacks only —
+   no remote fonts. */
+:root {
+  --ink: #0f172a;
+  --muted: #475569;
+  --hairline: #e2e8f0;
+  --accent: #0ea5e9;
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-serif: ui-serif, "Iowan Old Style", Georgia, serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+body { margin: 0; background: #f1f5f9; color: var(--ink); }
+.toolbar { position: sticky; top: 0; display: flex; gap: 12px; align-items: center; padding: 10px 16px; background: #fff; border-bottom: 1px solid var(--hairline); font: 13px var(--font-sans); color: var(--muted); }
+.toolbar button { font: inherit; padding: 7px 12px; border: 0; border-radius: 6px; background: var(--accent); color: #fff; cursor: pointer; }
+.doc-sheet { max-width: 210mm; margin: 24px auto; padding: 18mm 20mm; background: #fff; border: 1px solid var(--hairline); box-shadow: 0 12px 40px -12px rgba(15, 23, 42, 0.12); }
+.doc-preview { font-family: var(--font-sans); font-size: 11pt; line-height: 1.65; color: var(--ink); overflow-wrap: anywhere; }
+.doc-preview h1, .doc-preview h2, .doc-preview h3, .doc-preview h4 { font-family: var(--font-serif); letter-spacing: -0.015em; line-height: 1.15; margin: 1.6em 0 0.4em; }
+.doc-preview h1 { font-size: 28pt; margin-top: 0; }
+.doc-preview h2 { font-size: 18pt; }
+.doc-preview h3 { font-size: 14pt; }
+.doc-preview p { margin: 0 0 1em; }
+.doc-preview .doc-meta { color: var(--muted); font-size: 9.5pt; margin-bottom: 2em; }
+.doc-preview ul, .doc-preview ol { margin: 0 0 1em 1.25em; }
+.doc-preview li { margin: 0.25em 0; }
+.doc-preview a { color: var(--accent); text-decoration: underline; text-underline-offset: 2px; }
+.doc-preview blockquote { border-left: 2px solid var(--accent); padding: 0.25em 0 0.25em 1em; margin: 1em 0; color: var(--muted); font-style: italic; }
+.doc-preview code { font-family: var(--font-mono); font-size: 0.88em; background: #f1f5f9; padding: 0.1em 0.35em; border-radius: 3px; }
+.doc-preview pre { font-family: var(--font-mono); background: #0f172a; color: #e2e8f0; padding: 1em 1.25em; border-radius: 6px; font-size: 9.5pt; white-space: pre-wrap; margin: 1em 0; }
+.doc-preview pre code { background: transparent; padding: 0; color: inherit; }
+.doc-preview table { width: 100%; border-collapse: collapse; margin: 1em 0; font-size: 10pt; }
+.doc-preview th, .doc-preview td { border-bottom: 1px solid var(--hairline); padding: 0.6em 0.75em; text-align: left; vertical-align: top; }
+.doc-preview th { font-weight: 600; background: #f8fafc; }
+.doc-preview img { max-width: 100%; height: auto; }
+.doc-preview figure { margin: 1em 0; }
+.doc-preview figcaption { color: var(--muted); font-size: 9.5pt; }
+.doc-preview hr { border: 0; border-top: 1px solid var(--hairline); margin: 2em 0; }
+@media print {
+  @page { size: A4; margin: 16mm 18mm; }
+  body { background: #fff; }
+  .no-print { display: none !important; }
+  .doc-sheet { margin: 0; padding: 0; max-width: none; border: 0; box-shadow: none; }
+  .doc-preview pre, .doc-preview table, .doc-preview img, .doc-preview figure { break-inside: avoid; }
+  .doc-preview h1, .doc-preview h2, .doc-preview h3 { break-after: avoid; }
+}

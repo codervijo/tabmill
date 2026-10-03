@@ -43,4 +43,6 @@ status to `Superseded by ADR-MMMM`, update this index.
 | ADR-0003 | node-only-in-docker-builder | Accepted | 2026-10-03 |
 | ADR-0004 | wxt-extension-framework | Accepted | 2026-10-03 |
 | ADR-0005 | builder-overrides-via-makefile-local | Accepted | 2026-10-03 |
-| ADR-0006 | cross-repo-pnpm-workspace | Accepted | 2026-10-03 |
+| ADR-0006 | cross-repo-pnpm-workspace | Superseded by ADR-0007 | 2026-10-03 |
+| ADR-0007 | workspace-location-and-relative-layout | Accepted | 2026-10-03 |
+| ADR-0008 | extensions-generated-from-recipes | Accepted | 2026-10-03 |

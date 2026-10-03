@@ -4,17 +4,23 @@ CLI + templates + Claude Code skills for building, releasing, and tracking Lamil
 portfolio of single-purpose Chrome (Manifest V3) extensions, each paired with an SEO landing
 page on a Lamill portfolio site.
 
-**Status:** v1.A (planning). No CLI yet. See `docs/prd.md` for phases and open questions.
+**Status:** v1.B — generator works (`new` + `build` → loadable extension, smoke-tested). See `docs/prd.md` for phases and open questions.
 
 ## Two directories
 
 - **tabmill** (this repo): CLI, shared packages, templates, CI templates, skill sources.
-- **tabmill-extensions** (workspace, separate repo): `extensions/<slug>/extension.yaml` + source,
+- **workspace** (`$TABMILL_WORKSPACE` = `~/work/projects/plugins/chrome-extension-projects`, separate repo): `extensions/<slug>/extension.yaml` + source,
   `registry.json`, build output. Its location comes from `tabmill.config.json` or `TABMILL_WORKSPACE`.
 
-## Planned commands
+## Build
 
-`init` · `skills sync` · `new` · `dev` · `test` · `build` · `zip` · `lint` · `assets` ·
+`make deps | test | lint | fmt | check | build | run ARGS="init"` — builder Makefile + `Makefile.local`.
+
+## Commands
+
+Shipped: `init` · `skills sync` · `new` · `build` (minimal). Planned:
+
+`dev` · `test` · `zip` · `lint` · `assets` ·
 `listing` · `landing` · `publish` (attended only) · `status`
 
 ## Docs

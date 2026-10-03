@@ -1,0 +1,11 @@
+# Scoped to tabmill-managed paths so pre-existing top-level projects are unaffected.
+/node_modules/
+/extensions/*/node_modules/
+/extensions/*/.output/
+/extensions/*/.wxt/
+/extensions/*/dist/
+/extensions/*/coverage/
+/extensions/*/playwright-report/
+/extensions/*/test-results/
+.env
+.env.*

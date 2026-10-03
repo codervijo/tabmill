@@ -11,4 +11,59 @@ tradeoffs, and links to commits / ADRs.
 
 ---
 
-(No phases shipped yet.)
+## v1.B — Tool + generator (shipped 2026-10-03)
+
+Not committed at ship time (operator commits). Key decisions: D-017/ADR-0007 workspace =
+`$TABMILL_WORKSPACE` (`~/.profile`), computed relative layout; D-018 tool build via builder
+Makefile; D-019/ADR-0008 extensions generated from recipes; D-020 minimal `build` pulled in.
+Lessons: generated Makefiles use `:=` for container vars (inherited `CONTAINER_NAME` sent a
+build to the Python container); container-root file ownership handed back after each target;
+pnpm store pinned inside the container; seed vs managed workspace files so template fixes
+propagate. `tabmill-new-extension` moved to tool-repo skills (writes recipes).
+
+### v1.B plan (as executed)
+
+Reslotted 2026-10-03 (ADR-0008): tabmill generates extensions; this phase builds the generator.
+
+- Tool build via a `Makefile` that includes the builder (Python stack) + `Makefile.local` (D-018). ✅
+- `tabmill init`, `tabmill skills sync` (seed vs managed files, sha-manifest drift guard). ✅
+- Workspace `Makefile` + generated `Makefile.local` → builder docker (ADR-0003/0005). ✅
+- `tabmill build <slug>` (minimal): validate YAML, generate manifest fields, WXT build in docker. ✅
+- `tabmill new <slug>`: render `templates/extension/<template>/` + `recipes/<slug>/` overlay + YAML
+  values → `extensions/<slug>/` (managed); add `registry.json` row; `skills sync` regenerates.
+- `templates/extension/popup/`: WXT config reading `manifest.gen.json`, popup shell with
+  "Built by Lamill" mark + footer, UTM CTA, privacy line, typed messaging helper, generated
+  README, Vitest + Playwright smoke test (bundled Chromium, in docker).
+- `recipes/save-page-pdf-md/extension.yaml` only (no feature code yet).
+
+Done = `tabmill new save-page-pdf-md && tabmill build save-page-pdf-md` produces an unpacked
+extension that loads and passes the smoke test, with nothing hand-written in the workspace.
+
+
+## v1.A — Kickoff / decisions lock (shipped 2026-10-03)
+
+Commit `f75188b`. Initialized from the Lamill standard (project-init) and the kickoff brief;
+ran 8 spikes verified against official docs (`NOTES.md` § v1.A spikes).
+
+Decisions: ADR-0002 Python + uv CLI · ADR-0003 Node only via the builder docker ·
+ADR-0004 WXT · ADR-0005 builder adapted via workspace `Makefile.local` · ADR-0006 cross-repo
+pnpm workspace (private tabmill, `TABMILL_PAT` in CI) · D-013 local PDF rendering ·
+D-015 placeholder-CTA lint (warn in dev, error at release) · D-016 no IndexNow.
+
+Key facts that shaped the plan: CWS API v1 ends 2026-10-15 and v2 can't create items (first
+upload is a dashboard step); new publishers capped at two published extensions; no metrics
+API (CSV import); duplicate-functionality policy is the largest portfolio risk; Playwright
+loads unpacked extensions only in bundled Chromium.
+
+Original phase plan:
+
+### v1.A plan (as executed)
+
+- [x] Initialize from existing skills + Lamill conventions (D-001, D-004).
+- [x] Spikes 1–8 → `NOTES.md`; decisions → `DECISIONS.md`.
+- [x] README, PLAN, CLAUDE, TODO, tabmill-dev skill, drafts of the five workspace skills.
+- [x] Operator resolves open questions (`docs/prd.md` § 7) → accepted decisions get ADRs.
+
+Done = decisions locked (framework, linking; CLI language + Node location locked as ADR-0002/0003) and ADRs written.
+
+

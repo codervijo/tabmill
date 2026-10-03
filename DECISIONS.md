@@ -20,7 +20,7 @@ project-check, project-adopt. No project-level skills in other Lamill repos.
   Conventions were read directly from `sites/portfolio` (lamill CLI), `builder/`, and sites.
 - latest-screenshot, project-check, project-adopt — not relevant to an empty repo.
 
-## D-002 — Directory paths (Accepted as default, 2026-10-03)
+## D-002 — Directory paths (Accepted 2026-10-03; workspace part superseded by D-017)
 
 Kickoff named `~/code/tabmill` / `~/code/tabmill-extensions`; `~/code` doesn't exist and the
 session opened in `~/work/projects/droyfun/tabmill`. TOOL_DIR = `~/work/projects/droyfun/tabmill`;
@@ -56,7 +56,7 @@ ships in the bundle beyond a tiny browser shim). Pre-1.0: pin minor.
 Alternatives: crxjs 3 (lighter, but zip/dev wiring/entrypoints are ours to build; fallback);
 Plasmo (unmaintained, 646 entries — rejected); vanilla Vite (most code to own).
 
-## D-006 — Linking: pnpm workspace spanning both repos (Accepted, 2026-10-03) → ADR-0006
+## D-006 — Linking: pnpm workspace spanning both repos (Accepted, 2026-10-03) → ADR-0006; sibling layout superseded by D-017 / ADR-0007
 
 `WORKSPACE_DIR/pnpm-workspace.yaml`: `packages: ['extensions/*', '../tabmill/packages/*']`;
 extensions depend on `@tabmill/<pkg>: workspace:*`. Verified by test install. CI checks out
@@ -117,6 +117,36 @@ rules carry a separate `release_severity`. Operator decision.
 lamill pings IndexNow only inside `new deploy`; operator chose to skip IndexNow rather than add
 a lamill command. Landing flow = git push + `lamill settings gsc submit-sitemap --force`.
 
+## D-017 — Workspace = `$TABMILL_WORKSPACE` in `~/.profile` (Accepted, 2026-10-03) → ADR-0007
+
+Operator: all Chrome extensions live in `~/work/projects/plugins/chrome-extension-projects`
+(existing repo `codervijo/chrome-extension-projects`, five pre-tabmill extensions at its top
+level), kept in a central env var. Exported in `~/.profile` (not `~/.bashrc`, which returns
+early for non-interactive shells). Cross-repo paths are computed by `tabmill init`.
+
+## D-018 — Tool build through the builder Makefile (Accepted, 2026-10-03)
+
+Operator: tool build controllable via a Makefile using the builder. `Makefile` includes
+`~/work/projects/builder/Makefile` (Python stack auto-detected from `pyproject.toml`);
+`Makefile.local` overrides `build` (`uv build`) and `run` (`uv run tabmill $(ARGS)`) — make's two
+"overriding recipe" warnings are expected — reuses the builder's `test`, adds `lint` / `fmt` /
+`check`, and sets `CONTAINER_NAME=tabmill-tool` + `DOCKER_CMD=docker` so `make buildsh` uses its
+own container without sudo (builder defaults: `mb1`, `sudo docker`). Runs on the host via uv.
+
+## D-019 — Extensions generated from recipes in tabmill (Accepted, 2026-10-03) → ADR-0008
+
+Operator: "tabmill tool [does] generating of extensions — you build only tabmill"; feature code
+via per-extension recipes in the tabmill repo (option 2). Phases reslotted to v1.A–v1.G.
+Kickoff deviations: extension source moves from WORKSPACE_DIR to `recipes/`; "#1 built by hand,
+extract later" becomes "generic code in templates from day one"; v1.G extensions are recipes,
+not workspace Claude sessions.
+
+## D-020 — `tabmill build` pulled into v1.B (Accepted, 2026-10-03)
+
+Generation needs manifest fields from YAML before the full v1.D build; v1.B ships a minimal
+`build` (required fields, length limits, permission justifications, placeholder-URL warning,
+`manifest.gen.json` + `package.json` version, WXT build in docker). Typed schema + lint stay v1.D.
+
 ## D-009 — Store API: V2 only, service-account auth (Proposed, 2026-10-03)
 
 V1 dies 2026-10-15; V2 can't create items, so first uploads are a HUMAN step by design.
@@ -150,11 +180,15 @@ renders icons/screenshots for `tabmill assets`.
 | rich | CLI | tool runtime | `✓ ↷ ✗` colored step output | Accepted |
 | httpx | CLI | tool runtime | CWS API + landing/lamill probes; Lamill convention | Accepted (v1.D) |
 | pydantic | CLI | tool runtime | typed extension.yaml schema + readable validation errors (goal #5) | Proposed (v1.C) |
-| pyyaml | CLI | tool runtime | parse extension.yaml; stdlib has no YAML | Proposed (v1.B) |
+| pyyaml | CLI | tool runtime | parse extension.yaml; stdlib has no YAML | Accepted (v1.B) |
+| types-pyyaml | CLI | dev | mypy strict stubs for pyyaml | Accepted (v1.B) |
 | ruff, mypy, pytest | CLI | dev | D-011 | Accepted |
 | wxt ~0.21 | extensions (docker, dev) | no | D-005 / ADR-0004 | Accepted |
 | vite | extensions (docker, dev; WXT peer) | no | D-005 / ADR-0004 | Accepted |
 | typescript ~5.9 | extensions (docker, dev) | no | strict typing of extension code | Accepted |
 | eslint, typescript-eslint, prettier, vitest | extensions (docker, dev) | no | D-011 | Accepted |
 | @playwright/test | extensions (docker, dev) | no | D-012 | Accepted |
-| **extension bundles** | shipped | **yes** | **none third-party so far.** `@tabmill/*` packages must have zero third-party runtime deps. save-page-pdf-md will likely need HTML→Markdown + article extraction; each library gets its own row here at v1.B before it's added | — |
+| @types/node ^24 | extensions (docker, dev) | no | types for `wxt.config.ts` / Playwright fixtures (vitest peer `^22 \|\| >=24`) | Accepted (v1.B) |
+| @mozilla/readability ^0.6.0 | save-page-pdf-md | **yes** | article extraction; Apache-2.0, 0 deps, 155 kB unpacked, ships types (npm 2026-10-03) | Accepted (operator), in v1.C |
+| turndown ^7.2.4 (+ @types/turndown) | save-page-pdf-md | **yes** | HTML→Markdown; MIT, published 2026-04; one dep (`@mixmark-io/domino`, Node-only — verified absent from the browser bundle 2026-10-03) | Accepted (operator), in v1.C |
+| **extension bundles** | shipped | **yes** | template adds **none**; per-extension runtime deps come from the recipe's `dependencies:` and need a row above. `@tabmill/*` packages must have zero third-party runtime deps | — |

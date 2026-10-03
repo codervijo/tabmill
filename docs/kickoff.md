@@ -6,7 +6,9 @@ in `DECISIONS.md`). Known deviations at intake:
 
 - Paths: `~/code/tabmill` → `~/work/projects/droyfun/tabmill`;
   `~/code/tabmill-extensions` → `~/work/projects/droyfun/tabmill-extensions` (D-002).
-- "Phase 0…5" → `v1.A…v1.F` per the canonical versioning scheme (D-003).
+- "Phase 0…5" → `v1.A…v1.F` per the canonical versioning scheme (D-003); reslotted v1.A–v1.G (D-019).
+- Workspace → `~/work/projects/plugins/chrome-extension-projects` via `$TABMILL_WORKSPACE` (D-017).
+- Extensions are generated from recipes in tabmill, not hand-built in the workspace (ADR-0008).
 
 ---
 
