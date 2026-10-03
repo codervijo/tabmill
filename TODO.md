@@ -34,7 +34,7 @@ Plan (all code in `recipes/save-page-pdf-md/`; workspace only via `tabmill new/b
 5. [x] Tests: unit (filename, markdown header, sanitizer allowlist via a minimal DOM if needed);
        smoke: print page renders a seeded article and strips `<script>`/`on*` attrs.
 6. [x] Build + typecheck + test + smoke in docker; confirm turndown's browser build excludes domino.
-7. [ ] HUMAN: validate on the 10 approved URLs in real Chrome (load `.output/chrome-mv3` unpacked);
+7. [ ] ⏸ ON HOLD (operator, 2026-10-03) — HUMAN: validate on the 10 approved URLs in real Chrome (load `.output/chrome-mv3` unpacked);
        record results in NOTES.md. Zip via `make in-docker-zip EXT=save-page-pdf-md`.
 
 - [ ] HUMAN (when the workspace repo exists): create a fine-grained PAT, repo access = tabmill only,

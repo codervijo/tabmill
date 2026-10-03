@@ -55,7 +55,7 @@ as v1.D (D-021) → v1.A–v1.H; `try` inserted as v1.F (D-023) → v1.A–v1.I.
 |---|---|---|
 | v1.A | ✅ done | Kickoff / decisions lock — 8 spikes, docs, skill drafts |
 | v1.B | ✅ done | Tool Makefile; `init` + `skills sync`; `build`; `new` (template + recipe → generated extension); popup template |
-| v1.C | 🔄 in progress | Extension #1 save-page-pdf-md recipe (feature code); 10 real URLs; smoke; zip |
+| v1.C | ⏸ on hold (operator 10-URL check deferred) | Extension #1 save-page-pdf-md recipe (feature code); 10 real URLs; smoke; zip |
 | v1.D | ✅ done | CLI `list` (all extensions + state) and `create` (starter recipe) |
 | v1.E | ✅ done | Extension #2 local-seo-checker recipe; shared packages; typed schema; CLI dev/test/zip/lint |
 | v1.F | ✅ done | CLI `try`: interactive Chromium in docker with the extension loaded |
