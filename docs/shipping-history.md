@@ -11,6 +11,25 @@ tradeoffs, and links to commits / ADRs.
 
 ---
 
+## v1.F — CLI `try` (shipped 2026-10-03)
+
+D-023. Operator confirmed the window opens on the desktop and the extension works.
+
+### v1.F plan: — CLI `try`: test an extension by hand in Chromium
+
+Operator (2026-10-03): a command that starts Chrome inside docker so they can test the extension.
+
+- `tabmill try <slug> [--url URL] [--dev]`: regenerate + build (or start the WXT dev server with
+  `--dev`), then launch Playwright's Chromium **headed** in the `tabmill-ext` container with the
+  unpacked build loaded; the window appears on the host desktop via the container's X11
+  forwarding. Real toolbar button → real activeTab grant.
+- Profile in the container only (`/root/.tabmill-try/<slug>`), reused across runs; never on host.
+- Chromium installed in the container only (same as smoke). Ctrl-C closes the browser.
+- `✗` with a fix when `$DISPLAY` / X11 isn't available.
+
+Done = operator can open #1 and #2 via `tabmill try`, click the toolbar icon, and use them.
+
+
 ## v1.E — Extension #2 + extraction (shipped 2026-10-03)
 
 D-022 (shared code in `templates/extension/_shared/`), pydantic schema, side-panel template,
