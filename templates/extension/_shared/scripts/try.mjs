@@ -22,7 +22,9 @@ const context = await chromium.launchPersistentContext(profileDir, {
   ],
 });
 const page = context.pages()[0] ?? (await context.newPage());
-await page.goto(url || "chrome://extensions");
+// Accept bare hosts like "google.com".
+const target = !url ? "chrome://extensions" : /^[a-z][a-z0-9+.-]*:/i.test(url) ? url : `https://${url}`;
+await page.goto(target);
 console.log("✓ Chromium open — pin the extension from the puzzle-piece menu, then click it.");
 console.log("  Close the browser window (or Ctrl-C) to finish.");
 
