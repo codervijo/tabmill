@@ -138,7 +138,7 @@ own container without sudo (builder defaults: `mb1`, `sudo docker`). Runs on the
 Operator: "tabmill tool [does] generating of extensions — you build only tabmill"; feature code
 via per-extension recipes in the tabmill repo (option 2). Phases reslotted to v1.A–v1.G.
 Kickoff deviations: extension source moves from WORKSPACE_DIR to `recipes/`; "#1 built by hand,
-extract later" becomes "generic code in templates from day one"; v1.H extensions are recipes,
+extract later" becomes "generic code in templates from day one"; v1.I extensions are recipes,
 not workspace Claude sessions.
 
 ## D-020 — `tabmill build` pulled into v1.B (Accepted, 2026-10-03)
@@ -164,12 +164,18 @@ cross-repo pnpm link at runtime. `packages/` (ADR-0006/0007 linking) stays avail
 that must be versioned independently; none exists yet. Also v1.E: side-panel template; typed
 schema (`cli/tabmill/schema.py`, pydantic, unknown keys rejected); `lint` / `dev` / `test` / `zip`.
 
+## D-023 — `try` as v1.F (Accepted, 2026-10-03)
+
+Operator asked for a command that starts Chrome inside docker to test an extension by hand;
+slotted as a new v1.F, done next (it makes the v1.C 10-URL check easy); later phases → v1.G–v1.I.
+Named `try` because `test` runs the automated suite.
+
 ## D-009 — Store API: V2 only, service-account auth (Proposed, 2026-10-03)
 
 V1 dies 2026-10-15; V2 can't create items, so first uploads are a HUMAN step by design.
 Service account preferred over OAuth refresh token (no token expiry; one SA per publisher).
 Client: hand-written `httpx` client (Lamill convention); `google-auth` only for the SA JWT
-token exchange if hand-rolling it isn't simpler — decide in v1.F.
+token exchange if hand-rolling it isn't simpler — decide in v1.G.
 
 ## D-010 — Metrics: CSV import (Proposed, 2026-10-03)
 
@@ -195,7 +201,7 @@ renders icons/screenshots for `tabmill assets`.
 |---|---|---|---|---|
 | typer | CLI | tool runtime | Lamill CLI convention (D-008) | Accepted |
 | rich | CLI | tool runtime | `✓ ↷ ✗` colored step output | Accepted |
-| httpx | CLI | tool runtime | CWS API + landing/lamill probes; Lamill convention | Accepted (v1.F) |
+| httpx | CLI | tool runtime | CWS API + landing/lamill probes; Lamill convention | Accepted (v1.G) |
 | pydantic | CLI | tool runtime | typed extension.yaml schema + readable validation errors (goal #5) | Accepted (v1.E) |
 | pyyaml | CLI | tool runtime | parse extension.yaml; stdlib has no YAML | Accepted (v1.B) |
 | types-pyyaml | CLI | dev | mypy strict stubs for pyyaml | Accepted (v1.B) |

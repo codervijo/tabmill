@@ -45,7 +45,7 @@ installed skills. End users of the extensions are not Tabmill users.
 
 Strict two-level versioning: `vN` tier, `vN.X` phase. Kickoff "Phase 0–5" = v1.A–v1.F (D-003);
 reslotted 2026-10-03 for generated extensions (ADR-0008) → v1.A–v1.G; `list`/`create` inserted
-as v1.D (D-021) → v1.A–v1.H.
+as v1.D (D-021) → v1.A–v1.H; `try` inserted as v1.F (D-023) → v1.A–v1.I.
 
 ### v1 — First extension portfolio
 
@@ -58,9 +58,10 @@ as v1.D (D-021) → v1.A–v1.H.
 | v1.C | 🔄 in progress | Extension #1 save-page-pdf-md recipe (feature code); 10 real URLs; smoke; zip |
 | v1.D | ✅ done | CLI `list` (all extensions + state) and `create` (starter recipe) |
 | v1.E | ✅ done | Extension #2 local-seo-checker recipe; shared packages; typed schema; CLI dev/test/zip/lint |
-| v1.F | ⏳ planned | CLI assets/listing/publish; CI release zips on tag |
-| v1.G | ⏳ planned | CLI landing/status; analytics package |
-| v1.H | ⏳ planned | Extensions #3–#5 as recipes |
+| v1.F | 🔄 in progress | CLI `try`: interactive Chromium in docker with the extension loaded |
+| v1.G | ⏳ planned | CLI assets/listing/publish; CI release zips on tag |
+| v1.H | ⏳ planned | CLI landing/status; analytics package |
+| v1.I | ⏳ planned | Extensions #3–#5 as recipes |
 
 #### Design notes
 
@@ -94,7 +95,7 @@ See `PLAN.md` (per-phase scope + done criteria) and `NOTES.md` (v1.A spike findi
 6. ~~IndexNow for existing sites~~ — resolved 2026-10-03: skipped (D-016).
 7. ~~Repo visibility~~ — resolved 2026-10-03: tabmill is private; workspace CI uses `TABMILL_PAT` (ADR-0007).
 8. **Publisher cap** (2026-10-03): new publishers get two published extensions; request more
-   before #3 (v1.H).
+   before #3 (v1.I).
 9. ~~Builder changes~~ — resolved 2026-10-03: workspace `Makefile.local` overrides only (ADR-0005).
 
 ## 8. References

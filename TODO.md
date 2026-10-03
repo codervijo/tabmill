@@ -65,6 +65,15 @@ Plan (all code in `recipes/save-page-pdf-md/`; workspace only via `tabmill new/b
        while ‹FILL› → filled → `new` generated → `list` shows it; removed afterwards. WXT `build`
        of a created recipe not re-run (same path as #1, verified in v1.B/v1.C).
 
+## v1.F — CLI `try` (in progress)
+
+1. [x] Chromium launcher `templates/extension/_shared/scripts/try.mjs`:
+       Playwright `launchPersistentContext(profile, {headless:false, channel:'chromium', args:
+       --load-extension})`, open `--url`, keep running until the window closes / SIGINT.
+2. [x] Workspace Makefile.local `try` target: install chromium (as smoke), check DISPLAY, run it.
+3. [x] `tabmill try <slug> [--url] [--dev]`: sync, build (or dev server in background), `make in-docker-try`.
+4. [ ] HUMAN: confirm the window appears on your desktop (`uv run tabmill try save-page-pdf-md`) — launch verified from the container, window not seen by Claude. Docs done.
+
 ## v1.E — Extension #2 + extraction ✅ (2026-10-03)
 
 1. [x] `templates/extension/side-panel/`: side panel entry (`side_panel` + `sidePanel` perm),

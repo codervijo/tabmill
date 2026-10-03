@@ -28,7 +28,7 @@ Run from the workspace root. Print one `✓` / `↷` / `✗` line per step; stop
    `chrome-store-policy` skill to resolve.
 7. **Smoke test.** Playwright loads the unpacked build (bundled Chromium, `channel: 'chromium'`).
 8. **Zip.** `uv run tabmill zip <slug>` *(planned v1.E; today `make in-docker-zip EXT=<slug>`)* → `extensions/<slug>/.output/<slug>-<version>.zip`.
-9. **Assets.** `uv run tabmill assets <slug>` *(planned v1.F)*: icons 16/32/48/128, 1–5 screenshots
+9. **Assets.** `uv run tabmill assets <slug>` *(planned v1.G)*: icons 16/32/48/128, 1–5 screenshots
    at 1280×800, small promo tile 440×280.
 10. **Listing draft.** Use the `tabmill-store-listing` skill → `extensions/<slug>/listing.md`.
 11. **Privacy check.** If analytics is on: privacy policy URL live, data categories + Limited
@@ -49,7 +49,7 @@ HUMAN line must say:
 
 ## Updates to an existing item (attended only)
 
-`uv run tabmill publish <slug>` *(planned v1.F)*: upload zip to the existing item, then publish
+`uv run tabmill publish <slug>` *(planned v1.G)*: upload zip to the existing item, then publish
 (`DEFAULT_PUBLISH`, or `STAGED_PUBLISH` to release manually after approval), then record
 review state from `fetchStatus` in `registry.json`.
 

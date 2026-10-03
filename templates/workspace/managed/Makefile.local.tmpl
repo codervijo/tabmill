@@ -22,16 +22,20 @@ HOST_UID := $(shell id -u)
 HOST_GID := $(shell id -g)
 OWNED_PATHS := node_modules pnpm-lock.yaml extensions /usr/src/app/{{tool_in_mount}}/packages
 EXT ?=
+URL ?=
+DEV ?=
+# Interactive targets (try, dev) need a TTY so Ctrl-C reaches the process in the container.
+DOCKER_TTY := $(shell [ -t 0 ] && echo -it)
 
-.PHONY: in-docker-% require-docker deps build test smoke lint typecheck zip dev
+.PHONY: in-docker-% require-docker deps build test smoke try lint typecheck zip dev
 
 # Run any target below inside the builder container, non-interactively, from the host.
 in-docker-%:
 	@if [ -f /.dockerenv ]; then $(MAKE) $*; exit $$?; fi
 	@DOCKERFILE_PATH="$(BUILDER_PATH)" DOCKERFILE_NAME="Dockerfile.$(STACK)" \
 		bash "$(BUILDER_PATH)/dev_container.sh" start >/dev/null
-	@$(DOCKER_CMD) exec $(CONTAINER_NAME) bash -lc \
-		'source "$$NVM_DIR/nvm.sh" && cd "$(CONTAINER_WS)" && make $* EXT="$(EXT)"; rc=$$?; \
+	@$(DOCKER_CMD) exec $(DOCKER_TTY) $(CONTAINER_NAME) bash -lc \
+		'source "$$NVM_DIR/nvm.sh" && cd "$(CONTAINER_WS)" && make $* EXT="$(EXT)" URL="$(URL)" DEV="$(DEV)"; rc=$$?; \
 		 chown -R $(HOST_UID):$(HOST_GID) $(OWNED_PATHS) 2>/dev/null; exit $$rc'
 
 # Node never runs on the host.
@@ -59,6 +63,25 @@ smoke: build
 	@pnpm --filter "./extensions/$(or $(EXT),*)" exec playwright install --with-deps --no-shell chromium
 	@pnpm -r --if-present --filter "./extensions/$(or $(EXT),*)" smoke
 	@echo "✓ Smoke tests complete"
+
+# Manual testing: headed Chromium in the container, window on the host via X11 (v1.F).
+TRY_PROFILE = /root/.tabmill-try/$(EXT)
+try: deps
+	@if [ -z "$(EXT)" ]; then echo "✗ set EXT=<slug>"; exit 1; fi
+	@if [ -z "$$DISPLAY" ] || [ ! -S /tmp/.X11-unix/X$${DISPLAY#:} ]; then \
+		echo "✗ no X11 display in the container — recreate it from a desktop session: docker rm -f $(CONTAINER_NAME), then make in-docker-try EXT=$(EXT)"; exit 1; fi
+	@pnpm --filter "./extensions/$(EXT)" exec playwright install --with-deps --no-shell chromium >/dev/null
+	@if [ -n "$(DEV)" ]; then \
+		rm -rf "extensions/$(EXT)/.output/chrome-mv3-dev"; \
+		pnpm --filter "./extensions/$(EXT)" dev > /tmp/tabmill-dev-$(EXT).log 2>&1 & dev=$$!; \
+		for i in $$(seq 1 60); do [ -f "extensions/$(EXT)/.output/chrome-mv3-dev/manifest.json" ] && break; sleep 1; done; \
+		echo "✓ dev server running (hot reload)"; \
+		pnpm --filter "./extensions/$(EXT)" try "$$PWD/extensions/$(EXT)/.output/chrome-mv3-dev" "$(TRY_PROFILE)-dev" "$(URL)"; \
+		kill $$dev 2>/dev/null; \
+	else \
+		pnpm --filter "./extensions/$(EXT)" build >/dev/null && \
+		pnpm --filter "./extensions/$(EXT)" try "$$PWD/extensions/$(EXT)/.output/chrome-mv3" "$(TRY_PROFILE)" "$(URL)"; \
+	fi
 
 typecheck: deps
 	@pnpm -r --if-present --filter "./extensions/$(or $(EXT),*)" typecheck

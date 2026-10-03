@@ -43,6 +43,7 @@ SCRIPTS = {
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "smoke": "playwright test",
+    "try": "node scripts/try.mjs",
 }
 
 

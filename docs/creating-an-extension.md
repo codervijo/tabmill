@@ -33,6 +33,7 @@ Lamill" footer + UTM CTA (`@/lib/brand`), `@/lib/inject`, typed messaging, Lamil
 ```
 uv run tabmill new <slug>        # register + generate into the workspace
 uv run tabmill test <slug>       # typecheck + unit + build + smoke (docker)
+uv run tabmill try <slug> [--url URL] [--dev]  # Chromium in docker, window on your desktop
 uv run tabmill dev <slug>        # hot reload; load .output/chrome-mv3-dev in your Chrome
 uv run tabmill lint <slug>       # store-policy checks (add --release before shipping)
 uv run tabmill zip <slug>        # build + lint + zip (--release blocks on placeholders)

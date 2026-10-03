@@ -76,7 +76,7 @@ def validate(ext: dict[str, Any], slug: str) -> list[str]:
     if ext["template"] not in TEMPLATES:
         errors.append(f"`template` must be one of {', '.join(TEMPLATES)}")
     if ext.get("analytics", False) is not False:
-        errors.append("`analytics` opt-in isn't supported until v1.G")
+        errors.append("`analytics` opt-in isn't supported until v1.H")
     declared = {p.get("name") for p in ext["permissions"] if isinstance(p, dict)}
     for need in TEMPLATE_PERMISSIONS.get(str(ext["template"]), ()):
         if need not in declared:

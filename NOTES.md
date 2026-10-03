@@ -141,7 +141,7 @@ Source: developer.chrome.com/docs/webstore/{api/v1,using-api,service-accounts,pu
 - Dashboard "Users" counts installations, not activity.
 - Optional per-item GA4 opt-in: listing page views, `install` event, UTM attribution;
   2-month retention; Marketer role only. GA4 Data API access to that property UNVERIFIED.
-- Design (v1.G): `tabmill status --import <csv>` → `registry.json` `metrics[]`
+- Design (v1.H): `tabmill status --import <csv>` → `registry.json` `metrics[]`
   `{date, report, value}` per extension, idempotent by (date, report).
 
 ### Spike 5 — Policy

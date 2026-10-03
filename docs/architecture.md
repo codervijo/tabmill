@@ -58,6 +58,11 @@ Two repos, related by a computed relative layout (ADR-0007):
   `extension.validate`; `lint.py` rules with dev/release severity — schema, perm-broad-host,
   perm-unused (bundle token scan), fill-placeholder, cta-placeholder, mv3-no-eval,
   mv3-no-remote-script, not-built, portfolio-similarity (Jaccard on single_purpose).
+- **try** (v1.F): `make in-docker-try` → container installs Chromium (container only), builds
+  (or starts `wxt dev` with `--dev`), runs `_shared/scripts/try.mjs` = Playwright
+  `launchPersistentContext` headed, `channel: chromium`, unpacked build loaded, profile
+  `/root/.tabmill-try/<slug>` in the container; window on the host via the container's X11
+  mounts (`/tmp/.X11-unix`, xauth). `DOCKER_TTY=-it` when interactive so Ctrl-C reaches it.
 - **Catalog** (`cli/tabmill/catalog.py`, v1.D): `list` rows = `recipes/*/` ∪ workspace
   registry — status `recipe` / `generated` / `built` (`.output/chrome-mv3/manifest.json`) /
   `orphan` (registered, no recipe) / `invalid` (YAML error); placeholders = any `‹FILL›` value
@@ -100,13 +105,13 @@ Two repos, related by a computed relative layout (ADR-0007):
 `cli/tabmill/`: `cli` (typer app), `config`, `constants`, `output` (✓ ↷ ✗), `templates`,
 `skills` (skill sources), `sync` (manifest engine), `workspace` (seed + managed files),
 `extension` (YAML load/validate/manifest fields), `generate` (template + recipe), `registry`,
-`catalog` (list rows, starter recipes). Planned packages: brand, funnel, messaging, analytics, policy (extracted in v1.E/v1.G).
+`catalog` (list rows, starter recipes). Planned packages: brand, funnel, messaging, analytics, policy (extracted in v1.E/v1.H).
 
 ## 5. CLI / UX surface
 
 `init`, `skills sync`, `new`, `build` (minimal) (v1.B) · `list`, `create` (v1.D) ·
-`dev`, `test`, `zip`, `lint`, full `build` (v1.E) · `assets`, `listing`, `publish` (v1.F) ·
-`landing`, `status` (v1.G). Output uses `✓ ↷ ✗`.
+`dev`, `test`, `zip`, `lint`, full `build` (v1.E) · `assets`, `listing`, `publish` (v1.G) ·
+`landing`, `status` (v1.H). Output uses `✓ ↷ ✗`.
 
 ## 6. Integrations / external APIs
 

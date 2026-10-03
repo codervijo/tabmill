@@ -5,7 +5,7 @@ description: Create the SEO landing page that pairs with a Tabmill extension —
 
 # Tabmill landing page
 
-> DRAFT (v1.A, 2026-10-03). `tabmill landing` is *(planned v1.G)*. Integration facts
+> DRAFT (v1.A, 2026-10-03). `tabmill landing` is *(planned v1.H)*. Integration facts
 > verified 2026-10-03 by reading the `lamill` CLI (`~/work/projects/sites/portfolio`).
 
 ## Write surface (policy boundary)

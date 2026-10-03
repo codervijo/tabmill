@@ -1,4 +1,4 @@
-"""`tabmill` commands: init, skills sync, new, build, list, create, lint, dev, test, zip."""
+"""`tabmill` commands: init, skills sync, new, build, list, create, lint, dev, test, zip, try."""
 
 from __future__ import annotations
 
@@ -206,10 +206,11 @@ def _registered(slug: str) -> config.Config:
     return cfg
 
 
-def _make(cfg: config.Config, target: str, slug: str) -> None:
+def _make(cfg: config.Config, target: str, slug: str, *extra: str) -> None:
     """Run a workspace make target in the builder container (ADR-0003)."""
     rc = subprocess.run(
-        ["make", "--no-print-directory", f"in-docker-{target}", f"EXT={slug}"], cwd=cfg.workspace
+        ["make", "--no-print-directory", f"in-docker-{target}", f"EXT={slug}", *extra],
+        cwd=cfg.workspace,
     ).returncode
     if rc != 0:
         output.fail(f"{target} failed (exit {rc})")
@@ -283,3 +284,16 @@ def dev(slug: str = typer.Argument(..., help="Extension slug.")) -> None:
         "  (once the server prints 'Started'; changes then reload automatically; Ctrl-C stops)"
     )
     _make(cfg, "dev", slug)
+
+
+@app.command("try")
+def try_(
+    slug: str = typer.Argument(..., help="Extension slug."),
+    url: str = typer.Option("", "--url", help="Page to open first (default: chrome://extensions)."),
+    dev: bool = typer.Option(False, "--dev", help="Use the hot-reload dev build."),
+) -> None:
+    """Open Chromium in docker (window on your desktop) with the extension loaded."""
+    cfg = _registered(slug)
+    _recipe(cfg, slug)
+    _sync(cfg, force=False)
+    _make(cfg, "try", slug, f"URL={url}", f"DEV={'1' if dev else ''}")

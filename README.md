@@ -24,6 +24,7 @@ uv run tabmill create <slug>        # starter recipe in recipes/<slug>/extension
 uv run tabmill new <slug>           # generate it into the workspace
 uv run tabmill build <slug>         # regenerate + WXT build in docker
 uv run tabmill test <slug>          # typecheck + unit + smoke (docker)
+uv run tabmill try <slug> [--url URL] [--dev]  # Chromium in docker, window on your desktop
 uv run tabmill dev <slug>           # hot reload; load .output/chrome-mv3-dev in Chrome
 uv run tabmill lint <slug> [--release]
 uv run tabmill zip <slug> [--release]
@@ -32,7 +33,7 @@ uv run tabmill skills sync          # refresh all tabmill-managed workspace file
 Anywhere: `uv tool install --editable ~/work/projects/droyfun/tabmill`, then `tabmill …`.
 
 
-Shipped: `init` · `skills sync` · `create` · `new` · `build` · `list` · `test` · `dev` · `lint` · `zip`. Planned:
+Shipped: `init` · `skills sync` · `create` · `new` · `build` · `list` · `test` · `try` · `dev` · `lint` · `zip`. Planned:
 
 `assets` ·
 `listing` · `landing` · `publish` (attended only) · `status`

@@ -5,7 +5,7 @@ description: Write the Chrome Web Store listing for a Tabmill extension — titl
 
 # Tabmill store listing
 
-> DRAFT (v1.A, 2026-10-03). Output path and `tabmill listing` *(planned v1.F)* may change.
+> DRAFT (v1.A, 2026-10-03). Output path and `tabmill listing` *(planned v1.G)* may change.
 > Limits verified 2026-10-03; see `chrome-store-policy` for sources.
 
 ## Inputs

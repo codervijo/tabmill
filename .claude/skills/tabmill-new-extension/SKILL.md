@@ -49,7 +49,7 @@ No real CTA destination yet → reserved placeholder host (`https://<name>.examp
 
 ## 6. Analytics
 
-`analytics: false` unless the user explicitly opts in (supported from v1.G).
+`analytics: false` unless the user explicitly opts in (supported from v1.H).
 
 ## 7. Write the recipe
 
