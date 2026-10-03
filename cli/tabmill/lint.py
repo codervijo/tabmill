@@ -11,7 +11,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Literal
 
-from . import catalog, extension, generate
+from . import catalog, extension, generate, listing
 
 Severity = Literal["error", "warn"]
 BROAD_HOSTS = {"<all_urls>", "*://*/*", "https://*/*", "http://*/*"}
@@ -70,6 +70,8 @@ RULES = {
         Rule("mv3-no-remote-script", "error", "error"),
         Rule("not-built", "warn", "error"),
         Rule("portfolio-similarity", "warn", "warn"),
+        Rule("store-images", "warn", "error"),
+        Rule("keyword-repeat", "warn", "error"),
     )
 }
 
@@ -131,6 +133,17 @@ def lint(tool_dir: Path, workspace: Path | None, slug: str, *, release: bool) ->
                 f"single purpose {sim:.0%} similar to `{other}` (duplicate-functionality policy)",
                 sev,
             )
+
+    if workspace is not None:
+        problems = listing.image_problems(workspace, slug)
+        if problems is None:
+            add("store-images", "no store images — run `tabmill assets`")
+        for problem in problems or []:
+            add("store-images", problem)
+        draft = listing.store_dir(workspace, slug) / listing.LISTING_FILE
+        if draft.exists():
+            for word, n in listing.keyword_repeats(draft.read_text()).items():
+                add("keyword-repeat", f"`{word}` appears {n}× in listing.md (store limit: 5)")
 
     built = workspace / "extensions" / slug / ".output" / "chrome-mv3" if workspace else None
     if built is None or not (built / "manifest.json").exists():

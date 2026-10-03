@@ -63,6 +63,11 @@ Two repos, related by a computed relative layout (ADR-0007):
   `launchPersistentContext` headed, `channel: chromium`, unpacked build loaded, profile
   `/root/.tabmill-try/<slug>` in the container; window on the host via the container's X11
   mounts (`/tmp/.X11-unix`, xauth). `DOCKER_TTY=-it` when interactive so Ctrl-C reaches it.
+- **Store** (v1.G): `assets` → `make in-docker-assets` (build renders `public/icon/*.png` from
+  `assets/icon.svg` first; then `scripts/assets.mjs store` → `.output/store/`); `listing.py`
+  (draft + PNG-header size checks + keyword counts); `cws.py` (v2 upload/publish/fetchStatus,
+  SA JWT via google-auth or OAuth refresh, error body → remedy, `transient` flag); `publish`
+  gates: TTY, `store_id`, `lint --release`, version zip, confirm.
 - **Catalog** (`cli/tabmill/catalog.py`, v1.D): `list` rows = `recipes/*/` ∪ workspace
   registry — status `recipe` / `generated` / `built` (`.output/chrome-mv3/manifest.json`) /
   `orphan` (registered, no recipe) / `invalid` (YAML error); placeholders = any `‹FILL›` value

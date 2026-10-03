@@ -170,6 +170,50 @@ Operator asked for a command that starts Chrome inside docker to test an extensi
 slotted as a new v1.F, done next (it makes the v1.C 10-URL check easy); later phases → v1.G–v1.I.
 Named `try` because `test` runs the automated suite.
 
+## D-024 — Store assets, listing, publish (Accepted, 2026-10-03)
+
+- Images rendered by Playwright Chromium in docker (`_shared/scripts/assets.mjs`): icon from
+  recipe `assets/icon.svg` or a generated initials tile; screenshots = real UI page framed at
+  1280×800 with a caption (recipe `screenshots:` optional, ≤ 5). Default screenshots show the
+  UI at rest — replace when the feature needs showing.
+- `listing` writes a Markdown draft (the API can't set listing text); keyword-repeat lint counts
+  only store-visible text (summary + description).
+- `publish`: CWS API v2, attended only (TTY, not CI), release lint first, confirm, upload →
+  publish (default / `--staged`) → fetchStatus → registry.json. Verified against mocks only.
+
+## D-025 — API keys + preflight as new v1.H (Accepted, 2026-10-03)
+
+Mirror lamill's `settings apikeys list|set|delete` (known keys, atomic writes, masked values,
+per-provider probes) in `tabmill.env`, plus `tabmill preflight` and per-command preflights.
+Operator chose a new phase after v1.G (option B).
+
+## D-026 — Publisher slot cap tracked in registry + status (Accepted, 2026-10-03)
+
+New publishers get 2 published-extension slots; more are earned (dashboard request is denied
+when published extensions "need higher sustained engagement" — /docs/webstore/publish,
+2026-10-03). `registry.json` gets `slots: {used, limit}`; `tabmill status` shows them; release
+warns at the cap. Whether unlisted/private items count: **not documented** (NOTES.md).
+
+## D-027 — Build/publish order changed (Accepted, 2026-10-03)
+
+Slots reward sustained use, so order: 1 save-page-pdf-md · 2 pressure-wash-quote ·
+3 local-seo-checker · 4 local-schema-generator · 5 jwt-inspector (never an early slot).
+local-seo-checker is already built (v1.E); the order governs publishing and what's built next.
+
+## D-028 — `tabmill hub`: registry → lamill.io extensions.json, deployed via lamill (Accepted, 2026-10-03)
+
+Exports registry data to `extensions.json` matching a contract in the lamill.io README, then
+deploys through the `lamill` CLI; runs at the end of `tabmill release`. **Blocked:** the
+lamill.io README (`~/work/projects/sites/lamill.io`, HEAD f1913e5) has no extensions.json
+contract yet — operator to confirm repo path + supply/locate the contract.
+
+## D-029 — Listing URLs on the hub (Accepted, 2026-10-03)
+
+Privacy policy = `https://lamill.io/extensions/<slug>/privacy`; support =
+`https://lamill.io/extensions/support`. Lint fails (release) if either is missing from the
+listing or the hub page isn't live (HTTP 200). Item 5 of the same brief (placeholder Rankmill
+CTA blocks release) was already in place (D-015).
+
 ## D-009 — Store API: V2 only, service-account auth (Proposed, 2026-10-03)
 
 V1 dies 2026-10-15; V2 can't create items, so first uploads are a HUMAN step by design.
@@ -202,6 +246,7 @@ renders icons/screenshots for `tabmill assets`.
 | typer | CLI | tool runtime | Lamill CLI convention (D-008) | Accepted |
 | rich | CLI | tool runtime | `✓ ↷ ✗` colored step output | Accepted |
 | httpx | CLI | tool runtime | CWS API + landing/lamill probes; Lamill convention | Accepted (v1.G) |
+| google-auth (+ cryptography) | CLI | tool runtime, lazy | signs the service-account JWT only (Apache-2.0, 2.59.1); HTTP stays httpx | Accepted (v1.G) |
 | pydantic | CLI | tool runtime | typed extension.yaml schema + readable validation errors (goal #5) | Accepted (v1.E) |
 | pyyaml | CLI | tool runtime | parse extension.yaml; stdlib has no YAML | Accepted (v1.B) |
 | types-pyyaml | CLI | dev | mypy strict stubs for pyyaml | Accepted (v1.B) |

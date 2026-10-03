@@ -16,6 +16,12 @@ class Permission(BaseModel):
     justification: str = ""
 
 
+class Screenshot(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    caption: str
+    page: str | None = None  # extension page to capture; default: the template's UI page
+
+
 class Recipe(BaseModel):
     model_config = ConfigDict(extra="forbid")
     name: str
@@ -40,6 +46,7 @@ class Recipe(BaseModel):
     analytics: bool = False
     privacy_line: str | None = None
     theme: dict[str, str] = {}
+    screenshots: list[Screenshot] = Field(default=[], max_length=5)  # store allows 1–5
 
 
 def structure_errors(data: dict[str, object]) -> list[str]:

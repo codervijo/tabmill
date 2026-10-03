@@ -27,7 +27,7 @@ DEV ?=
 # Interactive targets (try, dev) need a TTY so Ctrl-C reaches the process in the container.
 DOCKER_TTY := $(shell [ -t 0 ] && echo -it)
 
-.PHONY: in-docker-% require-docker deps build test smoke try lint typecheck zip dev
+.PHONY: in-docker-% require-docker deps browsers build assets test smoke try lint typecheck zip dev
 
 # Run any target below inside the builder container, non-interactively, from the host.
 in-docker-%:
@@ -50,7 +50,12 @@ deps: require-docker
 	@pnpm install --store-dir /root/.pnpm-store --config.confirmModulesPurge=false
 	@echo "✓ Dependencies installed"
 
-build: deps
+# Playwright's Chromium (container only) renders icons/store images and runs smoke/try.
+browsers: deps
+	@pnpm --filter "./extensions/$(or $(EXT),*)" exec playwright install --with-deps --no-shell chromium >/dev/null
+
+build: browsers
+	@pnpm -r --filter "./extensions/$(or $(EXT),*)" assets:icons >/dev/null
 	@pnpm -r --filter "./extensions/$(or $(EXT),*)" build
 	@echo "✓ Build complete"
 
@@ -63,6 +68,10 @@ smoke: build
 	@pnpm --filter "./extensions/$(or $(EXT),*)" exec playwright install --with-deps --no-shell chromium
 	@pnpm -r --if-present --filter "./extensions/$(or $(EXT),*)" smoke
 	@echo "✓ Smoke tests complete"
+
+assets: build
+	@pnpm -r --filter "./extensions/$(or $(EXT),*)" assets:store
+	@echo "✓ Store assets in extensions/$(or $(EXT),*)/.output/store/"
 
 # Manual testing: headed Chromium in the container, window on the host via X11 (v1.F).
 TRY_PROFILE = /root/.tabmill-try/$(EXT)

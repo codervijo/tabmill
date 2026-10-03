@@ -1,16 +1,30 @@
-"""`tabmill` commands: init, skills sync, new, build, list, create, lint, dev, test, zip, try."""
+"""`tabmill` commands — see `tabmill --help` (README § Commands)."""
 
 from __future__ import annotations
 
 import dataclasses
 import json
+import os
 import subprocess
+import sys
 from pathlib import Path
 
 import typer
 from rich.table import Table
 
-from . import catalog, config, extension, generate, lint, output, registry, sync, workspace
+from . import (
+    catalog,
+    config,
+    cws,
+    extension,
+    generate,
+    lint,
+    listing,
+    output,
+    registry,
+    sync,
+    workspace,
+)
 from .constants import ENV_WORKSPACE
 
 app = typer.Typer(
@@ -297,3 +311,112 @@ def try_(
     _recipe(cfg, slug)
     _sync(cfg, force=False)
     _make(cfg, "try", slug, f"URL={url}", f"DEV={'1' if dev else ''}")
+
+
+@app.command()
+def assets(slug: str = typer.Argument(..., help="Extension slug.")) -> None:
+    """Render icons, promo tile, and 1280×800 screenshots into .output/store/ (docker)."""
+    cfg = _registered(slug)
+    _recipe(cfg, slug)
+    _sync(cfg, force=False)
+    _make(cfg, "assets", slug)
+    problems = listing.image_problems(cfg.workspace, slug) or []
+    for p in problems:
+        output.fail(p)
+    if problems:
+        raise typer.Exit(1)
+    output.ok(f"store images: extensions/{slug}/{listing.STORE_DIR}/")
+
+
+@app.command("listing")
+def listing_cmd(slug: str = typer.Argument(..., help="Extension slug.")) -> None:
+    """Write the store listing draft (paste into the Developer Dashboard)."""
+    cfg = _registered(slug)
+    ext = _recipe(cfg, slug)
+    path = listing.write_listing(cfg.workspace, slug, ext)
+    output.ok(f"listing draft: {path.relative_to(cfg.workspace)}")
+    for word, n in listing.keyword_repeats(path.read_text()).items():
+        output.skip(f"keyword-repeat: `{word}` appears {n}× (store limit: 5)")
+    output.console.print("  refine the description with the tabmill-store-listing skill")
+
+
+FIRST_PUBLISH = """  First publish of a new item is manual (the API can't create items):
+  1. https://chrome.google.com/webstore/devconsole → Add new item → upload {zip}
+  2. Fill Store listing + Privacy practices from {listing}
+  3. Set visibility; submit
+  4. Put the item ID in registry.json → extensions.{slug}.store_id"""
+
+
+def _store_call(fn: object) -> dict[str, object]:
+    try:
+        return fn()  # type: ignore[operator, no-any-return]  # thunk returning API JSON
+    except cws.CwsError as e:
+        (output.skip if e.transient else output.fail)(str(e))
+        raise typer.Exit(1) from e
+
+
+@app.command()
+def publish(
+    slug: str = typer.Argument(..., help="Extension slug."),
+    staged: bool = typer.Option(
+        False, "--staged", help="After approval, wait for a manual release."
+    ),
+    check: bool = typer.Option(
+        False, "--check", help="Only fetch review status into registry.json."
+    ),
+) -> None:
+    """Upload the release zip and submit for review. Attended only — never in CI."""
+    cfg = _registered(slug)
+    row = registry.read(cfg.workspace)["extensions"][slug]
+    store_id = row.get("store_id")
+    if not check and (os.environ.get("CI") or not sys.stdin.isatty()):
+        output.fail("publish never runs unattended — run it yourself in a terminal")
+        raise typer.Exit(1)
+    if not store_id:
+        zips = sorted((cfg.workspace / "extensions" / slug / ".output").glob("*.zip"))
+        output.fail(f"{slug} has no store_id yet")
+        output.console.print(
+            FIRST_PUBLISH.format(
+                zip=zips[-1] if zips else f"(run `tabmill zip {slug} --release`)",
+                listing=listing.store_dir(cfg.workspace, slug) / listing.LISTING_FILE,
+                slug=slug,
+            )
+        )
+        raise typer.Exit(1)
+    try:
+        client = cws.connect(cfg.tool_dir)
+    except cws.CwsError as e:
+        output.fail(str(e))
+        raise typer.Exit(1) from e
+    if not check:
+        if not _lint(cfg, slug, release=True):
+            raise typer.Exit(1)
+        ext = _recipe(cfg, slug)
+        zips = sorted(
+            (cfg.workspace / "extensions" / slug / ".output").glob(f"*-{ext['version']}-*.zip")
+        )
+        if not zips:
+            output.fail(f"no zip for {ext['version']} — run `tabmill zip {slug} --release`")
+            raise typer.Exit(1)
+        kind = "staged" if staged else "default"
+        if not typer.confirm(f"Upload {zips[-1].name} to item {store_id} and submit ({kind})?"):
+            output.skip("publish cancelled")
+            raise typer.Exit(0)
+        up = _store_call(lambda: client.upload(store_id, zips[-1]))
+        state = str(up.get("uploadState"))
+        if state == "IN_PROGRESS":
+            state = client.wait_for_upload(store_id)
+        if state != "SUCCEEDED":
+            output.fail(f"upload {state.lower() or 'failed'} — check the Developer Dashboard")
+            raise typer.Exit(1)
+        output.ok(f"uploaded {zips[-1].name}")
+        _store_call(lambda: client.publish(store_id, staged=staged))
+        output.ok("submitted for review")
+        registry.upsert(cfg.workspace, slug, {"submitted_version": str(ext["version"])})
+    status = cws.summarize(_store_call(lambda: client.fetch_status(store_id)))
+    registry.upsert(cfg.workspace, slug, status)
+    output.ok(
+        f"review: {status['review_state'] or '—'} · published: {status['published_state'] or '—'}"
+    )
+    if status["taken_down"] or status["warned"]:
+        output.fail("item is taken down or warned for policy — check the Developer Dashboard")

@@ -65,6 +65,51 @@ Plan (all code in `recipes/save-page-pdf-md/`; workspace only via `tabmill new/b
        while ‹FILL› → filled → `new` generated → `list` shows it; removed afterwards. WXT `build`
        of a created recipe not re-run (same path as #1, verified in v1.B/v1.C).
 
+## Unslotted — awaiting PRD placement (operator brief 2026-10-03)
+
+- [ ] v1.H API keys + preflight (D-025): `settings apikeys list|set|delete` in `tabmill.env`
+      (known CWS_* keys, atomic write, masked, probes: token exchange, SA key parse, publisher
+      access via fetchStatus); `tabmill preflight`; per-command preflights.
+- [ ] Slots (D-026): `registry.json` `slots: {used, limit}` (limit 2 default); `tabmill status`
+      shows used/limit; `tabmill release` warns at the cap.
+- [ ] `tabmill release` command (today a skill): runs the release steps, then `tabmill hub`.
+- [ ] `tabmill hub` (D-028): registry → `extensions.json` per the lamill.io contract →
+      deploy via `lamill`. BLOCKED: contract not in lamill.io README; HUMAN: confirm repo
+      path (`~/work/projects/sites/lamill.io`?) and the contract.
+- [ ] Listing URLs (D-029): `privacy_policy_url` = lamill.io/extensions/<slug>/privacy,
+      `support_url` = lamill.io/extensions/support in listing.md; release lint fails if missing
+      or the hub page isn't live.
+- [ ] Build order (D-027): next recipe = pressure-wash-quote (needs maps-overlay template).
+- [x] Rankmill CTA placeholder blocks release (D-015); HUMAN line below.
+
+## v1.G — Assets, listing, publish (in progress)
+
+1. [x] `templates/extension/_shared/scripts/assets.mjs` (Playwright, docker): icon SVG →
+       PNG 16/32/48/128 (+ store icon 128 = 96 art + 16 px transparent pad); promo tile
+       440×280; screenshots 1280×800 = extension UI page captured, framed on a Lamill stage
+       with a caption. Output `extensions/<slug>/.output/store/`.
+2. [x] Icon source: recipe `assets/icon.svg` if present, else generated (initials on accent
+       tile). Icons copied into `public/icon/` so the manifest gets them. Recipe
+       `screenshots: [{page, caption}]` optional; default one = UI + single_purpose.
+3. [x] `tabmill assets <slug>`; lint: icon-128 / screenshot-size / promo-small rules on
+       `.output/store/`.
+4. [x] `tabmill listing <slug>` → `extensions/<slug>/.output/store/listing.md` (title, summary,
+       description skeleton from recipe, captions, permission justifications, privacy answers);
+       keyword-repeat (> 5) lint on it. Copy is a draft — `tabmill-store-listing` skill refines it.
+5. [x] `cli/tabmill/cws.py`: CWS API v2 client (httpx; service account via google-auth, or
+       OAuth refresh token) — upload (raw zip), publish (DEFAULT / STAGED), fetchStatus; error
+       bodies → specific remediations. Mock-transport tests.
+6. [x] `tabmill publish <slug> [--staged]`: refuses without a TTY / in CI, without `store_id`
+       (prints first-publish dashboard steps), on `lint --release` errors; confirm prompt;
+       upload → publish → status → registry.json. `tabmill status`-style read via `--check`.
+7. [x] CI template: upload-artifact v7. Release lint stays local (`zip --release`, `publish`) —
+       store images are rendered in docker and not committed.
+8. [x] Skills: tabmill-release + tabmill-store-listing finalized; docs.
+       Verified against mocks only — real publish needs operator credentials (HUMAN).
+
+9. [ ] HUMAN: CWS credentials in `tabmill/.env` (see `.env.example`) + first dashboard upload →
+       then a real `tabmill publish --check` to verify the client against the live API.
+
 ## v1.F — CLI `try` ✅ (2026-10-03)
 
 1. [x] Chromium launcher `templates/extension/_shared/scripts/try.mjs`:

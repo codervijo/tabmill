@@ -5,7 +5,8 @@ description: Write the Chrome Web Store listing for a Tabmill extension — titl
 
 # Tabmill store listing
 
-> DRAFT (v1.A, 2026-10-03). Output path and `tabmill listing` *(planned v1.G)* may change.
+> Start from `uv run tabmill listing <slug>` — it writes `extensions/<slug>/.output/store/listing.md`
+> with title, summary, captions, justifications, and privacy answers filled from the recipe.
 > Limits verified 2026-10-03; see `chrome-store-policy` for sources.
 
 ## Inputs
@@ -18,7 +19,8 @@ describe what it actually does.
 
 ## Output
 
-Write `extensions/<slug>/listing.md` with these sections, in order:
+Edit the generated `listing.md`: finish the **Detailed description** (its `‹FILL›`), check the
+rest against this list. Sections, in order:
 
 1. **Title** — the manifest `name`, ≤ 75 chars. Lead with the job ("Save Page as Markdown or
    PDF"), not "Lamill …". No "#1", "official", "best", no third-party trademarks.
@@ -47,5 +49,5 @@ Write `extensions/<slug>/listing.md` with these sections, in order:
 
 ## Self-check before handing back
 
-Run the listing items of the `chrome-store-policy` checklist. Count characters for title and
-summary and state the counts. Flag any claim the extension doesn't actually deliver.
+Run the listing items of the `chrome-store-policy` checklist. Re-run `uv run tabmill lint <slug> --release` — it
+counts title/summary length and flags any word repeated more than 5 times in the visible text. Flag any claim the extension doesn't actually deliver.

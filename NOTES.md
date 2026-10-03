@@ -33,6 +33,12 @@ Measured from "extension.yaml agreed" to "unpacked build loads in Chrome".
 
 ## Observations
 
+- 2026-10-03: publisher cap — /docs/webstore/publish: new publishers get "a maximum of two
+  published extensions" (themes exempt); raise via "request an increase" in the dashboard;
+  denials cite "higher sustained engagement" or "tenure and activity requirements".
+  **Whether unlisted or private items count toward the cap is not documented** (UNVERIFIED —
+  ask CWS support or observe when a third item is submitted).
+
 - 2026-10-03 (v1.E): local-seo-checker — side panel, permissions activeTab + scripting +
   sidePanel, 15.5 kB, no runtime deps; unit 9/9, smoke 2/2, typecheck clean. `tabmill dev`:
   WXT dev server in the container answers on host :3000 and writes `.output/chrome-mv3-dev`;

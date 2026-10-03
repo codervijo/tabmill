@@ -34,7 +34,7 @@ Scope `https://www.googleapis.com/auth/chromewebstore` (`.readonly` suffices for
   `https://developers.google.com/oauthplayground`, mint refresh token in OAuth Playground.
   UNVERIFIED: refresh tokens for consent screens in "Testing" status may expire after 7 days.
 
-Env (TOOL_DIR/.env): `CWS_PUBLISHER_ID` + either `CWS_SA_KEY_FILE` or
+Template: `tabmill/.env.example`. Env (TOOL_DIR/.env): `CWS_PUBLISHER_ID` + either `CWS_SA_KEY_FILE` or
 `CWS_CLIENT_ID` / `CWS_CLIENT_SECRET` / `CWS_REFRESH_TOKEN`. Item IDs live per extension in
 `registry.json`, not env.
 

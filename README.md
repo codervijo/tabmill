@@ -26,6 +26,9 @@ uv run tabmill build <slug>         # regenerate + WXT build in docker
 uv run tabmill test <slug>          # typecheck + unit + smoke (docker)
 uv run tabmill try <slug> [--url URL] [--dev]  # Chromium in docker, window on your desktop
 uv run tabmill dev <slug>           # hot reload; load .output/chrome-mv3-dev in Chrome
+uv run tabmill assets <slug>        # store icon, promo tile, screenshots (docker)
+uv run tabmill listing <slug>       # store listing draft (.output/store/listing.md)
+uv run tabmill publish <slug> [--staged|--check]  # attended only
 uv run tabmill lint <slug> [--release]
 uv run tabmill zip <slug> [--release]
 uv run tabmill skills sync          # refresh all tabmill-managed workspace files
@@ -33,10 +36,9 @@ uv run tabmill skills sync          # refresh all tabmill-managed workspace file
 Anywhere: `uv tool install --editable ~/work/projects/droyfun/tabmill`, then `tabmill …`.
 
 
-Shipped: `init` · `skills sync` · `create` · `new` · `build` · `list` · `test` · `try` · `dev` · `lint` · `zip`. Planned:
+Shipped: `init` · `skills sync` · `create` · `new` · `build` · `list` · `test` · `try` · `dev` · `lint` · `zip` · `assets` · `listing` · `publish`. Planned:
 
-`assets` ·
-`listing` · `landing` · `publish` (attended only) · `status`
+`landing` · `status`
 
 ## Docs
 

@@ -33,10 +33,12 @@ def _ids(findings: list[lint.Finding]) -> dict[str, str]:
 def test_placeholder_warns_in_dev_and_blocks_release(setup: Config) -> None:
     _build(setup, {"a.js": "browser.scripting.executeScript; browser.storage.session"})
     assert _ids(lint.lint(setup.tool_dir, setup.workspace, SLUG, release=False)) == {
-        "fill-placeholder": "warn"
+        "fill-placeholder": "warn",
+        "store-images": "warn",
     }
     assert _ids(lint.lint(setup.tool_dir, setup.workspace, SLUG, release=True)) == {
-        "fill-placeholder": "error"
+        "fill-placeholder": "error",
+        "store-images": "error",
     }
 
 
@@ -86,3 +88,33 @@ def test_broad_host_and_similarity(setup: Config) -> None:
 def test_similarity() -> None:
     assert lint.similarity("Audit local SEO", "audit local seo") == 1.0
     assert lint.similarity("Save page as PDF", "Decode JWT tokens") == 0.0
+
+
+def test_store_images_and_keyword_repeat(setup: Config) -> None:
+    import struct
+
+    _build(setup, {"a.js": "browser.scripting; browser.storage"})
+    store = setup.workspace / "extensions" / SLUG / ".output" / "store"
+    store.mkdir(parents=True)
+
+    def png(name: str, w: int, h: int) -> None:
+        ihdr = struct.pack(">II", w, h)
+        (store / name).write_bytes(
+            b"\x89PNG\r\n\x1a\n" + b"\x00\x00\x00\rIHDR" + ihdr + b"\x08\x06"
+        )
+
+    png("icon-128.png", 128, 128)
+    png("promo-440x280.png", 440, 280)
+    png("screenshot-1.png", 1280, 720)  # wrong size
+    (store / "listing.md").write_text(
+        "## Title\nmarkdown\n## Detailed description\n" + "markdown " * 6
+    )
+    ids = _ids(lint.lint(setup.tool_dir, setup.workspace, SLUG, release=True))
+    assert ids["store-images"] == "error"
+    assert ids["keyword-repeat"] == "error"
+    png("screenshot-1.png", 1280, 800)
+    (store / "listing.md").write_text(
+        "## Title\nmarkdown\n## Detailed description\n" + "markdown " * 5
+    )
+    ids = _ids(lint.lint(setup.tool_dir, setup.workspace, SLUG, release=True))
+    assert "store-images" not in ids and "keyword-repeat" not in ids

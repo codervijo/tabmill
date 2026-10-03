@@ -16,7 +16,7 @@ tooling; packages and CLI commands move into TOOL_DIR only when #2 needs them.
 Done = #1 works on 10 real test URLs (listed in NOTES.md with results); smoke passes; zip builds;
 time-to-first-build logged.
 
-## v1.G — Assets, listing, publish, release CI
+## v1.G — Assets, listing, publish, release CI (in progress)
 
 - CLI: `assets` (Playwright icons 16/32/48/128, screenshots 1280×800, promo tile 440×280),
   `listing`, `publish` (CWS API **v2**, updates `registry.json`). CI release zips on tag.

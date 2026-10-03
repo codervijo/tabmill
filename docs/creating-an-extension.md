@@ -43,6 +43,6 @@ All Node work runs in the builder container; nothing Node runs on the host.
 
 ## 4. Before release
 
-Validate in real Chrome (load `.output/chrome-mv3` unpacked), run the `chrome-store-policy`
-checklist, then follow the `tabmill-release` skill. First publish of a new item is manual in
+`uv run tabmill assets <slug>` and `uv run tabmill listing <slug>`, check them, then
+`uv run tabmill zip <slug> --release`. Follow the `tabmill-release` skill. First publish of a new item is manual in
 the Developer Dashboard (the API can't create items).
