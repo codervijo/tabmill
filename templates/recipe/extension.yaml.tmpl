@@ -1,0 +1,24 @@
+# Recipe for {{slug}} — source of truth for the generated extension (ADR-0008).
+# Fill every ‹FILL›: `tabmill new` refuses while name / summary / single_purpose are unfilled,
+# and release lint blocks on any that remain (D-015). Then: tabmill new {{slug}}
+name: ‹FILL›            # store title, ≤ 75 chars — lead with the job, not the brand
+slug: {{slug}}
+version: 0.1.0
+summary: ‹FILL›         # manifest description, ≤ 132 chars, plain text
+single_purpose: ‹FILL›  # one sentence: <verb> <object> <for whom/where>; no "and" joining features
+template: {{template}}
+permissions:
+  - name: activeTab
+    justification: Read the current page only after the user clicks the toolbar button.
+optional_permissions: []
+dependencies: {}        # runtime npm deps — each needs a DECISIONS.md row first
+dev_dependencies: {}
+remote_code: false
+portfolio_site: ‹FILL›  # e.g. markpdf.dev
+landing_page_url: ""
+target_keywords: [‹FILL›]  # tool queries people search, e.g. "webpage to pdf"
+cta_text: ‹FILL›
+cta_url: ‹FILL›         # no real destination yet? use https://<name>.example/<path> (D-015)
+utm_campaign: {{slug}}
+store_category: ‹FILL›  # not in official docs; picked in the dashboard at "Add new item"
+analytics: false

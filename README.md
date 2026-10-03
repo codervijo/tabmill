@@ -18,7 +18,17 @@ page on a Lamill portfolio site.
 
 ## Commands
 
-Shipped: `init` · `skills sync` · `new` · `build` (minimal). Planned:
+```
+uv run tabmill list                 # every extension: status, version, what still needs filling
+uv run tabmill create <slug>        # starter recipe in recipes/<slug>/extension.yaml
+uv run tabmill new <slug>           # generate it into the workspace
+uv run tabmill build <slug>         # regenerate + WXT build in docker
+uv run tabmill skills sync          # refresh all tabmill-managed workspace files
+```
+Anywhere: `uv tool install --editable ~/work/projects/droyfun/tabmill`, then `tabmill …`.
+
+
+Shipped: `init` · `skills sync` · `create` · `new` · `build` (minimal) · `list`. Planned:
 
 `dev` · `test` · `zip` · `lint` · `assets` ·
 `listing` · `landing` · `publish` (attended only) · `status`

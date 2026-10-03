@@ -16,7 +16,7 @@ Two repos, related by a computed relative layout (ADR-0007):
 │   ├── recipes/<slug>/              extension source: extension.yaml + feature code (ADR-0008)
 │   ├── templates/extension/<tpl>/   generic surface code (popup today)
 │   ├── templates/workspace/  ci/    rendered into the workspace by `tabmill init`
-│   ├── skills/  packages/ (v1.C)  docs/
+│   ├── skills/  packages/ (v1.E)  docs/
 │   └── .claude/skills/tabmill-dev/
 └── plugins/chrome-extension-projects/   WORKSPACE_DIR = $TABMILL_WORKSPACE
     ├── chrome-dejargon/ … (5 pre-tabmill projects — untouched)
@@ -49,6 +49,11 @@ Two repos, related by a computed relative layout (ADR-0007):
   or an untracked file in the way = hand edit → refuse unless `--force`; files dropped from
   source are removed. Template changes reach the workspace on the next sync.
 - **Init**: seed files + `extensions/` + `.tabmill-ref` pin, then sync.
+- **Catalog** (`cli/tabmill/catalog.py`, v1.D): `list` rows = `recipes/*/` ∪ workspace
+  registry — status `recipe` / `generated` / `built` (`.output/chrome-mv3/manifest.json`) /
+  `orphan` (registered, no recipe) / `invalid` (YAML error); placeholders = any `‹FILL›` value
+  (dotted path) + placeholder URLs (D-015). `create` renders `templates/recipe/extension.yaml.tmpl`;
+  `new`/`build` refuse `‹FILL›` in name / summary / single_purpose. Workspace optional for both.
 - **Generator** (`cli/tabmill/generate.py`, ADR-0008): for each slug in `registry.json`,
   managed files under `extensions/<slug>/` = `templates/extension/<template>/**` (`*.tmpl`
   rendered) + `recipes/<slug>/**` overlay (same path wins; `extension.yaml` excluded) +
@@ -70,12 +75,12 @@ Two repos, related by a computed relative layout (ADR-0007):
 
 ## 3. Data shapes / schemas
 
-- **extension.yaml** (kickoff field list; typed schema lands in v1.C): `name`, `slug`,
+- **extension.yaml** (kickoff field list; typed schema lands in v1.E): `name`, `slug`,
   `version`, `single_purpose`, `template`, `permissions[] {name, justification}`,
   `optional_permissions[]`, `portfolio_site`, `landing_page_url`, `target_keywords[]`,
   `cta_text`, `cta_url`, `utm_campaign`, `store_category`, `analytics` (default `false`),
   `theme` (optional). Policy spike suggests adding: `remote_code`, `privacy_policy_url`,
-  `data_usage {categories, limited_use}` — decide in v1.C.
+  `data_usage {categories, limited_use}` — decide in v1.E.
 - **registry.json**: per slug — `version`, `store_id` (from dashboard "Add new item"),
   `status`, `review_state`, `metrics[] {date, report, value}` (from CSV import).
 - **tabmill.config.json** (TOOL_DIR): `builder`, `tool_repo`, optional `workspace` fallback.
@@ -85,12 +90,14 @@ Two repos, related by a computed relative layout (ADR-0007):
 
 `cli/tabmill/`: `cli` (typer app), `config`, `constants`, `output` (✓ ↷ ✗), `templates`,
 `skills` (skill sources), `sync` (manifest engine), `workspace` (seed + managed files),
-`extension` (YAML load/validate/manifest fields), `generate` (template + recipe), `registry`. Planned packages: brand, funnel, messaging, analytics, policy (extracted in v1.C/v1.E).
+`extension` (YAML load/validate/manifest fields), `generate` (template + recipe), `registry`,
+`catalog` (list rows, starter recipes). Planned packages: brand, funnel, messaging, analytics, policy (extracted in v1.E/v1.G).
 
 ## 5. CLI / UX surface
 
-`init`, `skills sync` (v1.B) · `new`, `dev`, `test`, `build`, `zip`, `lint` (v1.C) ·
-`assets`, `listing`, `publish` (v1.D) · `landing`, `status` (v1.E). Output uses `✓ ↷ ✗`.
+`init`, `skills sync`, `new`, `build` (minimal) (v1.B) · `list`, `create` (v1.D) ·
+`dev`, `test`, `zip`, `lint`, full `build` (v1.E) · `assets`, `listing`, `publish` (v1.F) ·
+`landing`, `status` (v1.G). Output uses `✓ ↷ ✗`.
 
 ## 6. Integrations / external APIs
 

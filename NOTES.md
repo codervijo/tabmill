@@ -10,7 +10,7 @@ Measured from "extension.yaml agreed" to "unpacked build loads in Chrome".
 | # | slug | phase | start | first build | elapsed | notes |
 |---|---|---|---|---|---|---|
 | 1 | save-page-pdf-md | v1.C | — | — | — | generator stub built in v1.B (build 4.7 s incl. install) |
-| 2 | local-seo-checker | v1.D | — | — | — | target: far below #1 |
+| 2 | local-seo-checker | v1.E | — | — | — | target: far below #1 |
 
 ## Blockers
 
@@ -134,7 +134,7 @@ Source: developer.chrome.com/docs/webstore/{api/v1,using-api,service-accounts,pu
 - Dashboard "Users" counts installations, not activity.
 - Optional per-item GA4 opt-in: listing page views, `install` event, UTM attribution;
   2-month retention; Marketer role only. GA4 Data API access to that property UNVERIFIED.
-- Design (v1.E): `tabmill status --import <csv>` → `registry.json` `metrics[]`
+- Design (v1.G): `tabmill status --import <csv>` → `registry.json` `metrics[]`
   `{date, report, value}` per extension, idempotent by (date, report).
 
 ### Spike 5 — Policy

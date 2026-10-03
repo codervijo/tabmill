@@ -41,7 +41,7 @@ Makefile (Python stack) with `Makefile.local` overrides (D-018). Workspace (`$TA
 - **Target**: local install; extensions → Chrome Web Store (manual publish approval)
 - **Live URL / install command**: not yet
 - **Last released version / deployed commit**: none
-- **Release / deploy trigger**: manual; workspace CI builds release zips on tag (v1.D)
+- **Release / deploy trigger**: manual; workspace CI builds release zips on tag (v1.F)
 - **Notes**: CWS credentials in `TOOL_DIR/.env` (never committed) — see `skills/tabmill-release/reference.md`
 
 ## How to run

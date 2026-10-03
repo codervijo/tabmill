@@ -21,14 +21,14 @@ Run from the workspace root. Print one `✓` / `↷` / `✗` line per step; stop
    fixes, minor for features). Never edit generated `manifest.json`. Must be greater than the
    version in `registry.json`.
 3. **Typecheck.** via the builder (docker) — never run Node on the host.
-4. **Unit tests.** `uv run tabmill test <slug>` *(planned v1.C)* — until then the workspace `make test`.
-5. **Build.** `uv run tabmill build <slug>` *(planned v1.C)*.
-6. **Lint.** `uv run tabmill lint <slug> --release` *(planned v1.C)* — release mode turns
+4. **Unit tests.** `uv run tabmill test <slug>` *(planned v1.E)* — until then the workspace `make test`.
+5. **Build.** `uv run tabmill build <slug>` (minimal today; full in v1.E).
+6. **Lint.** `uv run tabmill lint <slug> --release` *(planned v1.E)* — release mode turns
    placeholder CTA/landing URLs into errors. Any `✗` blocks the release; use the
    `chrome-store-policy` skill to resolve.
 7. **Smoke test.** Playwright loads the unpacked build (bundled Chromium, `channel: 'chromium'`).
-8. **Zip.** `uv run tabmill zip <slug>` *(planned v1.C)* → `extensions/<slug>/.output/<slug>-<version>.zip`.
-9. **Assets.** `uv run tabmill assets <slug>` *(planned v1.D)*: icons 16/32/48/128, 1–5 screenshots
+8. **Zip.** `uv run tabmill zip <slug>` *(planned v1.E; today `make in-docker-zip EXT=<slug>`)* → `extensions/<slug>/.output/<slug>-<version>.zip`.
+9. **Assets.** `uv run tabmill assets <slug>` *(planned v1.F)*: icons 16/32/48/128, 1–5 screenshots
    at 1280×800, small promo tile 440×280.
 10. **Listing draft.** Use the `tabmill-store-listing` skill → `extensions/<slug>/listing.md`.
 11. **Privacy check.** If analytics is on: privacy policy URL live, data categories + Limited
@@ -49,7 +49,7 @@ HUMAN line must say:
 
 ## Updates to an existing item (attended only)
 
-`uv run tabmill publish <slug>` *(planned v1.D)*: upload zip to the existing item, then publish
+`uv run tabmill publish <slug>` *(planned v1.F)*: upload zip to the existing item, then publish
 (`DEFAULT_PUBLISH`, or `STAGED_PUBLISH` to release manually after approval), then record
 review state from `fetchStatus` in `registry.json`.
 

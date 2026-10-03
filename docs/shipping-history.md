@@ -11,6 +11,32 @@ tradeoffs, and links to commits / ADRs.
 
 ---
 
+## v1.D — CLI `list` + `create` (shipped 2026-10-03)
+
+D-021. Build of a `create`d recipe not re-run (same path as #1).
+
+### v1.D plan (as executed)
+
+Operator-felt gaps (2026-10-03): no way to see all extensions, no command to start one.
+
+- `tabmill list [--json]`: one row per slug across `recipes/` and the workspace
+  `registry.json` — slug, version, template, status (`recipe` → `generated` → `built`, built =
+  `.output/chrome-mv3/manifest.json` exists), store ID, `↷` flags for placeholder fields
+  (`‹FILL›`, reserved `.example` URLs). Read-only.
+- `tabmill create <slug> [--template popup]`: writes a starter `recipes/<slug>/extension.yaml`
+  (`activeTab` only, `analytics: false`, `‹FILL›` for name / summary / single purpose / CTA /
+  keywords / category); validates the slug (lowercase kebab-case); refuses if the slug exists as a
+  recipe or registry entry, or the template isn't implemented; prints the next step
+  (`fill the ‹FILL› fields, then tabmill new <slug>`). Never touches the workspace.
+- `new` keeps its name (operator, 2026-10-03). `new` / `build` refuse a recipe that still has
+  `‹FILL›` in fields the manifest needs (name, summary, single_purpose).
+- `tabmill-new-extension` skill: step 7 starts from `tabmill create`.
+
+Done = `tabmill create demo && <fill fields> && tabmill new demo && tabmill build demo` works
+end to end; `tabmill list` shows save-page-pdf-md (built) and demo; tests cover duplicate,
+bad-slug, and placeholder refusals.
+
+
 ## v1.B — Tool + generator (shipped 2026-10-03)
 
 Not committed at ship time (operator commits). Key decisions: D-017/ADR-0007 workspace =

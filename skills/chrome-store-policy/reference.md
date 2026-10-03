@@ -3,7 +3,7 @@
 Fetched 2026-10-03. `pp/` = `https://developer.chrome.com/docs/webstore/program-policies/`.
 Re-verify on each tier kickoff; policies change.
 
-## Lint rules (proposed for `packages/policy`, v1.C)
+## Lint rules (proposed for `packages/policy`, v1.E)
 
 | id | sev | mechanical check | source |
 |---|---|---|---|

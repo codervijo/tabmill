@@ -5,12 +5,13 @@ description: Write the Chrome Web Store listing for a Tabmill extension — titl
 
 # Tabmill store listing
 
-> DRAFT (v1.A, 2026-10-03). Output path and `tabmill listing` *(planned v1.D)* may change.
+> DRAFT (v1.A, 2026-10-03). Output path and `tabmill listing` *(planned v1.F)* may change.
 > Limits verified 2026-10-03; see `chrome-store-policy` for sources.
 
 ## Inputs
 
-`extensions/<slug>/extension.yaml`: `name`, `single_purpose`, `target_keywords`,
+The recipe `tabmill/recipes/<slug>/extension.yaml` (the generated copy in
+`extensions/<slug>/README.md` summarizes it): `name`, `single_purpose`, `target_keywords`,
 `permissions` + justifications, `analytics`, `cta_text`, `cta_url`, `portfolio_site`,
 `landing_page_url`, `store_category`. Read the built extension's UI too — the listing must
 describe what it actually does.

@@ -1,4 +1,4 @@
-"""extension.yaml reading, validation, and manifest fields (v1.B minimal; typed schema in v1.D).
+"""extension.yaml reading, validation, and manifest fields (v1.B minimal; typed schema in v1.E).
 
 The CLI is the only reader of extension.yaml (ADR-0002). `generate` turns the fields into
 `manifest.gen.json`, which the generated `wxt.config.ts` passes to WXT (ADR-0004).
@@ -59,7 +59,7 @@ def is_placeholder(value: object) -> bool:
 
 
 def validate(ext: dict[str, Any], slug: str) -> list[str]:
-    """Errors that block a build. (Policy lint proper is v1.C.)"""
+    """Errors that block a build. (Policy lint proper is v1.E.)"""
     errors = [f"missing field `{k}`" for k in REQUIRED if k not in ext]
     if errors:
         return errors
@@ -72,7 +72,7 @@ def validate(ext: dict[str, Any], slug: str) -> list[str]:
     if ext["template"] not in TEMPLATES:
         errors.append(f"`template` must be one of {', '.join(TEMPLATES)}")
     if ext.get("analytics", False) is not False:
-        errors.append("`analytics` opt-in isn't supported until v1.E")
+        errors.append("`analytics` opt-in isn't supported until v1.G")
     for key in ("permissions", "optional_permissions", "host_permissions"):
         for perm in ext.get(key) or []:
             if not isinstance(perm, dict) or not perm.get("name"):

@@ -49,9 +49,12 @@ No real CTA destination yet → reserved placeholder host (`https://<name>.examp
 
 ## 6. Analytics
 
-`analytics: false` unless the user explicitly opts in (supported from v1.F).
+`analytics: false` unless the user explicitly opts in (supported from v1.G).
 
 ## 7. Write the recipe
+
+Start from the starter: `uv run tabmill create <slug> [--template popup]` (refuses bad or
+existing slugs), then fill every `‹FILL›`. Resulting shape:
 
 ```yaml
 name: Save Page as Markdown or PDF          # ≤ 75 chars
@@ -82,6 +85,8 @@ tests under `recipes/<slug>/tests/`. A recipe file replaces the template file at
 
 ## 8. Generate and verify
 
-`make run ARGS="new <slug>"` → `make run ARGS="build <slug>"` → in the workspace
+`uv run tabmill new <slug>` (refuses while name / summary / single_purpose are `‹FILL›`) →
+`uv run tabmill build <slug>` → in the workspace
 `make in-docker-test EXT=<slug>` and `make in-docker-smoke EXT=<slug>`. Record start/first-build
-times in NOTES.md (time-to-first-build). Run the `chrome-store-policy` checklist before feature work.
+times in NOTES.md (time-to-first-build). `uv run tabmill list` shows status and remaining
+placeholders. Run the `chrome-store-policy` checklist before feature work.

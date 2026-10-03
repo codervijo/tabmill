@@ -52,3 +52,9 @@ The dated H2 is what `lamill project status` parses. Append-only.
 > "are you writing extensions from claude here - i expect tabmill tool to be doing generating of
 > extensions - you build only tabmill" → proposed reslot; "accept reslot, option 2"
 > → ADR-0008 (recipes in tabmill → generated managed files in the workspace), phases v1.A–v1.G.
+
+## 2026-10-03 — v1.D slotted: `list` + `create`
+
+> "few issues i notice: no command to list all extensions, or create a new one" → "add list and
+> create commands to the PRD" → "no, dont rename. pick best defaults for the user"
+> → D-021: new v1.D (list + create) before extension #2; later phases v1.E–v1.H; `new` kept.

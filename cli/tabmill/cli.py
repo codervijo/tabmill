@@ -1,14 +1,16 @@
-"""`tabmill` command surface. v1.B: init, skills sync, new, build (minimal)."""
+"""`tabmill` command surface. v1.B: init, skills sync, new, build (minimal); v1.D: list, create."""
 
 from __future__ import annotations
 
 import dataclasses
+import json
 import subprocess
 from pathlib import Path
 
 import typer
+from rich.table import Table
 
-from . import config, extension, generate, output, registry, sync, workspace
+from . import catalog, config, extension, generate, output, registry, sync, workspace
 from .constants import ENV_WORKSPACE
 
 app = typer.Typer(
@@ -123,3 +125,74 @@ def build(
         output.fail(f"WXT build failed (exit {rc})")
         raise typer.Exit(rc)
     output.ok(f"built: extensions/{slug}/.output/chrome-mv3/")
+
+
+def _config_and_workspace() -> tuple[config.Config, Path | None]:
+    """list/create work from recipes alone; the workspace is optional for them."""
+    try:
+        cfg = config.load()
+    except config.ConfigError:
+        output.skip(f"no workspace configured (${ENV_WORKSPACE}) — recipes only")
+        return config.load(require_workspace=False), None
+    if not cfg.workspace.exists():
+        output.skip(f"workspace {cfg.workspace} not found — recipes only")
+        return cfg, None
+    return cfg, cfg.workspace
+
+
+STATUS_STYLE = {
+    "built": "[green]✓ built[/green]",
+    "generated": "[green]✓ generated[/green]",
+    "recipe": "[yellow]↷ recipe only[/yellow]",
+    "orphan": "[red]✗ orphan[/red]",
+    "invalid": "[red]✗ invalid[/red]",
+}
+
+
+@app.command("list")
+def list_(
+    as_json: bool = typer.Option(False, "--json", help="Machine-readable output."),
+) -> None:
+    """All extensions: recipes in tabmill + what's generated/built in the workspace."""
+    cfg, ws = _config_and_workspace()
+    rows = catalog.rows(cfg.tool_dir, ws)
+    if as_json:
+        typer.echo(json.dumps([r.to_dict() for r in rows], indent=2))
+        return
+    if not rows:
+        output.skip("no extensions yet — start one with `tabmill create <slug>`")
+        return
+    table = Table(show_edge=False, pad_edge=False, box=None, header_style="bold")
+    for col in ("slug", "status", "version", "template", "store id"):
+        table.add_column(col, no_wrap=True)
+    table.add_column("needs filling", overflow="fold")
+    for r in rows:
+        todo = r.error or " ".join(r.placeholders)
+        table.add_row(
+            r.slug,
+            STATUS_STYLE[r.status],
+            r.version,
+            r.template,
+            r.store_id or "—",
+            f"[yellow]{todo}[/yellow]" if todo else "—",
+        )
+    output.console.print(table)
+
+
+@app.command()
+def create(
+    slug: str = typer.Argument(..., help="New extension slug, e.g. jwt-inspector."),
+    template: str = typer.Option("popup", "--template", "-t", help="Surface template."),
+) -> None:
+    """Start a new extension: write a starter recipe in tabmill/recipes/<slug>/."""
+    cfg, ws = _config_and_workspace()
+    try:
+        path = catalog.create(cfg.tool_dir, ws, slug, template)
+    except catalog.CreateError as e:
+        output.fail(str(e))
+        raise typer.Exit(1) from e
+    output.ok(f"created {path.relative_to(cfg.tool_dir)}")
+    output.console.print(
+        f"  next: fill every ‹FILL› in it (feature code goes in recipes/{slug}/src/feature/), "
+        f"then `tabmill new {slug}`"
+    )

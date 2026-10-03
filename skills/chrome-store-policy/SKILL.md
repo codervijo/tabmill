@@ -7,7 +7,7 @@ description: Chrome Web Store policy checklist for Tabmill extensions — single
 
 > DRAFT (v1.A, 2026-10-03). Verified against developer.chrome.com policy pages on
 > 2026-10-03 — sources and the full rule table are in [reference.md](reference.md).
-> `tabmill lint` does not exist yet (planned v1.C); until then run this checklist by hand.
+> `tabmill lint` does not exist yet (planned v1.E); until then run this checklist by hand.
 
 Policy is priority #1 for Tabmill — above speed. When in doubt, choose the reading that
 asks for less permission and discloses more.

@@ -41,7 +41,31 @@ Plan (all code in `recipes/save-page-pdf-md/`; workspace only via `tabmill new/b
       permission Contents: read-only — https://github.com/settings/personal-access-tokens/new — and save
       it as secret `TABMILL_PAT` in the `codervijo/chrome-extension-projects` repo (Settings → Secrets and variables → Actions)
 
-## v1.D — queued (was v1.C before the reslot)
+## v1.D — CLI `list` + `create` ✅ (2026-10-03)
+
+1. [x] `cli/tabmill/catalog.py`: rows from `recipes/*/` ∪ workspace `registry.json` — slug,
+       version, template, status (`recipe` / `generated` / `built` / `✗ orphan` = registered
+       but no recipe), store ID, placeholder fields (any `‹FILL›` value; placeholder CTA /
+       landing URLs, D-015). Recipe that fails to parse → row with the error, not a crash.
+2. [x] `tabmill list [--json]`: rich table (✓ built / ↷ placeholders / ✗ orphan or invalid);
+       `--json` = list of row dicts, stable keys. Works without a workspace (recipes only, ↷).
+3. [x] `templates/recipe/extension.yaml.tmpl` + `tabmill create <slug> [--template popup]`:
+       slug = lowercase kebab-case ≤ 40 chars; refuse existing recipe / registry slug /
+       unimplemented template; writes the starter with `‹FILL›` for name, summary,
+       single_purpose, cta_text, cta_url, portfolio_site, target_keywords, store_category;
+       `utm_campaign` defaults to the slug; `activeTab` with its standard justification.
+       Prints next step. Never touches the workspace.
+4. [x] `new` / `build` refuse `‹FILL›` in name / summary / single_purpose (manifest-facing).
+5. [x] Tests: create (ok, bad slug, duplicate recipe, duplicate registry, bad template),
+       list (recipe-only, generated, built, orphan, placeholders, invalid recipe, json),
+       placeholder refusal in `new`.
+6. [x] `tabmill-new-extension` skill step 7 → start from `tabmill create`; README, architecture,
+       NOTES; sync workspace skills (stale phase refs); fix `tabmill-store-listing` input path.
+7. [x] Verified on a throwaway slug in a scratch workspace: create (+ 3 refusals) → `new` refused
+       while ‹FILL› → filled → `new` generated → `list` shows it; removed afterwards. WXT `build`
+       of a created recipe not re-run (same path as #1, verified in v1.B/v1.C).
+
+## v1.E — queued (extension #2)
 
 - [ ] `recipes/local-seo-checker/extension.yaml`: `cta_url: https://rankmill.example/local-seo-audit`
       (placeholder, D-015); the HUMAN line below stays here (tabmill repo)

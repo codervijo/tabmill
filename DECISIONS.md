@@ -138,21 +138,29 @@ own container without sudo (builder defaults: `mb1`, `sudo docker`). Runs on the
 Operator: "tabmill tool [does] generating of extensions — you build only tabmill"; feature code
 via per-extension recipes in the tabmill repo (option 2). Phases reslotted to v1.A–v1.G.
 Kickoff deviations: extension source moves from WORKSPACE_DIR to `recipes/`; "#1 built by hand,
-extract later" becomes "generic code in templates from day one"; v1.G extensions are recipes,
+extract later" becomes "generic code in templates from day one"; v1.H extensions are recipes,
 not workspace Claude sessions.
 
 ## D-020 — `tabmill build` pulled into v1.B (Accepted, 2026-10-03)
 
-Generation needs manifest fields from YAML before the full v1.D build; v1.B ships a minimal
+Generation needs manifest fields from YAML before the full v1.E build; v1.B ships a minimal
 `build` (required fields, length limits, permission justifications, placeholder-URL warning,
-`manifest.gen.json` + `package.json` version, WXT build in docker). Typed schema + lint stay v1.D.
+`manifest.gen.json` + `package.json` version, WXT build in docker). Typed schema + lint stay v1.E.
+
+## D-021 — `list` + `create` as v1.D; keep `new` (Accepted, 2026-10-03)
+
+Operator noticed no command lists extensions or starts one; asked to add both and "pick best
+defaults". Slotted as v1.D, before extension #2, so #2 starts from `tabmill create` and its
+time-to-first-build reflects the real workflow; later phases shift to v1.E–v1.H. `new` is not
+renamed (operator). Defaults: `list` read-only with `--json`; `create` writes only a recipe
+skeleton with `‹FILL›` markers, refuses duplicates/bad slugs, never touches the workspace.
 
 ## D-009 — Store API: V2 only, service-account auth (Proposed, 2026-10-03)
 
 V1 dies 2026-10-15; V2 can't create items, so first uploads are a HUMAN step by design.
 Service account preferred over OAuth refresh token (no token expiry; one SA per publisher).
 Client: hand-written `httpx` client (Lamill convention); `google-auth` only for the SA JWT
-token exchange if hand-rolling it isn't simpler — decide in v1.D.
+token exchange if hand-rolling it isn't simpler — decide in v1.F.
 
 ## D-010 — Metrics: CSV import (Proposed, 2026-10-03)
 
@@ -178,8 +186,8 @@ renders icons/screenshots for `tabmill assets`.
 |---|---|---|---|---|
 | typer | CLI | tool runtime | Lamill CLI convention (D-008) | Accepted |
 | rich | CLI | tool runtime | `✓ ↷ ✗` colored step output | Accepted |
-| httpx | CLI | tool runtime | CWS API + landing/lamill probes; Lamill convention | Accepted (v1.D) |
-| pydantic | CLI | tool runtime | typed extension.yaml schema + readable validation errors (goal #5) | Proposed (v1.C) |
+| httpx | CLI | tool runtime | CWS API + landing/lamill probes; Lamill convention | Accepted (v1.F) |
+| pydantic | CLI | tool runtime | typed extension.yaml schema + readable validation errors (goal #5) | Proposed (v1.E) |
 | pyyaml | CLI | tool runtime | parse extension.yaml; stdlib has no YAML | Accepted (v1.B) |
 | types-pyyaml | CLI | dev | mypy strict stubs for pyyaml | Accepted (v1.B) |
 | ruff, mypy, pytest | CLI | dev | D-011 | Accepted |

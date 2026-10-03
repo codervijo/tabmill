@@ -61,6 +61,11 @@ def load_recipe(tool_dir: Path, slug: str) -> dict[str, Any]:
     except extension.ExtensionError as e:
         raise RecipeError(str(e)) from e
     errors = extension.validate(ext, slug)
+    errors += [
+        f"`{f}` is still ‹FILL› — fill it in {d / RECIPE_FILE}"
+        for f in ("name", "summary", "single_purpose")
+        if extension.FILL_MARKER in str(ext.get(f, ""))
+    ]
     if errors:
         raise RecipeError("; ".join(f"{RECIPE_FILE}: {e}" for e in errors))
     return ext
