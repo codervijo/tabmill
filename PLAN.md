@@ -16,15 +16,6 @@ tooling; packages and CLI commands move into TOOL_DIR only when #2 needs them.
 Done = #1 works on 10 real test URLs (listed in NOTES.md with results); smoke passes; zip builds;
 time-to-first-build logged.
 
-## v1.E — Extension #2 recipe (local-seo-checker) + extraction
-
-- Recipe for #2, started with `tabmill create` (CTA placeholder `https://rankmill.example/local-seo-audit`, D-015).
-- Move code both use into `packages/` or templates; typed extension.yaml schema (pydantic).
-- CLI: `dev`, `test`, `zip`, `lint` (`--release` severities, D-015); full `build`.
-- Write `docs/creating-an-extension.md`; refine skills.
-
-Done = both generated from recipes; typecheck + lint + tests pass; #2 time-to-first-build far below #1.
-
 ## v1.F — Assets, listing, publish, release CI
 
 - CLI: `assets` (Playwright icons 16/32/48/128, screenshots 1280×800, promo tile 440×280),

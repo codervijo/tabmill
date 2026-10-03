@@ -155,6 +155,15 @@ time-to-first-build reflects the real workflow; later phases shift to v1.E–v1.
 renamed (operator). Defaults: `list` read-only with `--json`; `create` writes only a recipe
 skeleton with `‹FILL›` markers, refuses duplicates/bad slugs, never touches the workspace.
 
+## D-022 — Shared extension code lives in `templates/extension/_shared/`, not pnpm packages (Accepted, 2026-10-03)
+
+Extraction trigger hit in v1.E (both extensions need the shell, brand, inject helper,
+messaging, tokens, smoke fixtures). Because extensions are generated (ADR-0008), the generator
+overlays `_shared/` under every surface template — same single source, no package build, no
+cross-repo pnpm link at runtime. `packages/` (ADR-0006/0007 linking) stays available for code
+that must be versioned independently; none exists yet. Also v1.E: side-panel template; typed
+schema (`cli/tabmill/schema.py`, pydantic, unknown keys rejected); `lint` / `dev` / `test` / `zip`.
+
 ## D-009 — Store API: V2 only, service-account auth (Proposed, 2026-10-03)
 
 V1 dies 2026-10-15; V2 can't create items, so first uploads are a HUMAN step by design.
@@ -187,7 +196,7 @@ renders icons/screenshots for `tabmill assets`.
 | typer | CLI | tool runtime | Lamill CLI convention (D-008) | Accepted |
 | rich | CLI | tool runtime | `✓ ↷ ✗` colored step output | Accepted |
 | httpx | CLI | tool runtime | CWS API + landing/lamill probes; Lamill convention | Accepted (v1.F) |
-| pydantic | CLI | tool runtime | typed extension.yaml schema + readable validation errors (goal #5) | Proposed (v1.E) |
+| pydantic | CLI | tool runtime | typed extension.yaml schema + readable validation errors (goal #5) | Accepted (v1.E) |
 | pyyaml | CLI | tool runtime | parse extension.yaml; stdlib has no YAML | Accepted (v1.B) |
 | types-pyyaml | CLI | dev | mypy strict stubs for pyyaml | Accepted (v1.B) |
 | ruff, mypy, pytest | CLI | dev | D-011 | Accepted |

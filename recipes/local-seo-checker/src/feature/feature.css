@@ -1,0 +1,7 @@
+.ls-score { margin: 0; font-weight: 650; }
+.ls-checks { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.ls-checks li { display: grid; gap: 2px; padding: 8px 10px; border-radius: 8px; border: 1px solid var(--lm-hairline); }
+.ls-checks span { font-size: 12.5px; color: var(--lm-muted); }
+.ls-pass strong { color: #16a34a; }
+.ls-warn strong { color: #ca8a04; }
+.ls-fail strong { color: #dc2626; }

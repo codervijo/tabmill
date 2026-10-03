@@ -49,6 +49,15 @@ Two repos, related by a computed relative layout (ADR-0007):
   or an untracked file in the way = hand edit → refuse unless `--force`; files dropped from
   source are removed. Template changes reach the workspace on the next sync.
 - **Init**: seed files + `extensions/` + `.tabmill-ref` pin, then sync.
+- **Templates** (v1.E): `_shared/` (wxt + web-ext config, tsconfig, vitest/playwright configs,
+  `src/lib/{brand,inject,messaging}.ts`, `shell.css`, smoke fixtures, config unit test) overlaid
+  first, then the surface (`popup/`, `side-panel/` = background `setPanelBehavior` + sidepanel
+  page; generator adds `action` to the manifest), then the recipe (D-022). Template-required
+  permissions (`sidePanel`) must be declared + justified in the recipe; `create` adds them.
+- **Schema + lint** (v1.E): `schema.py` (pydantic, `extra="forbid"`) + friendly checks in
+  `extension.validate`; `lint.py` rules with dev/release severity — schema, perm-broad-host,
+  perm-unused (bundle token scan), fill-placeholder, cta-placeholder, mv3-no-eval,
+  mv3-no-remote-script, not-built, portfolio-similarity (Jaccard on single_purpose).
 - **Catalog** (`cli/tabmill/catalog.py`, v1.D): `list` rows = `recipes/*/` ∪ workspace
   registry — status `recipe` / `generated` / `built` (`.output/chrome-mv3/manifest.json`) /
   `orphan` (registered, no recipe) / `invalid` (YAML error); placeholders = any `‹FILL›` value

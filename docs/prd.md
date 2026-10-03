@@ -57,7 +57,7 @@ as v1.D (D-021) → v1.A–v1.H.
 | v1.B | ✅ done | Tool Makefile; `init` + `skills sync`; `build`; `new` (template + recipe → generated extension); popup template |
 | v1.C | 🔄 in progress | Extension #1 save-page-pdf-md recipe (feature code); 10 real URLs; smoke; zip |
 | v1.D | ✅ done | CLI `list` (all extensions + state) and `create` (starter recipe) |
-| v1.E | ⏳ planned | Extension #2 local-seo-checker recipe; shared packages; typed schema; CLI dev/test/zip/lint |
+| v1.E | ✅ done | Extension #2 local-seo-checker recipe; shared packages; typed schema; CLI dev/test/zip/lint |
 | v1.F | ⏳ planned | CLI assets/listing/publish; CI release zips on tag |
 | v1.G | ⏳ planned | CLI landing/status; analytics package |
 | v1.H | ⏳ planned | Extensions #3–#5 as recipes |

@@ -1,39 +1,13 @@
 // save-page-pdf-md feature: replaces the popup template's stub (ADR-0008).
 import { type Article, HANDOFF_PREFIX, isArticle } from "./article";
+import { runInTab, UserError } from "@/lib/inject";
 import { markdownFilename } from "./filename";
 import { toMarkdown } from "./markdown";
 
-class UserError extends Error {}
-
-const RESTRICTED =
-  "This page can't be read. Browser pages (chrome://), the Chrome Web Store, and other " +
-  "protected pages are off-limits to extensions.";
-
-async function targetTabId(): Promise<number> {
-  // `?tabId=` lets smoke tests drive the popup as a normal page (no toolbar click in tests).
-  const override = new URLSearchParams(location.search).get("tabId");
-  if (override) return Number(override);
-  const [tab] = await browser.tabs.query({ active: true, currentWindow: true });
-  if (tab?.id === undefined) throw new UserError("No active tab to save.");
-  return tab.id;
-}
-
 async function extract(): Promise<Article> {
-  const tabId = await targetTabId();
-  let result: unknown;
-  try {
-    const [injection] = await browser.scripting.executeScript({
-      target: { tabId },
-      files: ["/content-scripts/extract.js"],
-    });
-    result = injection?.result;
-  } catch {
-    throw new UserError(RESTRICTED);
-  }
-  if (!isArticle(result) || !result.html.trim()) {
-    throw new UserError("No readable content found on this page.");
-  }
-  return result;
+  const article = await runInTab("/content-scripts/extract.js", isArticle);
+  if (!article.html.trim()) throw new UserError("No readable content found on this page.");
+  return article;
 }
 
 function download(text: string, filename: string): void {

@@ -11,6 +11,21 @@ tradeoffs, and links to commits / ADRs.
 
 ---
 
+## v1.E — Extension #2 + extraction (shipped 2026-10-03)
+
+D-022 (shared code in `templates/extension/_shared/`), pydantic schema, side-panel template,
+`lint`/`dev`/`test`/`zip`. #2 time-to-first-build 1 min 06 s. Hot reload in host Chrome unverified.
+
+### v1.E plan: — Extension #2 recipe (local-seo-checker) + extraction
+
+- Recipe for #2, started with `tabmill create` (CTA placeholder `https://rankmill.example/local-seo-audit`, D-015).
+- Move code both use into `packages/` or templates; typed extension.yaml schema (pydantic).
+- CLI: `dev`, `test`, `zip`, `lint` (`--release` severities, D-015); full `build`.
+- Write `docs/creating-an-extension.md`; refine skills.
+
+Done = both generated from recipes; typecheck + lint + tests pass; #2 time-to-first-build far below #1.
+
+
 ## v1.D — CLI `list` + `create` (shipped 2026-10-03)
 
 D-021. Build of a `create`d recipe not re-run (same path as #1).

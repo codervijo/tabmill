@@ -12,6 +12,8 @@ from urllib.parse import urlparse
 
 import yaml
 
+from . import schema
+
 GENERATED_MANIFEST = "manifest.gen.json"
 NAME_MAX = 75  # developer.chrome.com/docs/extensions/reference/manifest/name
 SUMMARY_MAX = 132  # .../manifest/description
@@ -29,6 +31,8 @@ REQUIRED = (
     "utm_campaign",
 )
 TEMPLATES = ("popup", "side-panel", "devtools", "context-menu", "maps-overlay")
+# Permissions a template's own code needs; the recipe must declare + justify them.
+TEMPLATE_PERMISSIONS = {"side-panel": ("sidePanel",)}
 # RFC 2606 / RFC 6761 reserved names → placeholder URLs (D-015).
 _RESERVED_TLDS = (".example", ".test", ".invalid", ".localhost")
 _RESERVED_HOSTS = ("example.com", "example.net", "example.org")
@@ -60,8 +64,8 @@ def is_placeholder(value: object) -> bool:
 
 def validate(ext: dict[str, Any], slug: str) -> list[str]:
     """Errors that block a build. (Policy lint proper is v1.E.)"""
-    errors = [f"missing field `{k}`" for k in REQUIRED if k not in ext]
-    if errors:
+    errors = schema.structure_errors(ext)
+    if any(e.startswith("missing field") or "`template`" in e for e in errors):
         return errors
     if ext["slug"] != slug:
         errors.append(f"`slug` is {ext['slug']!r} but the directory is {slug!r}")
@@ -73,6 +77,10 @@ def validate(ext: dict[str, Any], slug: str) -> list[str]:
         errors.append(f"`template` must be one of {', '.join(TEMPLATES)}")
     if ext.get("analytics", False) is not False:
         errors.append("`analytics` opt-in isn't supported until v1.G")
+    declared = {p.get("name") for p in ext["permissions"] if isinstance(p, dict)}
+    for need in TEMPLATE_PERMISSIONS.get(str(ext["template"]), ()):
+        if need not in declared:
+            errors.append(f"template `{ext['template']}` needs permission `{need}`")
     for key in ("permissions", "optional_permissions", "host_permissions"):
         for perm in ext.get(key) or []:
             if not isinstance(perm, dict) or not perm.get("name"):

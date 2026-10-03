@@ -23,14 +23,18 @@ uv run tabmill list                 # every extension: status, version, what sti
 uv run tabmill create <slug>        # starter recipe in recipes/<slug>/extension.yaml
 uv run tabmill new <slug>           # generate it into the workspace
 uv run tabmill build <slug>         # regenerate + WXT build in docker
+uv run tabmill test <slug>          # typecheck + unit + smoke (docker)
+uv run tabmill dev <slug>           # hot reload; load .output/chrome-mv3-dev in Chrome
+uv run tabmill lint <slug> [--release]
+uv run tabmill zip <slug> [--release]
 uv run tabmill skills sync          # refresh all tabmill-managed workspace files
 ```
 Anywhere: `uv tool install --editable ~/work/projects/droyfun/tabmill`, then `tabmill …`.
 
 
-Shipped: `init` · `skills sync` · `create` · `new` · `build` (minimal) · `list`. Planned:
+Shipped: `init` · `skills sync` · `create` · `new` · `build` · `list` · `test` · `dev` · `lint` · `zip`. Planned:
 
-`dev` · `test` · `zip` · `lint` · `assets` ·
+`assets` ·
 `listing` · `landing` · `publish` (attended only) · `status`
 
 ## Docs

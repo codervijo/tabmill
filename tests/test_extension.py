@@ -18,6 +18,8 @@ BASE: dict[str, Any] = {
     "cta_text": "x",
     "cta_url": "https://markpdf.dev",
     "utm_campaign": "demo",
+    "target_keywords": ["demo tool"],
+    "store_category": "Tools",
 }
 
 
@@ -37,6 +39,21 @@ def test_valid_extension_has_no_errors() -> None:
     ],
 )
 def test_validation_errors(patch: dict[str, Any], needle: str) -> None:
+    errors = extension.validate({**BASE, **patch}, "demo")
+    assert any(needle in e for e in errors), errors
+
+
+@pytest.mark.parametrize(
+    ("patch", "needle"),
+    [
+        ({"permision": []}, "unknown field `permision`"),
+        ({"version": "1.0"}, "`version`"),
+        ({"remote_code": True}, "`remote_code`"),
+        ({"permissions": []}, "`permissions`"),
+        ({"target_keywords": "seo"}, "`target_keywords`"),
+    ],
+)
+def test_schema_errors(patch: dict[str, Any], needle: str) -> None:
     errors = extension.validate({**BASE, **patch}, "demo")
     assert any(needle in e for e in errors), errors
 

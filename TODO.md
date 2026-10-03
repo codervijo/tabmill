@@ -13,7 +13,7 @@ blocker to `NOTES.md`, mark it BLOCKED, move on.
 - [x] CLI language → Python + uv (ADR-0002); Node only in docker builder (ADR-0003)
 - [x] WXT (ADR-0004), local PDF (D-013), Makefile.local overrides (ADR-0005)
 - [x] Linking (ADR-0006), skip IndexNow (D-016), tabmill private, placeholder-CTA lint (D-015)
-- [ ] HUMAN: set real Rankmill CTA URL (placeholder `https://rankmill.example/local-seo-audit`; release lint blocks until replaced)
+- [ ] HUMAN: set real Rankmill CTA URL + `portfolio_site` for local-seo-checker (placeholder `https://rankmill.example/local-seo-audit`; release lint blocks until replaced)
 - [ ] HUMAN: `git init` TOOL_DIR (+ GitHub repo if wanted)
 
 ## v1.B — Tool + generator ✅ (2026-10-03; details in docs/shipping-history.md)
@@ -65,8 +65,24 @@ Plan (all code in `recipes/save-page-pdf-md/`; workspace only via `tabmill new/b
        while ‹FILL› → filled → `new` generated → `list` shows it; removed afterwards. WXT `build`
        of a created recipe not re-run (same path as #1, verified in v1.B/v1.C).
 
-## v1.E — queued (extension #2)
+## v1.E — Extension #2 + extraction ✅ (2026-10-03)
 
-- [ ] `recipes/local-seo-checker/extension.yaml`: `cta_url: https://rankmill.example/local-seo-audit`
-      (placeholder, D-015); the HUMAN line below stays here (tabmill repo)
-- [ ] `packages/policy` rule `cta-placeholder` (warn; error under `--release`) + per-rule release severity
+1. [x] `templates/extension/side-panel/`: side panel entry (`side_panel` + `sidePanel` perm),
+       action click opens panel (background), shared shell CSS/brand; smoke test.
+2. [x] Extract shared template code (packages/ not needed — D-022) (both templates use it): `templates/extension/_shared/`
+       (brand shell, messaging, tokens, smoke fixtures, inject helper) overlaid before the
+       surface template — no third-party code, no pnpm package needed yet.
+3. [x] `tabmill create local-seo-checker -t side-panel`; recipe: activeTab + scripting; checks
+       on the current page, all local: LocalBusiness JSON-LD (presence + key fields), NAP
+       (name/address/phone) found + consistent with JSON-LD, service-area/location links,
+       conversion elements (tel:, forms, booking/CTA buttons). Score + fix hints.
+4. [x] Typed extension.yaml schema (pydantic) replaces `extension.validate`.
+5. [x] `tabmill lint <slug> [--release]`: rules from `skills/chrome-store-policy/reference.md`
+       that are mechanical now (perm-justification, perm-broad-host, names/lengths,
+       mv3-no-eval/remote-script on the built bundle, cta-placeholder, fill-placeholder,
+       portfolio-similarity heuristic) with dev vs release severity.
+6. [x] `tabmill dev|test|zip <slug>` wrapping `make in-docker-*`.
+7. [x] `docs/creating-an-extension.md`; NOTES time-to-first-build for #2.
+
+- [x] `recipes/local-seo-checker/extension.yaml` with placeholder `cta_url` (D-015)
+- [x] `cta-placeholder` rule (warn; error under `--release`) + per-rule release severity (`cli/tabmill/lint.py`)

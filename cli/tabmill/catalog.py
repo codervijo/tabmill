@@ -16,6 +16,9 @@ SLUG_MAX = 40
 BUILT_MANIFEST = ".output/chrome-mv3/manifest.json"
 # Manifest-facing fields: `new` / `build` refuse while these hold ‹FILL›.
 MANIFEST_FIELDS = ("name", "summary", "single_purpose")
+TEMPLATE_PERMISSION_REASONS = {
+    "sidePanel": "Show results in Chrome's side panel, opened from the toolbar button.",
+}
 
 
 class CreateError(Exception):
@@ -122,7 +125,14 @@ def create(tool_dir: Path, workspace: Path | None, slug: str, template: str) -> 
         raise CreateError(f"recipe `{slug}` already exists at {target}")
     if workspace and workspace.exists() and slug in registry.slugs(workspace):
         raise CreateError(f"`{slug}` is already registered in {workspace / 'registry.json'}")
-    text = render((tool_dir / RECIPE_TEMPLATE).read_text(), {"slug": slug, "template": template})
+    extra = "".join(
+        f"  - name: {perm}\n    justification: {TEMPLATE_PERMISSION_REASONS[perm]}\n"
+        for perm in extension.TEMPLATE_PERMISSIONS.get(template, ())
+    )
+    text = render(
+        (tool_dir / RECIPE_TEMPLATE).read_text(),
+        {"slug": slug, "template": template, "template_permissions": extra},
+    )
     target.mkdir(parents=True)
     path = target / generate.RECIPE_FILE
     path.write_text(text)

@@ -10,7 +10,7 @@ template: {{template}}
 permissions:
   - name: activeTab
     justification: Read the current page only after the user clicks the toolbar button.
-optional_permissions: []
+{{template_permissions}}optional_permissions: []
 dependencies: {}        # runtime npm deps — each needs a DECISIONS.md row first
 dev_dependencies: {}
 remote_code: false

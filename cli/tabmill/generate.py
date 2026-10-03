@@ -1,6 +1,7 @@
 """Generate one extension's managed files from template + recipe (ADR-0008).
 
-    templates/extension/<template>/**   generic surface code (`*.tmpl` → `{{name}}` rendering)
+    templates/extension/_shared/**      code every template uses (shell, brand, inject, tests)
+  + templates/extension/<template>/**   surface code (`*.tmpl` → `{{name}}` rendering)
   + recipes/<slug>/**                   feature code; a file here replaces the template's file
   + generated here                      manifest.gen.json, package.json, src/generated/config.ts,
                                         README.md
@@ -21,6 +22,7 @@ from .templates import render
 RECIPES_DIR = "recipes"
 EXT_TEMPLATES_DIR = "templates/extension"
 RECIPE_FILE = "extension.yaml"
+SHARED_TEMPLATE = "_shared"  # overlaid first, under every surface template
 TEMPLATE_SUFFIX = ".tmpl"
 LAMILL_URL = "https://lamill.io"
 DEFAULT_PRIVACY = "Runs locally — page content never leaves your browser."
@@ -165,11 +167,14 @@ def extension_files(tool_dir: Path, slug: str) -> dict[str, bytes]:
     if not template_root.exists():
         raise RecipeError(f"template `{ext['template']}` not implemented yet ({template_root})")
     values = {"name": str(ext["name"]), "slug": slug}
-    files = _tree(template_root, values)
+    files = _tree(tool_dir / EXT_TEMPLATES_DIR / SHARED_TEMPLATE, values)
+    files.update(_tree(template_root, values))
     files.update(_tree(recipe_dir(tool_dir, slug), values, skip=frozenset({RECIPE_FILE})))
-    files[extension.GENERATED_MANIFEST] = (
-        json.dumps(extension.to_manifest(ext), indent=2) + "\n"
-    ).encode()
+    manifest = extension.to_manifest(ext)
+    if ext["template"] == "side-panel":
+        # No popup → WXT emits no `action`; the toolbar button must exist to open the panel.
+        manifest["action"] = {"default_title": ext["name"]}
+    files[extension.GENERATED_MANIFEST] = (json.dumps(manifest, indent=2) + "\n").encode()
     files["package.json"] = _package_json(ext).encode()
     files["src/generated/config.ts"] = _config_ts(ext).encode()
     files["README.md"] = _readme(ext).encode()

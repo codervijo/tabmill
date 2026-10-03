@@ -9,8 +9,8 @@ Measured from "extension.yaml agreed" to "unpacked build loads in Chrome".
 
 | # | slug | phase | start | first build | elapsed | notes |
 |---|---|---|---|---|---|---|
-| 1 | save-page-pdf-md | v1.C | — | — | — | generator stub built in v1.B (build 4.7 s incl. install) |
-| 2 | local-seo-checker | v1.E | — | — | — | target: far below #1 |
+| 1 | save-page-pdf-md | v1.C | — | — | — | not measured — built while the generator itself was being written (v1.B–v1.C) |
+| 2 | local-seo-checker | v1.E | 2026-10-03 12:52:58 | 12:54:04 | 1 min 06 s | `create` → first `build`; feature code written by Claude in that window |
 
 ## Blockers
 
@@ -32,6 +32,13 @@ Measured from "extension.yaml agreed" to "unpacked build loads in Chrome".
 | 10 | https://news.ycombinator.com/ | non-article fallback | — | — |
 
 ## Observations
+
+- 2026-10-03 (v1.E): local-seo-checker — side panel, permissions activeTab + scripting +
+  sidePanel, 15.5 kB, no runtime deps; unit 9/9, smoke 2/2, typecheck clean. `tabmill dev`:
+  WXT dev server in the container answers on host :3000 and writes `.output/chrome-mv3-dev`;
+  hot reload in host Chrome **not yet verified by the operator**. UNVERIFIED: whether activeTab
+  stays granted for audits after navigating within the tab (side panel persists; the panel
+  tells the user to click the toolbar again if access is lost).
 
 - 2026-10-03 (v1.C, automated, in docker): save-page-pdf-md builds to 61 kB (extractor 37.6 kB,
   popup 14.3 kB, print 2.7 kB); zip 23.5 kB. Manifest permissions = activeTab, scripting,

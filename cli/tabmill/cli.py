@@ -1,4 +1,4 @@
-"""`tabmill` command surface. v1.B: init, skills sync, new, build (minimal); v1.D: list, create."""
+"""`tabmill` commands: init, skills sync, new, build, list, create, lint, dev, test, zip."""
 
 from __future__ import annotations
 
@@ -10,7 +10,7 @@ from pathlib import Path
 import typer
 from rich.table import Table
 
-from . import catalog, config, extension, generate, output, registry, sync, workspace
+from . import catalog, config, extension, generate, lint, output, registry, sync, workspace
 from .constants import ENV_WORKSPACE
 
 app = typer.Typer(
@@ -196,3 +196,90 @@ def create(
         f"  next: fill every ‹FILL› in it (feature code goes in recipes/{slug}/src/feature/), "
         f"then `tabmill new {slug}`"
     )
+
+
+def _registered(slug: str) -> config.Config:
+    cfg = _load()
+    if slug not in registry.slugs(cfg.workspace):
+        output.fail(f"{slug} is not in registry.json — run `tabmill new {slug}` first")
+        raise typer.Exit(1)
+    return cfg
+
+
+def _make(cfg: config.Config, target: str, slug: str) -> None:
+    """Run a workspace make target in the builder container (ADR-0003)."""
+    rc = subprocess.run(
+        ["make", "--no-print-directory", f"in-docker-{target}", f"EXT={slug}"], cwd=cfg.workspace
+    ).returncode
+    if rc != 0:
+        output.fail(f"{target} failed (exit {rc})")
+        raise typer.Exit(rc)
+
+
+def _lint(cfg: config.Config, slug: str, release: bool) -> bool:
+    findings = lint.lint(cfg.tool_dir, cfg.workspace, slug, release=release)
+    for f in findings:
+        (output.fail if f.severity == "error" else output.skip)(f"{f.rule}: {f.message}")
+    errors = sum(f.severity == "error" for f in findings)
+    warns = len(findings) - errors
+    mode = "release" if release else "dev"
+    if errors:
+        output.fail(f"lint {slug} ({mode}): {errors} error(s), {warns} warning(s)")
+        return False
+    output.ok(f"lint {slug} ({mode}): {warns} warning(s)")
+    return True
+
+
+@app.command("lint")
+def lint_cmd(
+    slug: str = typer.Argument(..., help="Extension slug."),
+    release: bool = typer.Option(
+        False, "--release", help="Release severities (placeholders block)."
+    ),
+) -> None:
+    """Chrome Web Store policy checks on the recipe and the last build."""
+    cfg, _ = _config_and_workspace()
+    if not _lint(cfg, slug, release):
+        raise typer.Exit(1)
+
+
+@app.command()
+def test(slug: str = typer.Argument(..., help="Extension slug.")) -> None:
+    """Regenerate, then typecheck + unit tests + build + smoke test, in docker."""
+    cfg = _registered(slug)
+    _recipe(cfg, slug)
+    _sync(cfg, force=False)
+    for target in ("typecheck", "test", "smoke"):
+        _make(cfg, target, slug)
+    output.ok(f"{slug}: typecheck, unit, smoke passed")
+
+
+@app.command()
+def zip(
+    slug: str = typer.Argument(..., help="Extension slug."),
+    release: bool = typer.Option(False, "--release", help="Block on release-severity lint."),
+) -> None:
+    """Regenerate, build, lint, and zip (`--release`: placeholders block)."""
+    cfg = _registered(slug)
+    _recipe(cfg, slug)
+    _sync(cfg, force=False)
+    _make(cfg, "build", slug)
+    if not _lint(cfg, slug, release):
+        raise typer.Exit(1)
+    _make(cfg, "zip", slug)
+    zips = sorted((cfg.workspace / "extensions" / slug / ".output").glob("*.zip"))
+    output.ok(f"zip: {zips[-1].relative_to(cfg.workspace) if zips else '(not found)'}")
+
+
+@app.command()
+def dev(slug: str = typer.Argument(..., help="Extension slug.")) -> None:
+    """WXT dev server with hot reload in docker; load the dev build in your own Chrome."""
+    cfg = _registered(slug)
+    _recipe(cfg, slug)
+    _sync(cfg, force=False)
+    dev_dir = cfg.workspace / "extensions" / slug / ".output" / "chrome-mv3-dev"
+    output.console.print(
+        f"  Chrome → chrome://extensions → Developer mode → Load unpacked → {dev_dir}\n"
+        "  (once the server prints 'Started'; changes then reload automatically; Ctrl-C stops)"
+    )
+    _make(cfg, "dev", slug)
