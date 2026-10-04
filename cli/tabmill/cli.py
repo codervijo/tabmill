@@ -604,8 +604,15 @@ def _hub(cfg: config.Config) -> None:
     output.ok(f"hub: {n} entr{'y' if n == 1 else 'ies'} → {cfg.hub_repo.name}/{rel}{note}")
     if changed:
         output.console.print(
-            f"  HUMAN: review, commit, and deploy {cfg.hub_repo.name} (tabmill never commits there)"
+            f"  HUMAN: review + commit {cfg.hub_repo.name}, push to main (Vercel deploys); "
+            "tabmill never commits there"
         )
+        published = [e["slug"] for e in export.entries if e["status"] == "published"]
+        if published:
+            output.console.print(
+                "  HUMAN: add /extensions/<slug> and /extensions/<slug>/privacy to "
+                f"public/sitemap.xml for: {', '.join(published)}"
+            )
 
 
 @app.command("hub")

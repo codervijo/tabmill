@@ -23,10 +23,17 @@ def _set_landing(cfg: Config, url: str) -> None:
     path.write_text(path.read_text().replace('landing_page_url: ""', f"landing_page_url: {url}"))
 
 
-def test_skips_without_store_or_tool_page(setup: Config) -> None:
+def test_skips_without_tool_page(setup: Config) -> None:
     export = hub.build(setup.tool_dir, setup.workspace)
     assert export.entries == []
-    assert "store_url / tool_page_url" in export.skipped[SLUG]
+    assert "tool_page_url" in export.skipped[SLUG]
+
+
+def test_not_in_store_yet_exports_null_store_url(setup: Config) -> None:
+    _set_landing(setup, "https://markpdf.dev/webpage-to-pdf")
+    (entry,) = hub.build(setup.tool_dir, setup.workspace).entries
+    hub.HubEntry.model_validate(entry)
+    assert entry["store_url"] is None and entry["status"] == "draft"
 
 
 def test_entry_matches_contract_and_status(setup: Config) -> None:

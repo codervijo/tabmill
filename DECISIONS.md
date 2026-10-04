@@ -234,6 +234,13 @@ still open in lamill.io's PRD) — deploy is a HUMAN step. `release` keeps an ex
 - Store title omits "Google" (trademark policy); summary/keywords mention it descriptively.
 - Quote handoff via `storage.local` (content scripts can't use `storage.session` by default).
 
+## D-032 — Hub follows lamill.io contract change (Accepted, 2026-10-03)
+
+lamill.io made `store_url` nullish ("In development" pages) and documented deploy = Vercel
+auto-deploy from `main`. `hub` now exports any extension with a real tool page; `store_url` is
+null until a `store_id` exists. Still never commits lamill.io; prints HUMAN steps (commit/push,
+and sitemap.xml lines for published entries, which lamill.io maintains by hand).
+
 ## D-009 — Store API: V2 only, service-account auth (Proposed, 2026-10-03)
 
 V1 dies 2026-10-15; V2 can't create items, so first uploads are a HUMAN step by design.

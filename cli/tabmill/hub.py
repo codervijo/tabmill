@@ -45,13 +45,13 @@ class Change(BaseModel):
 
 
 class HubEntry(BaseModel):
-    """Mirror of lamill.io `extensionSchema` (zod), checked 2026-10-03."""
+    """Mirror of lamill.io `extensionSchema` (zod), re-checked 2026-10-03 (store_url nullish)."""
 
     model_config = ConfigDict(extra="forbid")
     slug: str = Field(pattern=r"^[a-z0-9-]+$")
     name: str
     pitch: str
-    store_url: HttpUrl
+    store_url: HttpUrl | None = None  # null while not in the store → "In development"
     tool_page_url: HttpUrl
     permissions: list[Permission] = []
     data_collected: list[str] = []
@@ -86,9 +86,8 @@ def build(tool_dir: Path, workspace: Path) -> Export:
         row = rows.get(slug, {})
         store_url = f"{STORE_DETAIL}/{row['store_id']}" if row.get("store_id") else None
         tool_page = _real_url(ext.get("landing_page_url"))
-        missing = [n for n, v in (("store_url", store_url), ("tool_page_url", tool_page)) if not v]
-        if missing:
-            out.skipped[slug] = f"no {' / '.join(missing)} yet"
+        if not tool_page:
+            out.skipped[slug] = "no tool_page_url yet (set `landing_page_url` in its recipe)"
             continue
         perms = [
             {"name": p["name"], "reason": p["justification"]}
