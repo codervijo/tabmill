@@ -11,6 +11,28 @@ tradeoffs, and links to commits / ADRs.
 
 ---
 
+## v1.H — API keys + preflight (shipped 2026-10-03)
+
+D-025. Probe "valid" paths verified against mocks only (no real credentials yet).
+
+### v1.H plan: — API keys + preflight
+
+Mirror lamill (`settings apikeys`, `portfolio.env`, probes; command preflights) — D-025.
+
+- `tabmill.env` (gitignored; replaces `.env`; template `tabmill.env.example`): atomic write
+  (tmp + rename, mode 600), comments/order preserved.
+- `tabmill settings apikeys list | set | delete`: known keys = `CWS_*`; `set` strict unless
+  `--force`, value prompted hidden when omitted; `delete` confirms unless `--yes`; `list`
+  masks values and probes: token exchange (SA / OAuth), SA key file parses, publisher access
+  via read-only fetchStatus on the first registered `store_id`.
+- `tabmill preflight`: workspace, builder, docker daemon, container image, X11, credentials.
+  Commands run only the checks they need first (docker for build/test/zip/dev/assets/try,
+  X11 for try, credentials for publish).
+
+Done = `settings apikeys list` shows probe results; `preflight` reports ✓/↷/✗ with fixes;
+`try` with no X11 / `build` with docker down fail fast with the fix.
+
+
 ## v1.F — CLI `try` (shipped 2026-10-03)
 
 D-023. Operator confirmed the window opens on the desktop and the extension works.

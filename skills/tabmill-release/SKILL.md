@@ -37,7 +37,7 @@ user runs it.
   `registry.json`. New publishers can publish only two extensions until more are requested.
 - **Existing item**: `uv run tabmill publish <slug> [--staged]` → release lint, confirm,
   upload, submit, status into `registry.json`. Later: `uv run tabmill publish <slug> --check`.
-- Credentials: `tabmill/.env` (see `.env.example`).
+- Credentials: `uv run tabmill settings apikeys set <KEY>`; check with `uv run tabmill settings apikeys list`.
 
 ## Commit
 

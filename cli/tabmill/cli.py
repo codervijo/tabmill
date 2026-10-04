@@ -13,6 +13,7 @@ import typer
 from rich.table import Table
 
 from . import (
+    apikeys,
     catalog,
     config,
     cws,
@@ -21,6 +22,7 @@ from . import (
     lint,
     listing,
     output,
+    preflight,
     registry,
     sync,
     workspace,
@@ -33,6 +35,23 @@ app = typer.Typer(
 )
 skills_app = typer.Typer(help="Workspace skills + other tabmill-managed files (read-only there).")
 app.add_typer(skills_app, name="skills")
+settings_app = typer.Typer(help="Setup: credentials.", no_args_is_help=True)
+apikeys_app = typer.Typer(help="Credentials in tabmill/tabmill.env.", no_args_is_help=True)
+settings_app.add_typer(apikeys_app, name="apikeys")
+app.add_typer(settings_app, name="settings")
+
+
+def _preflight(kind: str) -> None:
+    """Fail fast, before any work, when a prerequisite of this command is missing."""
+    failed = False
+    for c in preflight.run(preflight.NEEDS[kind]):
+        if c.status == "fail":
+            output.fail(f"preflight {c.name}: {c.detail}")
+            failed = True
+        elif c.status == "warn":
+            output.skip(f"preflight {c.name}: {c.detail}")
+    if failed:
+        raise typer.Exit(1)
 
 
 def _load(workspace_override: Path | None = None) -> config.Config:
@@ -132,6 +151,7 @@ def build(
         raise typer.Exit(1)
     _recipe(cfg, slug)
     _sync(cfg, force=False)
+    _preflight("docker")
     rc = subprocess.run(
         ["make", "--no-print-directory", "in-docker-build", f"EXT={slug}"], cwd=cfg.workspace
     ).returncode
@@ -222,6 +242,7 @@ def _registered(slug: str) -> config.Config:
 
 def _make(cfg: config.Config, target: str, slug: str, *extra: str) -> None:
     """Run a workspace make target in the builder container (ADR-0003)."""
+    _preflight("try" if target == "try" else "docker")
     rc = subprocess.run(
         ["make", "--no-print-directory", f"in-docker-{target}", f"EXT={slug}", *extra],
         cwd=cfg.workspace,
@@ -383,6 +404,7 @@ def publish(
             )
         )
         raise typer.Exit(1)
+    _preflight("publish")
     try:
         client = cws.connect(cfg.tool_dir)
     except cws.CwsError as e:
@@ -420,3 +442,97 @@ def publish(
     )
     if status["taken_down"] or status["warned"]:
         output.fail("item is taken down or warned for policy — check the Developer Dashboard")
+
+
+PROBE_STYLE = {
+    "valid": "[green]✓ valid[/green]",
+    "invalid": "[red]✗ invalid[/red]",
+    "not-testable": "[yellow]↷ not testable[/yellow]",
+    "missing": "—",
+}
+
+
+@apikeys_app.command("list")
+def apikeys_list(
+    no_probe: bool = typer.Option(False, "--no-probe", help="Skip the network probes."),
+) -> None:
+    """Known credentials: set / not set, masked value, and a live probe."""
+    cfg, ws = _config_and_workspace()
+    values = cws.load_env(cfg.tool_dir)
+    store_id = None
+    if ws is not None:
+        store_id = next(
+            (
+                r.get("store_id")
+                for r in registry.read(ws)["extensions"].values()
+                if r.get("store_id")
+            ),
+            None,
+        )
+    probes = {} if no_probe else apikeys.probe_all(cfg.tool_dir, store_id)
+    table = Table(show_edge=False, pad_edge=False, box=None, header_style="bold")
+    for col in ("key", "value", "probe", "detail"):
+        table.add_column(col, overflow="fold")
+    for key in apikeys.KNOWN_KEYS:
+        r = probes.get(key)
+        table.add_row(
+            key,
+            apikeys.mask(key, values.get(key, "")) or "[dim]not set[/dim]",
+            PROBE_STYLE[r.status] if r else "—",
+            r.detail if r else "",
+        )
+    output.console.print(table)
+    output.console.print(f"  file: {apikeys.env_path(cfg.tool_dir)} (gitignored, mode 600)")
+
+
+@apikeys_app.command("set")
+def apikeys_set(
+    key: str = typer.Argument(..., help="Credential name, e.g. CWS_PUBLISHER_ID."),
+    value: str = typer.Argument("", help="Value (omit to be prompted, hidden)."),
+    force: bool = typer.Option(False, "--force", help="Allow a key name tabmill doesn't know."),
+) -> None:
+    """Set a credential in tabmill.env (prompted value stays out of shell history)."""
+    if key not in apikeys.KNOWN_KEYS and not force:
+        output.fail(
+            f"unknown key {key} — known: {', '.join(apikeys.KNOWN_KEYS)} (--force to override)"
+        )
+        raise typer.Exit(1)
+    if not value:
+        value = typer.prompt(key, hide_input=key in apikeys.SECRET_KEYS)
+    if key == "CWS_SA_KEY_FILE":
+        path = Path(value).expanduser()
+        if not path.exists():
+            output.fail(f"{path} not found")
+            raise typer.Exit(1)
+        value = str(path.resolve())
+    existed = apikeys.set_key(config.TOOL_DIR, key, value)
+    output.ok(
+        f"{key} {'updated' if existed else 'set'} — check with `tabmill settings apikeys list`"
+    )
+
+
+@apikeys_app.command("delete")
+def apikeys_delete(
+    key: str = typer.Argument(..., help="Credential name."),
+    yes: bool = typer.Option(False, "--yes", help="Skip the confirmation."),
+) -> None:
+    """Remove a credential from tabmill.env."""
+    if not yes and not typer.confirm(f"Delete {key} from tabmill.env?"):
+        output.skip("not deleted")
+        raise typer.Exit(0)
+    if apikeys.delete_key(config.TOOL_DIR, key):
+        output.ok(f"{key} deleted")
+    else:
+        output.skip(f"{key} was not set")
+
+
+@app.command("preflight")
+def preflight_cmd() -> None:
+    """Check everything tabmill depends on: workspace, builder, docker, X11, credentials."""
+    checks = preflight.run()
+    for c in checks:
+        {"ok": output.ok, "warn": output.skip, "fail": output.fail}[c.status](
+            f"{c.name}: {c.detail}"
+        )
+    if any(c.status == "fail" for c in checks):
+        raise typer.Exit(1)

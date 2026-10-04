@@ -24,16 +24,24 @@ time-to-first-build logged.
 
 Done = #1 fully prepared via CLI; operator does the first real publish (dashboard "Add new item").
 
-## v1.H — Landing, status, analytics
+## v1.I — Slots, status, release, hub, listing URLs
 
-- CLI: `landing` (via `lamill`), `status` (registry + CWS fetchStatus + CSV metrics import).
-- `packages/analytics`: opt-in, privacy-safe events, consent UI. Finalize `tabmill-landing-page`.
+D-026, D-028, D-029. `registry.json` `slots {used, limit}`; `tabmill status` (registry +
+fetchStatus + slots); `tabmill release <slug>` (release steps → `HUMAN: publish` line, warns at
+the slot cap, then `hub`); `tabmill hub` writes lamill.io `src/content/extensions.json` per its
+zod contract (`slug, name, pitch, store_url, tool_page_url, permissions[{name,reason}],
+data_collected, analytics, changelog[{version,date,notes}], status`) and deploys via `lamill`;
+recipe gains `changelog:`; listing gets privacy/support URLs; release lint checks them live.
 
-Done = `tabmill status` shows #1 and #2 with real data.
+## v1.J — pressure-wash-quote (new #2 by publish order, D-027)
 
-## v1.I — Extensions #3–#5
+`maps-overlay` template; recipe: trace surfaces on Google Maps satellite → sq ft (optional
+roof pitch) → WashCalc quote, PDF export.
 
-pressure-wash-quote, local-schema-generator, jwt-inspector — each a recipe in tabmill. Request
-the publisher cap raise first.
+## v1.K — Landing, analytics
 
-Done = each takes under a day; template/skill gaps fixed in tabmill.
+CLI `landing` (via `lamill`); `packages/analytics` opt-in; finalize `tabmill-landing-page`.
+
+## v1.L — local-schema-generator, jwt-inspector
+
+Recipes; jwt-inspector never takes an early slot.

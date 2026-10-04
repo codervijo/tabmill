@@ -18,6 +18,10 @@ Working on Tabmill itself → the `tabmill-dev` skill; new extension → `tabmil
 
 ## Build
 
+Credentials: `uv run tabmill settings apikeys set <KEY>` → `tabmill.env` (gitignored; never
+commit it, never print values). `uv run tabmill preflight` checks the whole setup.
+
+
 `make deps | test | lint | fmt | check | build | run ARGS="…"` (builder Makefile + `Makefile.local`, D-018).
 
 ## Rules

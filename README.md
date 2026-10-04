@@ -32,11 +32,13 @@ uv run tabmill publish <slug> [--staged|--check]  # attended only
 uv run tabmill lint <slug> [--release]
 uv run tabmill zip <slug> [--release]
 uv run tabmill skills sync          # refresh all tabmill-managed workspace files
+uv run tabmill preflight            # workspace, builder, docker, X11, credentials
+uv run tabmill settings apikeys list|set|delete   # store credentials in tabmill.env
 ```
 Anywhere: `uv tool install --editable ~/work/projects/droyfun/tabmill`, then `tabmill …`.
 
 
-Shipped: `init` · `skills sync` · `create` · `new` · `build` · `list` · `test` · `try` · `dev` · `lint` · `zip` · `assets` · `listing` · `publish`. Planned:
+Shipped: `init` · `skills sync` · `create` · `new` · `build` · `list` · `test` · `try` · `dev` · `lint` · `zip` · `assets` · `listing` · `publish` · `preflight` · `settings apikeys`. Planned:
 
 `landing` · `status`
 

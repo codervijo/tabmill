@@ -65,21 +65,21 @@ Plan (all code in `recipes/save-page-pdf-md/`; workspace only via `tabmill new/b
        while ‹FILL› → filled → `new` generated → `list` shows it; removed afterwards. WXT `build`
        of a created recipe not re-run (same path as #1, verified in v1.B/v1.C).
 
-## Unslotted — awaiting PRD placement (operator brief 2026-10-03)
+## Slotted 2026-10-03 (v1.H–v1.L, see PLAN.md) — operator brief items
 
-- [ ] v1.H API keys + preflight (D-025): `settings apikeys list|set|delete` in `tabmill.env`
+- [x] **v1.H** API keys + preflight (D-025): `settings apikeys list|set|delete` in `tabmill.env`
       (known CWS_* keys, atomic write, masked, probes: token exchange, SA key parse, publisher
       access via fetchStatus); `tabmill preflight`; per-command preflights.
-- [ ] Slots (D-026): `registry.json` `slots: {used, limit}` (limit 2 default); `tabmill status`
+- [ ] **v1.I** Slots (D-026): `registry.json` `slots: {used, limit}` (limit 2 default); `tabmill status`
       shows used/limit; `tabmill release` warns at the cap.
-- [ ] `tabmill release` command (today a skill): runs the release steps, then `tabmill hub`.
-- [ ] `tabmill hub` (D-028): registry → `extensions.json` per the lamill.io contract →
-      deploy via `lamill`. BLOCKED: contract not in lamill.io README; HUMAN: confirm repo
-      path (`~/work/projects/sites/lamill.io`?) and the contract.
-- [ ] Listing URLs (D-029): `privacy_policy_url` = lamill.io/extensions/<slug>/privacy,
+- [ ] **v1.I** `tabmill release` command (today a skill): runs the release steps, then `tabmill hub`.
+- [ ] **v1.I** `tabmill hub` (D-028): registry → `extensions.json` per the lamill.io contract →
+      deploy via `lamill`. Contract found 2026-10-03 in lamill.io (uncommitted there): zod schema
+      `src/lib/extensions.ts`, README § Extensions data contract.
+- [ ] **v1.I** Listing URLs (D-029): `privacy_policy_url` = lamill.io/extensions/<slug>/privacy,
       `support_url` = lamill.io/extensions/support in listing.md; release lint fails if missing
       or the hub page isn't live.
-- [ ] Build order (D-027): next recipe = pressure-wash-quote (needs maps-overlay template).
+- [ ] **v1.J** Build order (D-027): next recipe = pressure-wash-quote (needs maps-overlay template).
 - [x] Rankmill CTA placeholder blocks release (D-015); HUMAN line below.
 
 ## v1.G — Assets, listing, publish (in progress)

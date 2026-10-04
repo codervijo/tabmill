@@ -76,7 +76,7 @@ def test_missing_credentials_names_fix() -> None:
 
 
 def test_env_file_and_override(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
-    (tmp_path / ".env").write_text("# c\nCWS_PUBLISHER_ID='p1'\nCWS_CLIENT_ID=i\n")
+    (tmp_path / "tabmill.env").write_text("# c\nCWS_PUBLISHER_ID='p1'\nCWS_CLIENT_ID=i\n")
     monkeypatch.setenv("CWS_CLIENT_ID", "from-env")
     env = cws.load_env(tmp_path)
     assert env["CWS_PUBLISHER_ID"] == "p1" and env["CWS_CLIENT_ID"] == "from-env"

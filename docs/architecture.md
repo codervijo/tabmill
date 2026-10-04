@@ -68,6 +68,11 @@ Two repos, related by a computed relative layout (ADR-0007):
   (draft + PNG-header size checks + keyword counts); `cws.py` (v2 upload/publish/fetchStatus,
   SA JWT via google-auth or OAuth refresh, error body → remedy, `transient` flag); `publish`
   gates: TTY, `store_id`, `lint --release`, version zip, confirm.
+- **Credentials + preflight** (v1.H, D-025): `apikeys.py` — `tabmill.env` (gitignored, mode
+  600, atomic tmp+rename, comments kept), known `CWS_*` keys, masked `list`, probes (SA key
+  parse, token exchange, publisher fetchStatus on the first `store_id`); `cws.load_env` reads it
+  (env vars win). `preflight.py` — checks workspace / builder / docker / container / x11 /
+  credentials; `NEEDS` maps commands → checks, run by `_preflight()` before any work.
 - **Catalog** (`cli/tabmill/catalog.py`, v1.D): `list` rows = `recipes/*/` ∪ workspace
   registry — status `recipe` / `generated` / `built` (`.output/chrome-mv3/manifest.json`) /
   `orphan` (registered, no recipe) / `invalid` (YAML error); placeholders = any `‹FILL›` value

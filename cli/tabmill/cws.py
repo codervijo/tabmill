@@ -1,7 +1,7 @@
 """Chrome Web Store API v2 client (v1 ends 2026-10-15). httpx-direct; google-auth only signs
 the service-account JWT. The API can't create items or change visibility (dashboard only).
 
-Credentials (TOOL_DIR/.env or environment, never committed):
+Credentials (TOOL_DIR/tabmill.env via `tabmill settings apikeys`, or environment; never committed):
   CWS_PUBLISHER_ID  + either CWS_SA_KEY_FILE (service account, preferred)
                     or CWS_CLIENT_ID / CWS_CLIENT_SECRET / CWS_REFRESH_TOKEN (OAuth)
 """
@@ -38,14 +38,10 @@ class CwsError(Exception):
 
 
 def load_env(tool_dir: Path) -> dict[str, str]:
-    """KEY=VALUE lines from TOOL_DIR/.env, overridden by the process environment."""
-    values: dict[str, str] = {}
-    env_file = tool_dir / ".env"
-    if env_file.exists():
-        for line in env_file.read_text().splitlines():
-            key, sep, value = line.partition("=")
-            if sep and not key.strip().startswith("#"):
-                values[key.strip()] = value.strip().strip('"').strip("'")
+    """TOOL_DIR/tabmill.env, overridden by the process environment."""
+    from . import apikeys
+
+    values = apikeys.read(tool_dir)
     values.update({k: os.environ[k] for k in ENV_KEYS if os.environ.get(k)})
     return values
 
@@ -110,7 +106,7 @@ def access_token(env: dict[str, str], http: httpx.Client) -> str:
     else:
         raise CwsError(
             "no store credentials — set CWS_SA_KEY_FILE (or CWS_CLIENT_ID / CWS_CLIENT_SECRET / "
-            f"CWS_REFRESH_TOKEN) in tabmill/.env; see {SETUP_DOC}"
+            f"CWS_REFRESH_TOKEN) in tabmill/tabmill.env; see {SETUP_DOC}"
         )
     resp = http.post(TOKEN_URI, data=data)
     if resp.status_code != 200:
@@ -169,7 +165,7 @@ def connect(tool_dir: Path, http: httpx.Client | None = None) -> Client:
     if not env.get("CWS_PUBLISHER_ID"):
         raise CwsError(
             "CWS_PUBLISHER_ID missing — Developer Dashboard → Publisher → Settings; put it in "
-            "tabmill/.env"
+            "tabmill/tabmill.env"
         )
     http = http or httpx.Client(timeout=120)
     return Client(env["CWS_PUBLISHER_ID"], access_token(env, http), http)
