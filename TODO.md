@@ -65,18 +65,37 @@ Plan (all code in `recipes/save-page-pdf-md/`; workspace only via `tabmill new/b
        while ‹FILL› → filled → `new` generated → `list` shows it; removed afterwards. WXT `build`
        of a created recipe not re-run (same path as #1, verified in v1.B/v1.C).
 
+## v1.I — Slots, status, release, hub, listing URLs ✅ (2026-10-03)
+
+1. [x] registry `slots {used, limit}` (limit 2; used = store `published_state == PUBLISHED`);
+       `tabmill status [--refresh]` table + slots line (`--refresh` = fetchStatus per store_id).
+2. [x] Recipe `changelog: [{version, date, notes}]` (schema); listing.md gets privacy policy
+       + support URLs (D-029).
+3. [x] `cli/tabmill/hub.py`: entries per lamill.io zod contract (pydantic mirror); skip (↷)
+       extensions lacking store_url / tool_page_url; write `<hub_repo>/src/content/extensions.json`
+       (`hub_repo` in tabmill.config.json, default ~/work/projects/sites/lamill.io); never commits;
+       deploy = printed HUMAN step until lamill.io settles its deploy path.
+4. [x] Lint `hub-urls` (warn dev / error release): listing has both URLs; `--release` also
+       requires HTTP 200 on both.
+5. [x] `tabmill release <slug>`: test → assets → listing → zip --release → slot-cap warning →
+       `HUMAN: publish <slug> <version>` in workspace TODO.md → `hub`. Never publishes.
+6. [x] Tests; docs; tabmill-release skill uses `tabmill release`.
+
+7. [ ] HUMAN: lamill.io — publish /extensions/<slug>/privacy + /extensions/support pages
+       (release lint probes them), choose its deploy path; then `tabmill hub` output can ship.
+
 ## Slotted 2026-10-03 (v1.H–v1.L, see PLAN.md) — operator brief items
 
 - [x] **v1.H** API keys + preflight (D-025): `settings apikeys list|set|delete` in `tabmill.env`
       (known CWS_* keys, atomic write, masked, probes: token exchange, SA key parse, publisher
       access via fetchStatus); `tabmill preflight`; per-command preflights.
-- [ ] **v1.I** Slots (D-026): `registry.json` `slots: {used, limit}` (limit 2 default); `tabmill status`
+- [x] **v1.I** Slots (D-026): `registry.json` `slots: {used, limit}` (limit 2 default); `tabmill status`
       shows used/limit; `tabmill release` warns at the cap.
-- [ ] **v1.I** `tabmill release` command (today a skill): runs the release steps, then `tabmill hub`.
-- [ ] **v1.I** `tabmill hub` (D-028): registry → `extensions.json` per the lamill.io contract →
+- [x] **v1.I** `tabmill release` command (today a skill): runs the release steps, then `tabmill hub`.
+- [x] **v1.I** `tabmill hub` (D-028): registry → `extensions.json` per the lamill.io contract →
       deploy via `lamill`. Contract found 2026-10-03 in lamill.io (uncommitted there): zod schema
       `src/lib/extensions.ts`, README § Extensions data contract.
-- [ ] **v1.I** Listing URLs (D-029): `privacy_policy_url` = lamill.io/extensions/<slug>/privacy,
+- [x] **v1.I** Listing URLs (D-029): `privacy_policy_url` = lamill.io/extensions/<slug>/privacy,
       `support_url` = lamill.io/extensions/support in listing.md; release lint fails if missing
       or the hub page isn't live.
 - [ ] **v1.J** Build order (D-027): next recipe = pressure-wash-quote (needs maps-overlay template).

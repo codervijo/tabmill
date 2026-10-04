@@ -1,4 +1,5 @@
 {
   "builder": "~/work/projects/builder",
-  "tool_repo": "codervijo/tabmill"
+  "tool_repo": "codervijo/tabmill",
+  "hub_repo": "~/work/projects/sites/lamill.io"
 }

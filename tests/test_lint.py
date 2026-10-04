@@ -10,6 +10,11 @@ from tabmill.config import TOOL_DIR, Config
 SLUG = "save-page-pdf-md"
 
 
+@pytest.fixture(autouse=True)
+def _offline(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(lint, "_http_status", lambda url: 200)
+
+
 @pytest.fixture
 def setup(cfg: Config) -> Config:
     shutil.copytree(TOOL_DIR / "recipes" / SLUG, cfg.tool_dir / "recipes" / SLUG)
@@ -35,10 +40,12 @@ def test_placeholder_warns_in_dev_and_blocks_release(setup: Config) -> None:
     assert _ids(lint.lint(setup.tool_dir, setup.workspace, SLUG, release=False)) == {
         "fill-placeholder": "warn",
         "store-images": "warn",
+        "hub-urls": "warn",
     }
     assert _ids(lint.lint(setup.tool_dir, setup.workspace, SLUG, release=True)) == {
         "fill-placeholder": "error",
         "store-images": "error",
+        "hub-urls": "error",
     }
 
 
@@ -118,3 +125,51 @@ def test_store_images_and_keyword_repeat(setup: Config) -> None:
     )
     ids = _ids(lint.lint(setup.tool_dir, setup.workspace, SLUG, release=True))
     assert "store-images" not in ids and "keyword-repeat" not in ids
+
+
+def test_hub_urls_present_and_live(setup: Config, monkeypatch: pytest.MonkeyPatch) -> None:
+    from tabmill import hub, listing
+
+    _build(setup, {"a.js": "browser.scripting; browser.storage"})
+    draft = listing.store_dir(setup.workspace, SLUG) / listing.LISTING_FILE
+    draft.parent.mkdir(parents=True, exist_ok=True)
+    draft.write_text(f"{hub.privacy_url(SLUG)}\n")
+    msgs = [f.message for f in lint.lint(setup.tool_dir, setup.workspace, SLUG, release=False)]
+    assert any("lacks https://lamill.io/extensions/support" in m for m in msgs)
+    draft.write_text(f"{hub.privacy_url(SLUG)}\n{hub.SUPPORT_URL}\n")
+    monkeypatch.setattr(lint, "_http_status", lambda url: 404)
+    found = [
+        f
+        for f in lint.lint(setup.tool_dir, setup.workspace, SLUG, release=True)
+        if f.rule == "hub-urls"
+    ]
+    assert found and all("not live (HTTP 404)" in f.message for f in found)
+    dev = [
+        f
+        for f in lint.lint(setup.tool_dir, setup.workspace, SLUG, release=False)
+        if f.rule == "hub-urls"
+    ]
+    assert dev == []  # liveness is only probed for releases
+
+
+def test_fill_in_listing_blocks_release(setup: Config) -> None:
+    from tabmill import hub, listing
+
+    _build(setup, {"a.js": "browser.scripting; browser.storage"})
+    draft = listing.store_dir(setup.workspace, SLUG) / listing.LISTING_FILE
+    draft.parent.mkdir(parents=True, exist_ok=True)
+    draft.write_text(f"‹FILL› steps\n{hub.privacy_url(SLUG)}\n{hub.SUPPORT_URL}\n")
+    msgs = [f.message for f in lint.lint(setup.tool_dir, setup.workspace, SLUG, release=True)]
+    assert "listing.md has 1 unfilled ‹FILL›" in msgs
+
+
+def test_listing_kept_unless_forced(setup: Config) -> None:
+    from tabmill import extension, generate, listing
+
+    ext = extension.load_file(generate.recipe_dir(setup.tool_dir, SLUG) / "extension.yaml")
+    path, written = listing.write_listing(setup.workspace, SLUG, ext)
+    assert written
+    path.write_text("hand-finished")
+    assert listing.write_listing(setup.workspace, SLUG, ext) == (path, False)
+    assert path.read_text() == "hand-finished"
+    assert listing.write_listing(setup.workspace, SLUG, ext, force=True)[1] is True

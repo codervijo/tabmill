@@ -28,4 +28,10 @@ def builder(tmp_path: Path) -> Path:
 @pytest.fixture
 def cfg(tool_dir: Path, builder: Path, tmp_path: Path) -> Config:
     ws = tmp_path / "projects" / "plugins" / "chrome-extension-projects"
-    return Config(tool_dir=tool_dir, workspace=ws, builder=builder, tool_repo="me/tabmill")
+    return Config(
+        tool_dir=tool_dir,
+        workspace=ws,
+        builder=builder,
+        tool_repo="me/tabmill",
+        hub_repo=tmp_path / "projects" / "sites" / "lamill.io",
+    )

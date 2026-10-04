@@ -11,6 +11,20 @@ tradeoffs, and links to commits / ADRs.
 
 ---
 
+## v1.I — Slots, status, release, hub, listing URLs (shipped 2026-10-03)
+
+D-026, D-028–D-030. Hub export empty until store IDs + tool pages exist; lamill.io pages 404.
+
+### v1.I plan: — Slots, status, release, hub, listing URLs
+
+D-026, D-028, D-029. `registry.json` `slots {used, limit}`; `tabmill status` (registry +
+fetchStatus + slots); `tabmill release <slug>` (release steps → `HUMAN: publish` line, warns at
+the slot cap, then `hub`); `tabmill hub` writes lamill.io `src/content/extensions.json` per its
+zod contract (`slug, name, pitch, store_url, tool_page_url, permissions[{name,reason}],
+data_collected, analytics, changelog[{version,date,notes}], status`) and deploys via `lamill`;
+recipe gains `changelog:`; listing gets privacy/support URLs; release lint checks them live.
+
+
 ## v1.H — API keys + preflight (shipped 2026-10-03)
 
 D-025. Probe "valid" paths verified against mocks only (no real credentials yet).

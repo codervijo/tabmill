@@ -73,6 +73,13 @@ Two repos, related by a computed relative layout (ADR-0007):
   parse, token exchange, publisher fetchStatus on the first `store_id`); `cws.load_env` reads it
   (env vars win). `preflight.py` — checks workspace / builder / docker / container / x11 /
   credentials; `NEEDS` maps commands → checks, run by `_preflight()` before any work.
+- **Release + hub** (v1.I): `release` chains make targets + listing + `lint --release` + zip,
+  warns at the slot cap (`registry.slots` — used = store PUBLISHED, limit default 2), appends the
+  HUMAN publish line, then `hub`. `hub.py` mirrors lamill.io's zod `extensionSchema` as pydantic
+  `HubEntry`; entries need a store_url (from `store_id`) and a real tool page
+  (`landing_page_url`), else skipped; zero entries → file untouched; writes only
+  `<hub_repo>/src/content/extensions.json`, never commits. Lint `hub-urls`: listing has
+  privacy + support URLs; `--release` probes both for HTTP 200.
 - **Catalog** (`cli/tabmill/catalog.py`, v1.D): `list` rows = `recipes/*/` ∪ workspace
   registry — status `recipe` / `generated` / `built` (`.output/chrome-mv3/manifest.json`) /
   `orphan` (registered, no recipe) / `invalid` (YAML error); placeholders = any `‹FILL›` value

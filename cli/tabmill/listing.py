@@ -13,7 +13,7 @@ from collections import Counter
 from pathlib import Path
 from typing import Any
 
-from . import generate
+from . import generate, hub
 
 STORE_DIR = ".output/store"
 LISTING_FILE = "listing.md"
@@ -150,7 +150,8 @@ Built by Lamill — {ext["portfolio_site"]}. {ext["cta_text"]}: {ext["cta_url"]}
 - **Data collected:** {data}
 - **Limited Use certifications:** all three (no selling/transfer, no unrelated use,
   no creditworthiness)
-- **Privacy policy URL:** ‹FILL› (required if any user data is handled)
+- **Privacy policy URL:** {hub.privacy_url(ext["slug"])}
+- **Support URL:** {hub.SUPPORT_URL}
 
 | Permission | Justification |
 |---|---|
@@ -158,9 +159,15 @@ Built by Lamill — {ext["portfolio_site"]}. {ext["cta_text"]}: {ext["cta_url"]}
 """
 
 
-def write_listing(workspace: Path, slug: str, ext: dict[str, Any]) -> Path:
+def write_listing(
+    workspace: Path, slug: str, ext: dict[str, Any], *, force: bool = False
+) -> tuple[Path, bool]:
+    """Create the draft; an existing one (possibly hand-finished) is kept unless `force`.
+    Returns (path, written)."""
     d = store_dir(workspace, slug)
     d.mkdir(parents=True, exist_ok=True)
     path = d / LISTING_FILE
+    if path.exists() and not force:
+        return path, False
     path.write_text(listing_markdown(ext))
-    return path
+    return path, True

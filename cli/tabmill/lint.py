@@ -11,7 +11,9 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Literal
 
-from . import catalog, extension, generate, listing
+import httpx
+
+from . import catalog, extension, generate, hub, listing
 
 Severity = Literal["error", "warn"]
 BROAD_HOSTS = {"<all_urls>", "*://*/*", "https://*/*", "http://*/*"}
@@ -72,6 +74,7 @@ RULES = {
         Rule("portfolio-similarity", "warn", "warn"),
         Rule("store-images", "warn", "error"),
         Rule("keyword-repeat", "warn", "error"),
+        Rule("hub-urls", "warn", "error"),
     )
 }
 
@@ -90,6 +93,13 @@ def _words(text: str) -> set[str]:
 def similarity(a: str, b: str) -> float:
     wa, wb = _words(a), _words(b)
     return len(wa & wb) / len(wa | wb) if wa | wb else 0.0
+
+
+def _http_status(url: str) -> int | None:
+    try:
+        return httpx.get(url, timeout=10, follow_redirects=True).status_code
+    except httpx.HTTPError:
+        return None
 
 
 def lint(tool_dir: Path, workspace: Path | None, slug: str, *, release: bool) -> list[Finding]:
@@ -141,6 +151,22 @@ def lint(tool_dir: Path, workspace: Path | None, slug: str, *, release: bool) ->
         for problem in problems or []:
             add("store-images", problem)
         draft = listing.store_dir(workspace, slug) / listing.LISTING_FILE
+        urls = (hub.privacy_url(slug), hub.SUPPORT_URL)
+        if not draft.exists():
+            add("hub-urls", "no listing.md — run `tabmill listing` (privacy + support URLs)")
+        else:
+            text = draft.read_text()
+            if extension.FILL_MARKER in text:
+                n = text.count(extension.FILL_MARKER)
+                add("fill-placeholder", f"listing.md has {n} unfilled ‹FILL›")
+            for url in urls:
+                if url not in text:
+                    add("hub-urls", f"listing.md lacks {url}")
+            if release:
+                for url in urls:
+                    code = _http_status(url)
+                    if code != 200:
+                        add("hub-urls", f"{url} not live (HTTP {code or 'unreachable'})")
         if draft.exists():
             for word, n in listing.keyword_repeats(draft.read_text()).items():
                 add("keyword-repeat", f"`{word}` appears {n}× in listing.md (store limit: 5)")

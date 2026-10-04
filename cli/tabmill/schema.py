@@ -22,6 +22,13 @@ class Screenshot(BaseModel):
     page: str | None = None  # extension page to capture; default: the template's UI page
 
 
+class Change(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    version: str
+    date: str = Field(pattern=r"^\d{4}-\d{2}-\d{2}$")  # YYYY-MM-DD (lamill.io hub contract)
+    notes: str
+
+
 class Recipe(BaseModel):
     model_config = ConfigDict(extra="forbid")
     name: str
@@ -47,6 +54,8 @@ class Recipe(BaseModel):
     privacy_line: str | None = None
     theme: dict[str, str] = {}
     screenshots: list[Screenshot] = Field(default=[], max_length=5)  # store allows 1–5
+    changelog: list[Change] = []  # shown on the lamill.io hub page (D-028)
+    data_collected: list[str] = []  # what leaves the browser; empty = nothing (hub privacy page)
 
 
 def structure_errors(data: dict[str, object]) -> list[str]:

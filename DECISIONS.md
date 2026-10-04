@@ -214,6 +214,15 @@ Privacy policy = `https://lamill.io/extensions/<slug>/privacy`; support =
 listing or the hub page isn't live (HTTP 200). Item 5 of the same brief (placeholder Rankmill
 CTA blocks release) was already in place (D-015).
 
+## D-030 — v1.I defaults (Accepted, 2026-10-03)
+
+Slot usage = items the store reports PUBLISHED (unlisted/private unknown — NOTES). `hub`
+validates against a pydantic mirror of lamill.io's zod schema, writes only
+`src/content/extensions.json`, skips entries lacking store/tool-page URLs, leaves the file
+untouched when nothing qualifies, and never commits/deploys lamill.io (its deploy path is
+still open in lamill.io's PRD) — deploy is a HUMAN step. `release` keeps an existing
+`listing.md`; lint blocks release on `‹FILL›` left in it.
+
 ## D-009 — Store API: V2 only, service-account auth (Proposed, 2026-10-03)
 
 V1 dies 2026-10-15; V2 can't create items, so first uploads are a HUMAN step by design.

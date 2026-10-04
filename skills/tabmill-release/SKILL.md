@@ -12,23 +12,22 @@ tabmill repo; all Node work happens in the builder container.
 drafted". `tabmill publish` refuses without a terminal and asks for confirmation — only the
 user runs it.
 
-## Steps (one `✓ ↷ ✗` line each; stop at the first `✗`)
+## Steps
 
 1. **Clean trees.** `git status` in tabmill and the workspace — unrelated changes → ask.
-2. **Version bump.** `version` in `recipes/<slug>/extension.yaml` (patch = fix, minor =
-   feature); must exceed `registry.json`. Never edit generated files.
-3. **Tests.** `uv run tabmill test <slug>` (typecheck, unit, build, smoke).
-4. **Assets.** `uv run tabmill assets <slug>` → `.output/store/` (icon 128, promo 440×280,
-   screenshots 1280×800). Look at them; replace `recipes/<slug>/assets/icon.svg` or add
-   `screenshots:` in the recipe if they don't show the feature well.
-5. **Listing.** `uv run tabmill listing <slug>` → `.output/store/listing.md`, then the
-   `tabmill-store-listing` skill to finish the description (fill its `‹FILL›`).
-6. **Zip.** `uv run tabmill zip <slug> --release` — builds, runs release lint (placeholders,
-   store images, keyword repetition, bundle rules), zips. Any `✗` → fix with the
-   `chrome-store-policy` skill.
-7. **Manual check.** `uv run tabmill try <slug>` on real pages.
-8. **Handoff.** Append to workspace `TODO.md`:
-   `- [ ] HUMAN: publish <slug> <version> — zip: <path>; listing: <path>` and stop.
+2. **Version bump** in `recipes/<slug>/extension.yaml` (must exceed `registry.json`); add a
+   `changelog:` entry `{version, date: YYYY-MM-DD, notes}` — it shows on the lamill.io hub.
+3. **`uv run tabmill release <slug>`** — regenerate → typecheck → unit → smoke → assets →
+   listing draft (kept if it exists) → release lint → zip → slot-cap warning → adds
+   `HUMAN: publish <slug> <version>` to the workspace TODO.md → `tabmill hub`.
+4. On `✗`: fix and re-run. Typical blockers: `‹FILL›` in the recipe or `listing.md` (finish
+   the description with `tabmill-store-listing`), placeholder CTA (D-015), privacy/support pages
+   not live on lamill.io (D-029), store image sizes, keyword repetition, bundle rules
+   (`chrome-store-policy`).
+5. **Manual check.** `uv run tabmill try <slug>` on real pages; look at `.output/store/`.
+6. **Hub.** If `hub` wrote lamill.io's `src/content/extensions.json`, the human reviews,
+   commits, and deploys lamill.io — tabmill never commits there.
+7. Stop. Report what's ready and the HUMAN lines.
 
 ## The human's publish
 

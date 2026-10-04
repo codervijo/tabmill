@@ -19,6 +19,7 @@ from . import (
     cws,
     extension,
     generate,
+    hub,
     lint,
     listing,
     output,
@@ -350,12 +351,19 @@ def assets(slug: str = typer.Argument(..., help="Extension slug.")) -> None:
 
 
 @app.command("listing")
-def listing_cmd(slug: str = typer.Argument(..., help="Extension slug.")) -> None:
+def listing_cmd(
+    slug: str = typer.Argument(..., help="Extension slug."),
+    force: bool = typer.Option(False, "--force", help="Regenerate, discarding edits to the draft."),
+) -> None:
     """Write the store listing draft (paste into the Developer Dashboard)."""
     cfg = _registered(slug)
     ext = _recipe(cfg, slug)
-    path = listing.write_listing(cfg.workspace, slug, ext)
-    output.ok(f"listing draft: {path.relative_to(cfg.workspace)}")
+    path, written = listing.write_listing(cfg.workspace, slug, ext, force=force)
+    rel = path.relative_to(cfg.workspace)
+    if written:
+        output.ok(f"listing draft: {rel}")
+    else:
+        output.ok(f"listing draft: {rel} exists, kept (--force to regenerate)")
     for word, n in listing.keyword_repeats(path.read_text()).items():
         output.skip(f"keyword-repeat: `{word}` appears {n}× (store limit: 5)")
     output.console.print("  refine the description with the tabmill-store-listing skill")
@@ -536,3 +544,103 @@ def preflight_cmd() -> None:
         )
     if any(c.status == "fail" for c in checks):
         raise typer.Exit(1)
+
+
+@app.command()
+def status(
+    refresh: bool = typer.Option(False, "--refresh", help="Fetch review state from the store."),
+) -> None:
+    """Every extension's version, store state, and the publisher slot count."""
+    cfg = _load()
+    rows = registry.read(cfg.workspace)["extensions"]
+    if refresh:
+        _preflight("publish")
+        try:
+            client = cws.connect(cfg.tool_dir)
+        except cws.CwsError as e:
+            output.fail(str(e))
+            raise typer.Exit(1) from e
+        for slug, row in rows.items():
+            if row.get("store_id"):
+                state = cws.summarize(_store_call(lambda r=row: client.fetch_status(r["store_id"])))
+                registry.upsert(cfg.workspace, slug, state)
+        rows = registry.read(cfg.workspace)["extensions"]
+    slots = registry.save_slots(cfg.workspace)
+    table = Table(show_edge=False, pad_edge=False, box=None, header_style="bold")
+    for col in ("slug", "version", "store id", "review", "published", "submitted"):
+        table.add_column(col, no_wrap=True)
+    for slug in sorted(rows):
+        r = rows[slug]
+        table.add_row(
+            slug,
+            str(r.get("version", "")),
+            r.get("store_id") or "—",
+            r.get("review_state") or "—",
+            r.get("published_state") or "—",
+            r.get("submitted_version") or "—",
+        )
+    output.console.print(table)
+    line = f"slots: {slots['used']}/{slots['limit']} published"
+    if slots["used"] >= slots["limit"]:
+        output.skip(f"{line} — at the cap: request more in the Developer Dashboard")
+    else:
+        output.ok(line)
+
+
+def _hub(cfg: config.Config) -> None:
+    if not (cfg.hub_repo / ".git").exists():
+        output.fail(f"hub repo {cfg.hub_repo} not found — set `hub_repo` in tabmill.config.json")
+        raise typer.Exit(1)
+    export = hub.build(cfg.tool_dir, cfg.workspace)
+    for slug, why in export.skipped.items():
+        output.skip(f"hub: {slug} skipped — {why}")
+    if not export.entries:
+        output.skip(f"hub: nothing to export — {cfg.hub_repo.name}/{hub.HUB_FILE} left untouched")
+        return
+    path, changed = hub.write(cfg.hub_repo, export)
+    rel = path.relative_to(cfg.hub_repo)
+    n = len(export.entries)
+    note = "" if changed else " (unchanged)"
+    output.ok(f"hub: {n} entr{'y' if n == 1 else 'ies'} → {cfg.hub_repo.name}/{rel}{note}")
+    if changed:
+        output.console.print(
+            f"  HUMAN: review, commit, and deploy {cfg.hub_repo.name} (tabmill never commits there)"
+        )
+
+
+@app.command("hub")
+def hub_cmd() -> None:
+    """Export extensions to the lamill.io hub (src/content/extensions.json, its zod contract)."""
+    _hub(_load())
+
+
+@app.command()
+def release(slug: str = typer.Argument(..., help="Extension slug.")) -> None:
+    """Prepare a release: test, assets, listing, release zip, slot check, hub. Never publishes."""
+    cfg = _registered(slug)
+    ext = _recipe(cfg, slug)
+    _sync(cfg, force=False)
+    for target in ("typecheck", "test", "smoke", "assets"):
+        _make(cfg, target, slug)
+    path, written = listing.write_listing(cfg.workspace, slug, ext)
+    output.ok(
+        f"listing draft {'written' if written else 'kept'}: {path.relative_to(cfg.workspace)}"
+    )
+    if not _lint(cfg, slug, release=True):
+        output.fail("release blocked — fix the errors above, then re-run `tabmill release`")
+        raise typer.Exit(1)
+    _make(cfg, "zip", slug)
+    slots = registry.save_slots(cfg.workspace)
+    row = registry.read(cfg.workspace)["extensions"][slug]
+    if row.get("published_state") != "PUBLISHED" and slots["used"] >= slots["limit"]:
+        output.skip(
+            f"slots {slots['used']}/{slots['limit']} — publishing {slug} needs another slot "
+            "(Developer Dashboard → request an increase)"
+        )
+    todo = cfg.workspace / "TODO.md"
+    line = f"- [ ] HUMAN: publish {slug} {ext['version']} — `uv run tabmill publish {slug}`"
+    if line not in todo.read_text():
+        with todo.open("a") as f:
+            f.write(f"\n{line}\n")
+    output.ok(f"TODO.md: {line.removeprefix('- [ ] ')}")
+    _hub(cfg)

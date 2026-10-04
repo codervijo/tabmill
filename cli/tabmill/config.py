@@ -23,6 +23,7 @@ class Config:
     workspace: Path
     builder: Path
     tool_repo: str
+    hub_repo: Path
 
 
 def _read_config_file(tool_dir: Path) -> dict[str, str]:
@@ -60,4 +61,5 @@ def load(tool_dir: Path = TOOL_DIR, *, require_workspace: bool = True) -> Config
         workspace=_resolve(ws_raw, tool_dir),
         builder=_resolve(builder_raw, tool_dir),
         tool_repo=file_cfg.get("tool_repo", ""),
+        hub_repo=_resolve(file_cfg.get("hub_repo") or "~/work/projects/sites/lamill.io", tool_dir),
     )

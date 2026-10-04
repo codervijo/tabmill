@@ -28,6 +28,9 @@ uv run tabmill try <slug> [--url URL] [--dev]  # Chromium in docker, window on y
 uv run tabmill dev <slug>           # hot reload; load .output/chrome-mv3-dev in Chrome
 uv run tabmill assets <slug>        # store icon, promo tile, screenshots (docker)
 uv run tabmill listing <slug>       # store listing draft (.output/store/listing.md)
+uv run tabmill release <slug>       # test → assets → listing → release lint → zip → hub; never publishes
+uv run tabmill status [--refresh]   # versions, store review state, publisher slots used/limit
+uv run tabmill hub                  # export to lamill.io src/content/extensions.json
 uv run tabmill publish <slug> [--staged|--check]  # attended only
 uv run tabmill lint <slug> [--release]
 uv run tabmill zip <slug> [--release]
@@ -38,9 +41,9 @@ uv run tabmill settings apikeys list|set|delete   # store credentials in tabmill
 Anywhere: `uv tool install --editable ~/work/projects/droyfun/tabmill`, then `tabmill …`.
 
 
-Shipped: `init` · `skills sync` · `create` · `new` · `build` · `list` · `test` · `try` · `dev` · `lint` · `zip` · `assets` · `listing` · `publish` · `preflight` · `settings apikeys`. Planned:
+Shipped: `init` · `skills sync` · `create` · `new` · `build` · `list` · `test` · `try` · `dev` · `lint` · `zip` · `assets` · `listing` · `publish` · `preflight` · `settings apikeys` · `release` · `status` · `hub`. Planned:
 
-`landing` · `status`
+`landing`
 
 ## Docs
 
