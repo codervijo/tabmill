@@ -223,6 +223,17 @@ untouched when nothing qualifies, and never commits/deploys lamill.io (its deplo
 still open in lamill.io's PRD) — deploy is a HUMAN step. `release` keeps an existing
 `listing.md`; lint blocks release on `‹FILL›` left in it.
 
+## D-031 — pressure-wash-quote / maps-overlay defaults (Accepted, 2026-10-03)
+
+- `maps-overlay` template: no host permissions — toolbar click injects a shadow-root panel into
+  the current tab (activeTab + scripting); second click removes it; background opens extension
+  pages for content scripts (`tabmill:open-page`); `overlay-preview.html` for screenshots/smoke.
+- Scale by **user calibration** on the map's scale bar (no unverified URL→meters formula).
+- Rates prefilled from washcalc.app `src/rates.js` MODEL tier (copied 2026-10-03, labelled
+  "WashCalc model rate — estimates, not survey data"); user's own rates stored locally.
+- Store title omits "Google" (trademark policy); summary/keywords mention it descriptively.
+- Quote handoff via `storage.local` (content scripts can't use `storage.session` by default).
+
 ## D-009 — Store API: V2 only, service-account auth (Proposed, 2026-10-03)
 
 V1 dies 2026-10-15; V2 can't create items, so first uploads are a HUMAN step by design.

@@ -18,6 +18,7 @@ BUILT_MANIFEST = ".output/chrome-mv3/manifest.json"
 MANIFEST_FIELDS = ("name", "summary", "single_purpose")
 TEMPLATE_PERMISSION_REASONS = {
     "sidePanel": "Show results in Chrome's side panel, opened from the toolbar button.",
+    "scripting": "Add the overlay to the current tab when the user clicks the toolbar button.",
 }
 
 

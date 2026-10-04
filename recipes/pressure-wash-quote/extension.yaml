@@ -1,0 +1,29 @@
+# Recipe for pressure-wash-quote — source of truth for the generated extension (ADR-0008).
+# Fill every ‹FILL›: `tabmill new` refuses while name / summary / single_purpose are unfilled,
+# and release lint blocks on any that remain (D-015). Then: tabmill new pressure-wash-quote
+name: Pressure Washing Estimate Calculator
+slug: pressure-wash-quote
+version: 0.1.0
+summary: Trace driveways, decks, siding and roofs on a satellite map to get square footage and a pressure washing estimate.
+single_purpose: Measure surfaces on a satellite map to estimate a pressure washing price.
+template: maps-overlay
+permissions:
+  - name: activeTab
+    justification: Read the current page only after the user clicks the toolbar button.
+  - name: scripting
+    justification: Add the overlay to the current tab when the user clicks the toolbar button.
+  - name: storage
+    justification: Remember the user's own price per square foot, and pass the finished estimate to the extension's print page.
+optional_permissions: []
+dependencies: {}        # runtime npm deps — each needs a DECISIONS.md row first
+dev_dependencies: {}
+remote_code: false
+portfolio_site: washcalc.app
+landing_page_url: ""
+target_keywords: [pressure washing estimate calculator, google maps area calculator]
+cta_text: Build a full quote on WashCalc
+cta_url: https://washcalc.app
+utm_campaign: pressure-wash-quote
+store_category: ‹FILL›  # not in official docs; picked in the dashboard at "Add new item"
+analytics: false
+privacy_line: Runs locally — nothing you trace or price leaves your browser.

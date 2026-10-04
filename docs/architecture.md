@@ -80,6 +80,10 @@ Two repos, related by a computed relative layout (ADR-0007):
   (`landing_page_url`), else skipped; zero entries → file untouched; writes only
   `<hub_repo>/src/content/extensions.json`, never commits. Lint `hub-urls`: listing has
   privacy + support URLs; `--release` probes both for HTTP 200.
+- **maps-overlay template** (v1.J, D-031): background `action.onClicked` → inject
+  `content-scripts/overlay.js` (shadow-root panel + `renderShell`, toggles); `tabmill:open-page`
+  message → `tabs.create` for extension pages; `overlay-preview.html` renders the panel for
+  store screenshots + smoke; `TEMPLATE_PERMISSIONS["maps-overlay"] = scripting`.
 - **Catalog** (`cli/tabmill/catalog.py`, v1.D): `list` rows = `recipes/*/` ∪ workspace
   registry — status `recipe` / `generated` / `built` (`.output/chrome-mv3/manifest.json`) /
   `orphan` (registered, no recipe) / `invalid` (YAML error); placeholders = any `‹FILL›` value

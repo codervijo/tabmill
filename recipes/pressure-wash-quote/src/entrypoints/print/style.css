@@ -1,0 +1,17 @@
+:root { --ink: #0f172a; --muted: #475569; --hairline: #e2e8f0; --accent: #0ea5e9; }
+body { margin: 0; background: #f1f5f9; color: var(--ink); font: 11pt/1.5 ui-sans-serif, system-ui, sans-serif; }
+.toolbar { position: sticky; top: 0; display: flex; gap: 12px; align-items: center; padding: 10px 16px; background: #fff; border-bottom: 1px solid var(--hairline); color: var(--muted); font-size: 13px; }
+.toolbar button { font: inherit; padding: 7px 12px; border: 0; border-radius: 6px; background: var(--accent); color: #fff; cursor: pointer; }
+.sheet { max-width: 210mm; margin: 24px auto; padding: 18mm 20mm; background: #fff; border: 1px solid var(--hairline); }
+h1 { font: 600 22pt/1.2 ui-serif, Georgia, serif; margin: 0 0 4px; }
+.meta { color: var(--muted); font-size: 9.5pt; }
+table { width: 100%; border-collapse: collapse; margin: 16px 0; }
+th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--hairline); }
+th { background: #f8fafc; font-weight: 600; }
+.total { font-size: 14pt; font-weight: 700; }
+@media print {
+  @page { size: A4; margin: 16mm 18mm; }
+  body { background: #fff; }
+  .no-print { display: none !important; }
+  .sheet { margin: 0; padding: 0; border: 0; max-width: none; }
+}

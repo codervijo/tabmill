@@ -10,6 +10,7 @@ Measured from "extension.yaml agreed" to "unpacked build loads in Chrome".
 | # | slug | phase | start | first build | elapsed | notes |
 |---|---|---|---|---|---|---|
 | 1 | save-page-pdf-md | v1.C | — | — | — | not measured — built while the generator itself was being written (v1.B–v1.C) |
+| 3 | pressure-wash-quote | v1.J | 2026-10-03 22:09:13 | 22:10:47 | 1 min 34 s | `create` → first `build`, incl. new maps-overlay template wiring |
 | 2 | local-seo-checker | v1.E | 2026-10-03 12:52:58 | 12:54:04 | 1 min 06 s | `create` → first `build`; feature code written by Claude in that window |
 
 ## Blockers

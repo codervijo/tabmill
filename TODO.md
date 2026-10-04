@@ -98,7 +98,11 @@ Plan (all code in `recipes/save-page-pdf-md/`; workspace only via `tabmill new/b
 - [x] **v1.I** Listing URLs (D-029): `privacy_policy_url` = lamill.io/extensions/<slug>/privacy,
       `support_url` = lamill.io/extensions/support in listing.md; release lint fails if missing
       or the hub page isn't live.
-- [ ] **v1.J** Build order (D-027): next recipe = pressure-wash-quote (needs maps-overlay template).
+- [x] **v1.J** pressure-wash-quote recipe + maps-overlay template (D-031): unit 6, smoke 2,
+      lint dev clean except store_category; first build 1 min 34 s.
+- [ ] **v1.J** HUMAN: try it on real Google Maps satellite view —
+      `uv run tabmill try pressure-wash-quote --url https://www.google.com/maps` → click the
+      toolbar icon → calibrate on the scale bar → trace a driveway → Save estimate as PDF.
 - [x] Rankmill CTA placeholder blocks release (D-015); HUMAN line below.
 
 ## v1.G — Assets, listing, publish (in progress)

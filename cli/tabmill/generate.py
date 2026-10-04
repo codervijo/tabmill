@@ -148,7 +148,11 @@ Built by Lamill — {LAMILL_URL}
 """
 
 
-UI_PAGES = {"popup": ("popup.html", 340), "side-panel": ("sidepanel.html", 400)}
+UI_PAGES = {
+    "popup": ("popup.html", 340),
+    "side-panel": ("sidepanel.html", 400),
+    "maps-overlay": ("overlay-preview.html", 320),
+}
 SMALL_WORDS = {"a", "an", "and", "as", "for", "of", "on", "or", "the", "to"}
 
 
@@ -220,7 +224,7 @@ def extension_files(tool_dir: Path, slug: str) -> dict[str, bytes]:
     files["assets/icon.svg"] = _icon_svg(ext).encode()  # a recipe's own icon replaces this
     files.update(_tree(recipe_dir(tool_dir, slug), values, skip=frozenset({RECIPE_FILE})))
     manifest = extension.to_manifest(ext)
-    if ext["template"] == "side-panel":
+    if ext["template"] in ("side-panel", "maps-overlay"):
         # No popup → WXT emits no `action`; the toolbar button must exist to open the panel.
         manifest["action"] = {"default_title": ext["name"]}
     files[extension.GENERATED_MANIFEST] = (json.dumps(manifest, indent=2) + "\n").encode()

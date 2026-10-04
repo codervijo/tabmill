@@ -32,7 +32,7 @@ REQUIRED = (
 )
 TEMPLATES = ("popup", "side-panel", "devtools", "context-menu", "maps-overlay")
 # Permissions a template's own code needs; the recipe must declare + justify them.
-TEMPLATE_PERMISSIONS = {"side-panel": ("sidePanel",)}
+TEMPLATE_PERMISSIONS = {"side-panel": ("sidePanel",), "maps-overlay": ("scripting",)}
 # RFC 2606 / RFC 6761 reserved names → placeholder URLs (D-015).
 _RESERVED_TLDS = (".example", ".test", ".invalid", ".localhost")
 _RESERVED_HOSTS = ("example.com", "example.net", "example.org")
