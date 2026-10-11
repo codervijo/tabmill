@@ -20,6 +20,7 @@ from . import (
     extension,
     generate,
     hub,
+    landing,
     lint,
     listing,
     output,
@@ -651,3 +652,58 @@ def release(slug: str = typer.Argument(..., help="Extension slug.")) -> None:
             f.write(f"\n{line}\n")
     output.ok(f"TODO.md: {line.removeprefix('- [ ] ')}")
     _hub(cfg)
+
+
+@app.command("landing")
+def landing_cmd(
+    slug: str = typer.Argument(..., help="Extension slug."),
+    check: bool = typer.Option(
+        False, "--check", help="Page is live: record it + resubmit sitemap."
+    ),
+) -> None:
+    """Brief for the tool page on the portfolio site; `--check` records it once live."""
+    cfg = _registered(slug)
+    ext = _recipe(cfg, slug)
+    problems = landing.precheck(ext)
+    for p in problems:
+        output.fail(p)
+    if problems:
+        raise typer.Exit(1)
+    url = landing.landing_url(ext)
+    if not check:
+        store_id = registry.read(cfg.workspace)["extensions"][slug].get("store_id")
+        draft = listing.store_dir(cfg.workspace, slug) / listing.LISTING_FILE
+        text = landing.brief(ext, store_id, draft.read_text() if draft.exists() else None)
+        path = landing.write_brief(cfg.workspace, slug, text)
+        output.ok(f"brief: {path}")
+        output.console.print(
+            f'  next: cd {landing.site_dir(ext)} && claude → "Write the page in this brief" '
+            f"(attach the file); page goes at {url}\n"
+            f"  then: uv run tabmill landing {slug} --check"
+        )
+        return
+    code = landing.is_live(url)
+    if code != 200:
+        output.fail(f"{url} not live (HTTP {code or 'unreachable'}) — deploy the site first")
+        raise typer.Exit(1)
+    output.ok(f"{url} is live")
+    changed = landing.set_landing_url(cfg.tool_dir, slug, url)
+    output.ok(f"recipe landing_page_url {'set' if changed else 'already set'}")
+    site = str(ext["portfolio_site"])
+    try:
+        rc = subprocess.run(
+            ["lamill", "settings", "gsc", "submit-sitemap", "--site", site, "--force"],
+            capture_output=True,
+            text=True,
+            timeout=120,
+        ).returncode
+    except (OSError, subprocess.TimeoutExpired):
+        rc = -1
+    if rc == 0:
+        output.ok(f"sitemap resubmitted to GSC for {site} (lamill)")
+    else:
+        output.skip(
+            "sitemap resubmit failed — run "
+            f"`lamill settings gsc submit-sitemap --site {site} --force`"
+        )
+    output.console.print("  next: uv run tabmill hub")

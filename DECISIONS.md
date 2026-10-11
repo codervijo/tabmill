@@ -241,6 +241,17 @@ auto-deploy from `main`. `hub` now exports any extension with a real tool page; 
 null until a `store_id` exists. Still never commits lamill.io; prints HUMAN steps (commit/push,
 and sitemap.xml lines for published entries, which lamill.io maintains by hand).
 
+## D-033 — `landing`: tabmill briefs, a Claude session in the site repo writes the page (Accepted, 2026-10-05)
+
+Operator chose option 1: tabmill has no AI and writes nothing into portfolio-site repos.
+`tabmill landing <slug>` writes a self-contained brief (target URL + queries, single purpose,
+permissions/privacy, store link with UTM or "coming soon", hub link, rules) to
+`extensions/<slug>/.output/store/landing-brief.md`; the page is written by a Claude session in
+`~/work/projects/sites/<portfolio_site>` using the user-level `write-lamill-seo-page` skill.
+`--check` confirms HTTP 200, sets the recipe's `landing_page_url`, and runs
+`lamill settings gsc submit-sitemap --site <site> --force` (soft-fail; no IndexNow, D-016).
+URL = `https://<portfolio_site>` + recipe `landing_path` (default `/` + first keyword, slugified).
+
 ## D-009 — Store API: V2 only, service-account auth (Proposed, 2026-10-03)
 
 V1 dies 2026-10-15; V2 can't create items, so first uploads are a HUMAN step by design.

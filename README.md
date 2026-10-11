@@ -31,6 +31,7 @@ uv run tabmill listing <slug>       # store listing draft (.output/store/listing
 uv run tabmill release <slug>       # test → assets → listing → release lint → zip → hub; never publishes
 uv run tabmill status [--refresh]   # versions, store review state, publisher slots used/limit
 uv run tabmill hub                  # export to lamill.io src/content/extensions.json
+uv run tabmill landing <slug> [--check]  # tool-page brief; --check records it once live
 uv run tabmill publish <slug> [--staged|--check]  # attended only
 uv run tabmill lint <slug> [--release]
 uv run tabmill zip <slug> [--release]
@@ -41,9 +42,9 @@ uv run tabmill settings apikeys list|set|delete   # store credentials in tabmill
 Anywhere: `uv tool install --editable ~/work/projects/droyfun/tabmill`, then `tabmill …`.
 
 
-Shipped: `init` · `skills sync` · `create` · `new` · `build` · `list` · `test` · `try` · `dev` · `lint` · `zip` · `assets` · `listing` · `publish` · `preflight` · `settings apikeys` · `release` · `status` · `hub`. Planned:
+Shipped: `init` · `skills sync` · `create` · `new` · `build` · `list` · `test` · `try` · `dev` · `lint` · `zip` · `assets` · `listing` · `publish` · `preflight` · `settings apikeys` · `release` · `status` · `hub` · `landing`. Planned:
 
-`landing`
+analytics
 
 ## Docs
 

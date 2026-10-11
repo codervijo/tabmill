@@ -1,45 +1,34 @@
 ---
 name: tabmill-landing-page
-description: Create the SEO landing page that pairs with a Tabmill extension — a web-tool page on the extension's portfolio_site (e.g. markpdf.dev, calcengine.site) targeting the tool query ("markdown to pdf"), linking to the store listing — and get it deployed and indexed via the existing `lamill` CLI. Use when the user asks for a landing page, web page, SEO page, or "the site side" of an extension, or when an extension reaches its landing step.
+description: Create the SEO tool page that pairs with a Tabmill extension — `tabmill landing <slug>` writes a brief, a Claude session in the portfolio site's repo writes the page from it (with the write-lamill-seo-page skill), and `tabmill landing <slug> --check` records the live URL and resubmits the sitemap. Use when the user asks for a landing page, tool page, SEO page, or "the site side" of an extension, or when hub export skips an extension for lacking a tool_page_url.
 ---
 
 # Tabmill landing page
 
-> DRAFT (v1.A, 2026-10-03). `tabmill landing` is *(planned v1.H)*. Integration facts
-> verified 2026-10-03 by reading the `lamill` CLI (`~/work/projects/sites/portfolio`).
-
-## Write surface (policy boundary)
-
-The page lives in the **portfolio site's own repo**: `~/work/projects/sites/<portfolio_site>/`.
-That is neither TOOL_DIR nor WORKSPACE_DIR. Tabmill writes only the page (and its link from
-the site's nav/hub if the user agrees); site config, build, and deploy belong to that repo
-and to `lamill`. Read the site's `AI_AGENTS.md` and `docs/CLAUDE.md` before touching it.
+D-033: tabmill has no AI and never writes into a site repo. The page is written by a Claude
+session opened **in the site repo** (`~/work/projects/sites/<portfolio_site>`).
 
 ## Steps
 
-1. **Inputs.** From `extensions/<slug>/extension.yaml`: `portfolio_site`, `landing_page_url`,
-   `target_keywords`, `single_purpose`, `utm_campaign`; the store URL from `registry.json`
-   (`store_id`) — if no store ID yet, the store link is a placeholder and the page must not go live.
-2. **Page content.** Invoke the user-level `write-lamill-seo-page` skill. It owns query
-   choice, H1/title/slug, metadata, schema, FAQ, internal links. Tabmill-specific inputs:
-   - the target query is the **tool** query (e.g. "markdown to pdf"), not "… chrome extension";
-   - the page should be useful on its own (a working web tool or a real how-to), with the
-     extension as the "do it in one click from any page" option;
-   - never invent numbers, ratings, user counts, or reviews.
-3. **Stack fit.** Match the site's stack — Astro (`markpdf.dev`, `calcengine.site`), Vite +
-   React (`washcalc.app`), TanStack Start (`lamill.io`). Check `lamill.toml [stack]`.
-4. **Store link.** `https://chromewebstore.google.com/detail/<store_id>` with
-   `utm_source=<portfolio_site>&utm_medium=landing&utm_campaign=<utm_campaign>`.
-5. **Build + test** with the site's own Makefile (inside the docker builder: `make build`, `make test`).
-6. **Deploy.** Sites deploy git-integrated: a push to the site's `main` triggers the build
-   (`lamill.toml [deploy] platform` = `cf-pages` or `vercel`). Commit + push only when the
-   user asks. Do **not** run `lamill new deploy` for an already-live site.
-7. **Index.**
-   - GSC: `lamill settings gsc submit-sitemap --site <portfolio_site> --force` after the deploy is live.
-   - IndexNow: **skipped** for landing pages (operator decision D-016, 2026-10-03).
-8. **Record.** Set `landing_page_url` in extension.yaml; note the date in `registry.json`.
+1. **Brief** (tabmill repo): `uv run tabmill landing <slug>` →
+   `extensions/<slug>/.output/store/landing-brief.md`. It holds the target URL
+   (`https://<portfolio_site>` + recipe `landing_path`, default `/<first keyword>`), queries,
+   single purpose, permissions/privacy, the UTM install link (or "Coming soon" before the store
+   listing exists), hub + privacy links, and the never-invent rules.
+2. **Pick the query with care**: the page must not compete with the site's own core page
+   (e.g. markpdf.dev already targets "markdown to pdf"). Set `landing_path` / reorder
+   `target_keywords` in the recipe if needed, then regenerate the brief.
+3. **Write the page** (site repo): open Claude Code there, attach the brief, "Write the page in
+   this brief". That session uses the user-level `write-lamill-seo-page` skill and the site's
+   own `AI_AGENTS.md` / `docs/CLAUDE.md` and stack (Astro, Vite + React, …).
+4. **Deploy**: the user commits + pushes the site (git-integrated deploy from `main`). Commit
+   or push only when the user asks. Don't run `lamill new deploy` for a live site.
+5. **Record** (tabmill repo): `uv run tabmill landing <slug> --check` — requires HTTP 200,
+   sets `landing_page_url` in the recipe, resubmits the sitemap
+   (`lamill settings gsc submit-sitemap --force`; IndexNow skipped, D-016).
+6. **Hub**: `uv run tabmill hub` — the extension now exports to lamill.io.
 
 ## Done when
 
-Page live (HTTP 200), in the sitemap, sitemap re-submitted (GSC only), links to the listing with UTM,
-listing links back to the page.
+Page live (200), in the site's sitemap, recipe has `landing_page_url`, hub entry exported,
+store listing and page link to each other.

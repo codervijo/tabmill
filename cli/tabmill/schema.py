@@ -45,6 +45,7 @@ class Recipe(BaseModel):
     remote_code: Literal[False] = False  # MV3: no remotely hosted code, ever
     portfolio_site: str
     landing_page_url: str = ""
+    landing_path: str = ""  # tool page path on portfolio_site; default /<first keyword>
     target_keywords: list[str] = Field(min_length=1)
     cta_text: str
     cta_url: str

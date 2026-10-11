@@ -63,7 +63,7 @@ as v1.D (D-021) → v1.A–v1.H; `try` inserted as v1.F (D-023) → v1.A–v1.I;
 | v1.H | ✅ done | CLI `settings apikeys` (tabmill.env, probes) + `preflight` |
 | v1.I | ✅ done | Publisher slots; CLI `status`, `release`, `hub` (lamill.io extensions.json); listing-URL lint |
 | v1.J | 🔄 in progress | Extension pressure-wash-quote recipe (+ `maps-overlay` template) |
-| v1.K | ⏳ planned | CLI `landing`; analytics package |
+| v1.K | 🔄 in progress | CLI `landing`; analytics package |
 | v1.L | ⏳ planned | Extensions local-schema-generator, jwt-inspector as recipes |
 
 #### Design notes

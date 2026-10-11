@@ -84,6 +84,10 @@ Two repos, related by a computed relative layout (ADR-0007):
   `content-scripts/overlay.js` (shadow-root panel + `renderShell`, toggles); `tabmill:open-page`
   message → `tabs.create` for extension pages; `overlay-preview.html` renders the panel for
   store screenshots + smoke; `TEMPLATE_PERMISSIONS["maps-overlay"] = scripting`.
+- **Landing** (v1.K, D-033): `landing.py` — URL = portfolio_site + `landing_path`
+  (default first keyword), self-contained brief → `.output/store/landing-brief.md`; `--check`
+  probes 200, rewrites only the recipe's `landing_page_url` line, runs lamill's
+  `settings gsc submit-sitemap` (soft-fail).
 - **Catalog** (`cli/tabmill/catalog.py`, v1.D): `list` rows = `recipes/*/` ∪ workspace
   registry — status `recipe` / `generated` / `built` (`.output/chrome-mv3/manifest.json`) /
   `orphan` (registered, no recipe) / `invalid` (YAML error); placeholders = any `‹FILL›` value

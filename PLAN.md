@@ -29,7 +29,7 @@ Done = #1 fully prepared via CLI; operator does the first real publish (dashboar
 `maps-overlay` template; recipe: trace surfaces on Google Maps satellite → sq ft (optional
 roof pitch) → WashCalc quote, PDF export.
 
-## v1.K — Landing, analytics
+## v1.K — Landing, analytics (in progress)
 
 CLI `landing` (via `lamill`); `packages/analytics` opt-in; finalize `tabmill-landing-page`.
 

@@ -65,6 +65,16 @@ Plan (all code in `recipes/save-page-pdf-md/`; workspace only via `tabmill new/b
        while ‹FILL› → filled → `new` generated → `list` shows it; removed afterwards. WXT `build`
        of a created recipe not re-run (same path as #1, verified in v1.B/v1.C).
 
+## v1.K — Landing + analytics (in progress)
+
+1. [x] Schema `landing_path` (optional); `cli/tabmill/landing.py`: URL, brief, recipe update.
+2. [x] `tabmill landing <slug> [--check]`: brief → print next steps; `--check` probe → set
+       `landing_page_url` in the recipe → `lamill settings gsc submit-sitemap` (soft-fail).
+3. [x] Rewrite `tabmill-landing-page` skill around the brief; tests; docs.
+4. [ ] Analytics package (opt-in) — plan separately before code.
+5. [ ] HUMAN: write the save-page-pdf-md tool page from its brief (session in sites/markpdf.dev),
+       deploy, then `tabmill landing save-page-pdf-md --check` → `tabmill hub`.
+
 ## v1.I — Slots, status, release, hub, listing URLs ✅ (2026-10-03)
 
 1. [x] registry `slots {used, limit}` (limit 2; used = store `published_state == PUBLISHED`);
