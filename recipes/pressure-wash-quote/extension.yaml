@@ -24,6 +24,6 @@ target_keywords: [pressure washing estimate calculator, google maps area calcula
 cta_text: Build a full quote on WashCalc
 cta_url: https://washcalc.app
 utm_campaign: pressure-wash-quote
-store_category: ‹FILL›  # not in official docs; picked in the dashboard at "Add new item"
+store_category: Tools  # Productivity › Tools — chromewebstore.google.com/category/extensions/productivity/tools (verified 2026-10-11); confirm in the dashboard at "Add new item"
 analytics: false
 privacy_line: Runs locally — nothing you trace or price leaves your browser.

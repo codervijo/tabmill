@@ -27,5 +27,5 @@ cta_url: https://markpdf.dev
 utm_campaign: save-page-pdf-md
 # Category list isn't in the official docs (checked 2026-10-03); picked in the dashboard at
 # "Add new item".
-store_category: ‹FILL›
+store_category: Tools  # Productivity › Tools — chromewebstore.google.com/category/extensions/productivity/tools (verified 2026-10-11); confirm in the dashboard at "Add new item"
 analytics: false

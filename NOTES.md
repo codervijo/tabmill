@@ -58,6 +58,9 @@ Measured from "extension.yaml agreed" to "unpacked build loads in Chrome".
 - 2026-10-03: Chrome Web Store category names are not listed on developer.chrome.com
   (best-listing, discovery, cws-dashboard-listing checked) → `store_category` stays ‹FILL›,
   picked in the dashboard at "Add new item".
+- 2026-10-11: live store category page `chromewebstore.google.com/category/extensions/productivity/tools`
+  exists ("Tools", parent Productivity) → all three recipes set `store_category: Tools`. Full
+  category list still dashboard-only (third-party counts disagree: 18 vs 27); confirm at "Add new item".
 - 2026-10-03 (v1.B docker verification): builder react image ships pnpm 12.8.1; WXT 0.21.4 +
   Vite 8.3.2 build in the container (popup bundle 1.9 kB; prod manifest = declared permissions
   + action only). Container runs as root → `in-docker-*` chowns created files back; pnpm store

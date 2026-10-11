@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 import shutil
 
 import pytest
@@ -36,6 +37,9 @@ def _ids(findings: list[lint.Finding]) -> dict[str, str]:
 
 
 def test_placeholder_warns_in_dev_and_blocks_release(setup: Config) -> None:
+    recipe = setup.tool_dir / "recipes" / SLUG / "extension.yaml"
+    text = recipe.read_text()
+    recipe.write_text(re.sub(r"(?m)^store_category: .*$", "store_category: ‹FILL›", text))
     _build(setup, {"a.js": "browser.scripting.executeScript; browser.storage.session"})
     assert _ids(lint.lint(setup.tool_dir, setup.workspace, SLUG, release=False)) == {
         "fill-placeholder": "warn",

@@ -93,7 +93,7 @@ def test_list_statuses(tool: Path, cfg: Config) -> None:
     (bad / "extension.yaml").write_text("name: [unclosed")
     by_slug = {r.slug: r for r in catalog.rows(tool, ws)}
     assert by_slug["save-page-pdf-md"].status == "built"
-    assert by_slug["save-page-pdf-md"].placeholders == ["store_category"]
+    assert by_slug["save-page-pdf-md"].placeholders == []
     assert by_slug["demo"].status == "recipe"
     assert by_slug["gone"].status == "orphan" and by_slug["gone"].version == "2.0.0"
     assert by_slug["broken"].status == "invalid" and "invalid YAML" in by_slug["broken"].error

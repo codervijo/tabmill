@@ -24,5 +24,5 @@ target_keywords: [local seo checker, local seo audit tool, nap consistency check
 cta_text: Get a full local SEO audit on Rankmill
 cta_url: https://rankmill.example/local-seo-audit  # placeholder (D-015) — blocks release
 utm_campaign: local-seo-checker
-store_category: ‹FILL›  # not in official docs; picked in the dashboard at "Add new item"
+store_category: Tools  # Productivity › Tools — chromewebstore.google.com/category/extensions/productivity/tools (verified 2026-10-11); confirm in the dashboard at "Add new item"
 analytics: false
