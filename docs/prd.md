@@ -45,7 +45,7 @@ installed skills. End users of the extensions are not Tabmill users.
 
 Strict two-level versioning: `vN` tier, `vN.X` phase. Kickoff "Phase 0–5" = v1.A–v1.F (D-003);
 reslotted 2026-10-03 for generated extensions (ADR-0008) → v1.A–v1.G; `list`/`create` inserted
-as v1.D (D-021) → v1.A–v1.H; `try` inserted as v1.F (D-023) → v1.A–v1.I; reslotted for D-025–D-029 → v1.A–v1.L.
+as v1.D (D-021) → v1.A–v1.H; `try` inserted as v1.F (D-023) → v1.A–v1.I; reslotted for D-025–D-029 → v1.A–v1.L; lifecycle CLI inserted as v1.L (D-034) → v1.A–v1.M.
 
 ### v1 — First extension portfolio
 
@@ -64,7 +64,8 @@ as v1.D (D-021) → v1.A–v1.H; `try` inserted as v1.F (D-023) → v1.A–v1.I;
 | v1.I | ✅ done | Publisher slots; CLI `status`, `release`, `hub` (lamill.io extensions.json); listing-URL lint |
 | v1.J | 🔄 in progress | Extension pressure-wash-quote recipe (+ `maps-overlay` template) |
 | v1.K | 🔄 in progress | CLI `landing`; analytics package |
-| v1.L | ⏳ planned | Extensions local-schema-generator, jwt-inspector as recipes |
+| v1.L | ⏳ planned | Lifecycle CLI: `new` · `try` · `check` · `ship` · `status` · `setup`; old commands folded in |
+| v1.M | ⏳ planned | Extensions local-schema-generator, jwt-inspector as recipes |
 
 #### Design notes
 
@@ -98,7 +99,7 @@ See `PLAN.md` (per-phase scope + done criteria) and `NOTES.md` (v1.A spike findi
 6. ~~IndexNow for existing sites~~ — resolved 2026-10-03: skipped (D-016).
 7. ~~Repo visibility~~ — resolved 2026-10-03: tabmill is private; workspace CI uses `TABMILL_PAT` (ADR-0007).
 8. **Publisher cap** (2026-10-03): new publishers get two published extensions; request more
-   before the third publish (v1.L; order D-027).
+   before the third publish (v1.M; order D-027).
 9. ~~Builder changes~~ — resolved 2026-10-03: workspace `Makefile.local` overrides only (ADR-0005).
 
 ## 8. References

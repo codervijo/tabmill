@@ -94,7 +94,7 @@ Plan (all code in `recipes/save-page-pdf-md/`; workspace only via `tabmill new/b
 7. [ ] HUMAN: lamill.io — publish /extensions/<slug>/privacy + /extensions/support pages
        (release lint probes them), choose its deploy path; then `tabmill hub` output can ship.
 
-## Slotted 2026-10-03 (v1.H–v1.L, see PLAN.md) — operator brief items
+## Slotted 2026-10-03 (v1.H–v1.M after D-034, see PLAN.md) — operator brief items
 
 - [x] **v1.H** API keys + preflight (D-025): `settings apikeys list|set|delete` in `tabmill.env`
       (known CWS_* keys, atomic write, masked, probes: token exchange, SA key parse, publisher

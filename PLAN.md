@@ -33,6 +33,26 @@ roof pitch) → WashCalc quote, PDF export.
 
 CLI `landing` (via `lamill`); `packages/analytics` opt-in; finalize `tabmill-landing-page`.
 
-## v1.L — local-schema-generator, jwt-inspector
+## v1.L — Lifecycle CLI (D-034)
+
+Operator (2026-10-08): ~20 commands, hard to know which to use. One path per extension:
+start → publish → track health over its store life.
+
+| Command | Absorbs |
+|---|---|
+| `new <slug>` | `create` (first run writes the starter recipe), `new` (later runs regenerate) |
+| `try <slug> [--dev]` | `build`, `dev`, `try` |
+| `check <slug>` | `test`, `lint` |
+| `ship <slug> [--publish]` | `assets`, `listing`, `landing`, `zip`, `release`, `hub`; `--publish` = attended upload |
+| `status [slug]` | `list`, `status`, `publish --check`; prints the next command per extension |
+| `setup` | `init`, `skills sync`, `preflight`, `settings apikeys` |
+
+Open at v1.L start: old commands removed vs hidden under an "advanced" group; skills and docs
+rewritten to the six verbs.
+
+Done = an extension goes recipe → store → health check using only the six commands; skills,
+README, and `docs/creating-an-extension.md` reference only them.
+
+## v1.M — local-schema-generator, jwt-inspector
 
 Recipes; jwt-inspector never takes an early slot.

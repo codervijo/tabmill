@@ -252,6 +252,13 @@ permissions/privacy, store link with UTM or "coming soon", hub link, rules) to
 `lamill settings gsc submit-sitemap --site <site> --force` (soft-fail; no IndexNow, D-016).
 URL = `https://<portfolio_site>` + recipe `landing_path` (default `/` + first keyword, slugified).
 
+## D-034 — Lifecycle CLI slotted as v1.L (Accepted, 2026-10-10)
+
+Operator: too many commands, unclear which to use. Six lifecycle verbs — `new`, `try`, `check`,
+`ship`, `status`, `setup` — absorb the existing ~20 (mapping in `PLAN.md` § v1.L). Slotted
+after v1.K; local-schema-generator + jwt-inspector move v1.L → v1.M. Remove-vs-hide for old
+commands decided at v1.L start.
+
 ## D-009 — Store API: V2 only, service-account auth (Proposed, 2026-10-03)
 
 V1 dies 2026-10-15; V2 can't create items, so first uploads are a HUMAN step by design.

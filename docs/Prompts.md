@@ -58,3 +58,9 @@ The dated H2 is what `lamill project status` parses. Append-only.
 > "few issues i notice: no command to list all extensions, or create a new one" → "add list and
 > create commands to the PRD" → "no, dont rename. pick best defaults for the user"
 > → D-021: new v1.D (list + create) before extension #2; later phases v1.E–v1.H; `new` kept.
+
+## 2026-10-10 — v1.L slotted: lifecycle CLI
+
+> "too many options, hard to know which to use" → proposed six verbs (new/try/check/ship/status/setup)
+> → "yes, slot it after v1.K"
+> → D-034: new v1.L lifecycle CLI; extensions #4–#5 move to v1.M.
