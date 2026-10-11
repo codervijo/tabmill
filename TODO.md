@@ -72,8 +72,17 @@ Plan (all code in `recipes/save-page-pdf-md/`; workspace only via `tabmill new/b
        `landing_page_url` in the recipe → `lamill settings gsc submit-sitemap` (soft-fail).
 3. [x] Rewrite `tabmill-landing-page` skill around the brief; tests; docs.
 4. [ ] Analytics package (opt-in) — plan separately before code.
-5. [ ] HUMAN: write the save-page-pdf-md tool page from its brief (session in sites/markpdf.dev),
-       deploy, then `tabmill landing save-page-pdf-md --check` → `tabmill hub`.
+5. [ ] save-page-pdf-md tool page (operator 2026-10-11: "save webpage as pdf" at
+       `/save-webpage-as-pdf`, not "markdown to pdf" — that's markpdf.dev's home query; D-035):
+   a. [x] Recipe `target_keywords` reordered (primary first → default `landing_path`).
+   b. [x] Bug: brief repeats summary + includes the listing's `‹FILL›` how-to → brief takes
+          single_purpose + summary only; how-to comes from the built UI.
+   c. [x] Bug: hub exports pre-store entries as `draft` → lamill.io 404s `/privacy`, but CWS
+          needs it live before submit. New status `unlisted` (pages live, hidden from the hub
+          index + sitemap) for any entry not yet PUBLISHED (D-035). lamill.io zod + routes too.
+   d. [x] Write the page in sites/markpdf.dev (write-lamill-seo-page skill), uncommitted.
+   e. [ ] HUMAN: review + commit/push markpdf.dev and lamill.io → `tabmill landing
+          save-page-pdf-md --check` → `tabmill hub` → commit/push lamill.io.
 
 ## v1.I — Slots, status, release, hub, listing URLs ✅ (2026-10-03)
 

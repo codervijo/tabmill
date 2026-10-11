@@ -259,6 +259,17 @@ Operator: too many commands, unclear which to use. Six lifecycle verbs — `new`
 after v1.K; local-schema-generator + jwt-inspector move v1.L → v1.M. Remove-vs-hide for old
 commands decided at v1.L start.
 
+## D-035 — #1 tool page targets "save webpage as pdf"; hub exports `unlisted` (Accepted, 2026-10-11)
+
+Operator picked both. (1) save-page-pdf-md's tool page is `markpdf.dev/save-webpage-as-pdf/`:
+"markdown to pdf" is markpdf.dev's own home query and the opposite direction of what the
+extension does. `target_keywords` reordered (primary first); `landing_path` set with the
+trailing slash markpdf.dev canonicalizes to. (2) `hub` used to export pre-store entries as
+`draft`, which lamill.io 404s — but the CWS privacy URL must be live before review. New status
+`unlisted` (lamill.io zod + routes: pages served with noindex, hidden from `/extensions` and
+the sitemap); `hub` exports every entry not yet PUBLISHED as `unlisted`. lamill.io changed in
+the same session (uncommitted there); `hub` must not run against a lamill.io without it.
+
 ## D-009 — Store API: V2 only, service-account auth (Proposed, 2026-10-03)
 
 V1 dies 2026-10-15; V2 can't create items, so first uploads are a HUMAN step by design.

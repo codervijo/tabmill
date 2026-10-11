@@ -33,7 +33,7 @@ def test_not_in_store_yet_exports_null_store_url(setup: Config) -> None:
     _set_landing(setup, "https://markpdf.dev/webpage-to-pdf")
     (entry,) = hub.build(setup.tool_dir, setup.workspace).entries
     hub.HubEntry.model_validate(entry)
-    assert entry["store_url"] is None and entry["status"] == "draft"
+    assert entry["store_url"] is None and entry["status"] == "unlisted"
 
 
 def test_entry_matches_contract_and_status(setup: Config) -> None:

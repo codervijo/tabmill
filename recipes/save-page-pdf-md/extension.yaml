@@ -20,8 +20,9 @@ dev_dependencies:
   "@types/turndown": "^5.0.6"
 remote_code: false
 portfolio_site: markpdf.dev
+landing_path: /save-webpage-as-pdf/  # trailing slash = markpdf.dev canonical form (D-035)
 landing_page_url: ""
-target_keywords: [markdown to pdf, save webpage as pdf, webpage to pdf, html to markdown]
+target_keywords: [save webpage as pdf, webpage to pdf, html to markdown, markdown to pdf]  # first = landing-page query (D-035)
 cta_text: Make branded PDFs from Markdown on MarkPDF
 cta_url: https://markpdf.dev
 utm_campaign: save-page-pdf-md

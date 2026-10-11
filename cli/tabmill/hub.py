@@ -45,7 +45,8 @@ class Change(BaseModel):
 
 
 class HubEntry(BaseModel):
-    """Mirror of lamill.io `extensionSchema` (zod), re-checked 2026-10-03 (store_url nullish)."""
+    """Mirror of lamill.io `extensionSchema` (zod), re-checked 2026-10-03 (store_url nullish);
+    `unlisted` added 2026-10-11 (D-035) — lamill.io must accept it before `hub` runs."""
 
     model_config = ConfigDict(extra="forbid")
     slug: str = Field(pattern=r"^[a-z0-9-]+$")
@@ -57,7 +58,9 @@ class HubEntry(BaseModel):
     data_collected: list[str] = []
     analytics: bool = False
     changelog: list[Change] = []
-    status: Literal["draft", "published"] = "draft"
+    # unlisted (D-035): page + privacy live, hidden from the hub index — CWS needs the privacy
+    # URL live before review, so every exported entry not yet PUBLISHED is unlisted.
+    status: Literal["draft", "unlisted", "published"] = "draft"
 
     @field_validator("slug")
     @classmethod
@@ -104,7 +107,7 @@ def build(tool_dir: Path, workspace: Path) -> Export:
             "data_collected": list(ext.get("data_collected") or []),
             "analytics": bool(ext.get("analytics")),
             "changelog": list(ext.get("changelog") or []),
-            "status": "published" if row.get("published_state") == "PUBLISHED" else "draft",
+            "status": "published" if row.get("published_state") == "PUBLISHED" else "unlisted",
         }
         try:
             HubEntry.model_validate(entry)

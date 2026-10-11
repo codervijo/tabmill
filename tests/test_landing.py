@@ -22,8 +22,8 @@ def _ext(tool: Path) -> dict[str, object]:
 
 
 def test_url_defaults_to_first_keyword(tool: Path) -> None:
-    ext = _ext(tool)
-    assert landing.landing_url(ext) == "https://markpdf.dev/markdown-to-pdf"
+    ext = {**_ext(tool), "landing_path": None}
+    assert landing.landing_url(ext) == "https://markpdf.dev/save-webpage-as-pdf"
     assert (
         landing.landing_url({**ext, "landing_path": "tools/save"})
         == "https://markpdf.dev/tools/save"
@@ -32,7 +32,7 @@ def test_url_defaults_to_first_keyword(tool: Path) -> None:
 
 def test_brief_without_store_says_coming_soon(tool: Path) -> None:
     text = landing.brief(_ext(tool), None, None)
-    assert "Primary query: **markdown to pdf**" in text
+    assert "Primary query: **save webpage as pdf**" in text
     assert "Coming soon" in text and "utm_" not in text
     assert "https://lamill.io/extensions/save-page-pdf-md/privacy" in text
     assert "Invent numbers" in text
@@ -44,6 +44,14 @@ def test_brief_with_store_has_utm_link(tool: Path) -> None:
         "chromewebstore.google.com/detail/abc123?utm_source=markpdf.dev&utm_medium=landing" in text
     )
     assert "It saves pages." in text
+
+
+def test_brief_drops_repeated_and_unfilled_listing_copy(tool: Path) -> None:
+    ext = _ext(tool)
+    draft = f"## Detailed description\n{ext['summary']}\n\n‹FILL› — how to use it\n\nReal copy.\n"
+    text = landing.brief(ext, None, draft)
+    assert text.count(ext["summary"]) == 1
+    assert "‹FILL›" not in text and "Real copy." in text
 
 
 def test_set_landing_url_edits_only_that_line(tool: Path) -> None:

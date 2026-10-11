@@ -76,8 +76,9 @@ Two repos, related by a computed relative layout (ADR-0007):
 - **Release + hub** (v1.I): `release` chains make targets + listing + `lint --release` + zip,
   warns at the slot cap (`registry.slots` — used = store PUBLISHED, limit default 2), appends the
   HUMAN publish line, then `hub`. `hub.py` mirrors lamill.io's zod `extensionSchema` as pydantic
-  `HubEntry`; entries need a store_url (from `store_id`) and a real tool page
-  (`landing_page_url`), else skipped; zero entries → file untouched; writes only
+  `HubEntry`; entries need a real tool page (`landing_page_url`), else skipped; `store_url`
+  null until a `store_id` exists (D-032); status `published` once the store says so, else
+  `unlisted` — pages live + noindex, hidden from the hub index (D-035); zero entries → file untouched; writes only
   `<hub_repo>/src/content/extensions.json`, never commits. Lint `hub-urls`: listing has
   privacy + support URLs; `--release` probes both for HTTP 200.
 - **maps-overlay template** (v1.J, D-031): background `action.onClicked` → inject
