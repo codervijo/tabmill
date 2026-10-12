@@ -13,7 +13,7 @@ blocker to `NOTES.md`, mark it BLOCKED, move on.
 - [x] CLI language → Python + uv (ADR-0002); Node only in docker builder (ADR-0003)
 - [x] WXT (ADR-0004), local PDF (D-013), Makefile.local overrides (ADR-0005)
 - [x] Linking (ADR-0006), skip IndexNow (D-016), tabmill private, placeholder-CTA lint (D-015)
-- [ ] HUMAN: set real Rankmill CTA URL + `portfolio_site` for local-seo-checker (placeholder `https://rankmill.example/local-seo-audit`; release lint blocks until replaced)
+- [x] HUMAN: CTA for local-seo-checker → `https://lamill.io/extensions`, `portfolio_site: lamill.io` (Rankmill is internal, 2026-10-12)
 - [ ] HUMAN: `git init` TOOL_DIR (+ GitHub repo if wanted)
 
 ## v1.B — Tool + generator ✅ (2026-10-03; details in docs/shipping-history.md)

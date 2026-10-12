@@ -18,11 +18,11 @@ optional_permissions: []
 dependencies: {}        # runtime npm deps — each needs a DECISIONS.md row first
 dev_dependencies: {}
 remote_code: false
-portfolio_site: ‹FILL›  # Rankmill site doesn't exist yet (TODO.md HUMAN line)
+portfolio_site: lamill.io  # Rankmill is internal, not a product (2026-10-12)
 landing_page_url: ""
 target_keywords: [local seo checker, local seo audit tool, nap consistency checker]
-cta_text: Get a full local SEO audit on Rankmill
-cta_url: https://rankmill.example/local-seo-audit  # placeholder (D-015) — blocks release
+cta_text: More free browser tools from Lamill
+cta_url: https://lamill.io/extensions
 utm_campaign: local-seo-checker
 store_category: Tools  # Productivity › Tools — chromewebstore.google.com/category/extensions/productivity/tools (verified 2026-10-11); confirm in the dashboard at "Add new item"
 analytics: false

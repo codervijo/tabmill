@@ -94,8 +94,8 @@ See `PLAN.md` (per-phase scope + done criteria) and `NOTES.md` (v1.A spike findi
 2. ~~Where Node runs~~ — resolved 2026-10-03: builder docker only, never host (ADR-0003).
 3. ~~Framework + linking~~ — resolved 2026-10-03: WXT (ADR-0004); cross-repo pnpm workspace (ADR-0006, layout superseded by ADR-0007).
 4. ~~Branded PDF via MarkPDF~~ — resolved 2026-10-03: generated locally (D-013).
-5. **Rankmill CTA target** (2026-10-03): placeholder `https://rankmill.example/local-seo-audit`
-   until the operator supplies the real URL; release lint blocks while it remains (D-015).
+5. ~~Rankmill CTA target~~ — resolved 2026-10-12: Rankmill is an internal tool, not a product;
+   local-seo-checker's CTA points to `https://lamill.io/extensions` (`portfolio_site: lamill.io`).
 6. ~~IndexNow for existing sites~~ — resolved 2026-10-03: skipped (D-016).
 7. ~~Repo visibility~~ — resolved 2026-10-03: tabmill is private; workspace CI uses `TABMILL_PAT` (ADR-0007).
 8. **Publisher cap** (2026-10-03): new publishers get two published extensions; request more
