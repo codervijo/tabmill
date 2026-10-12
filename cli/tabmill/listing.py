@@ -171,3 +171,32 @@ def write_listing(
         return path, False
     path.write_text(listing_markdown(ext))
     return path, True
+
+
+RELEASES_DIR = "releases"
+RELEASES_IGNORE = "/releases/"
+
+
+def collect_release(workspace: Path, slug: str, version: str) -> Path:
+    """Copy what the dashboard upload needs into `releases/<slug>-<version>/` (one folder).
+
+    The zip, store images, and listing draft otherwise sit under
+    `extensions/<slug>/.output/`. Re-running replaces the folder's files. `releases/` is
+    added to the workspace .gitignore (the seed .gitignore is written only once).
+    """
+    import shutil
+
+    out = workspace / RELEASES_DIR / f"{slug}-{version}"
+    out.mkdir(parents=True, exist_ok=True)
+    built = workspace / "extensions" / slug / ".output"
+    for f in [*built.glob(f"{slug}-{version}-*.zip"), *store_dir(workspace, slug).glob("*.png")]:
+        shutil.copy2(f, out / f.name)
+    listing_md = store_dir(workspace, slug) / LISTING_FILE
+    if listing_md.exists():
+        shutil.copy2(listing_md, out / LISTING_FILE)
+    ignore = workspace / ".gitignore"
+    lines = ignore.read_text().splitlines() if ignore.exists() else []
+    if RELEASES_IGNORE not in lines:
+        with ignore.open("a") as fh:
+            fh.write(f"{RELEASES_IGNORE}\n")
+    return out

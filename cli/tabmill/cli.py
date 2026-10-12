@@ -657,6 +657,10 @@ def release(slug: str = typer.Argument(..., help="Extension slug.")) -> None:
         output.fail("release blocked — fix the errors above, then re-run `tabmill release`")
         raise typer.Exit(1)
     _make(cfg, "zip", slug)
+    out = listing.collect_release(cfg.workspace, slug, str(ext["version"]))
+    output.ok(f"upload folder: {out}")
+    for item in sorted(out.iterdir()):
+        output.console.print(f"  {item.name}")
     slots = registry.save_slots(cfg.workspace)
     row = registry.read(cfg.workspace)["extensions"][slug]
     if row.get("published_state") != "PUBLISHED" and slots["used"] >= slots["limit"]:

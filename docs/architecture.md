@@ -74,6 +74,8 @@ Two repos, related by a computed relative layout (ADR-0007):
   (env vars win). `preflight.py` — checks workspace / builder / docker / container / x11 /
   credentials; `NEEDS` maps commands → checks, run by `_preflight()` before any work.
 - **Release + hub** (v1.I): `release` chains make targets + listing + `lint --release` + zip,
+  copies the zip, store PNGs and listing.md into `<workspace>/releases/<slug>-<version>/` (the
+  upload folder; `/releases/` gitignored — `listing.collect_release`),
   warns at the slot cap (`registry.slots` — used = store PUBLISHED, limit default 2), appends the
   HUMAN publish line, then `hub`. `hub.py` mirrors lamill.io's zod `extensionSchema` as pydantic
   `HubEntry`; entries need a real tool page (`landing_page_url`), else skipped; `store_url`

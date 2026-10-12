@@ -9,3 +9,4 @@
 /extensions/*/test-results/
 .env
 .env.*
+/releases/

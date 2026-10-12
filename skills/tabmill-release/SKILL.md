@@ -18,7 +18,8 @@ user runs it.
 2. **Version bump** in `recipes/<slug>/extension.yaml` (must exceed `registry.json`); add a
    `changelog:` entry `{version, date: YYYY-MM-DD, notes}` — it shows on the lamill.io hub.
 3. **`uv run tabmill release <slug>`** — regenerate → typecheck → unit → smoke → assets →
-   listing draft (kept if it exists) → release lint → zip → slot-cap warning → adds
+   listing draft (kept if it exists) → release lint → zip → upload folder
+   `releases/<slug>-<version>/` (zip + images + listing.md) → slot-cap warning → adds
    `HUMAN: publish <slug> <version>` to the workspace TODO.md → `tabmill hub`.
 4. On `✗`: fix and re-run. Typical blockers: `‹FILL›` in the recipe or `listing.md` (finish
    the description with `tabmill-store-listing`), placeholder CTA (D-015), the shared privacy page

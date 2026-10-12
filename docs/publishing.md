@@ -29,6 +29,9 @@ it never runs unattended or in CI.
 1. `uv run tabmill list`: the "needs filling" column must show `—` for the slug.
 2. `uv run tabmill release <slug>` runs test → assets → listing draft → release lint →
    zip → slot check → hub export. It never publishes. Fix any `✗` and re-run.
+   Everything the dashboard needs lands in one folder:
+   `$TABMILL_WORKSPACE/releases/<slug>-<version>/` (zip, icon, screenshots, promo tile,
+   listing.md).
 3. Refine the listing draft with the `tabmill-store-listing` skill; check
    `.output/store/` images; `uv run tabmill try <slug>` on real pages.
 
@@ -50,10 +53,10 @@ older `Policy version`, or the extension does more than the policy covers (`priv
 
 In https://chrome.google.com/webstore/devconsole (signed in as Lamill):
 
-1. **Add new item** → upload the release zip that `release` printed.
+1. **Add new item** → upload the zip from `releases/<slug>-<version>/`.
 2. **Store listing:** paste from the listing draft. Category from the recipe's
    `store_category` (Productivity › Tools). Upload icon, screenshots, promo tile from
-   `.output/store/`.
+   the same folder.
 3. **Privacy practices:** single-purpose statement, a justification for each permission,
    data-use answers (from the listing draft), privacy URL from step 2.
 4. **Distribution:** visibility Public → **Submit for review**.
