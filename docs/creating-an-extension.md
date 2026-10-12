@@ -45,4 +45,4 @@ All Node work runs in the builder container; nothing Node runs on the host.
 
 `uv run tabmill assets <slug>` and `uv run tabmill listing <slug>`, check them, then
 `uv run tabmill zip <slug> --release`. Follow the `tabmill-release` skill. First publish of a new item is manual in
-the Developer Dashboard (the API can't create items).
+the Developer Dashboard (the API can't create items). Full workflow: [publishing.md](publishing.md).
