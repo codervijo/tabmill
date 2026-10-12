@@ -79,8 +79,15 @@ Two repos, related by a computed relative layout (ADR-0007):
   `HubEntry`; entries need a real tool page (`landing_page_url`), else skipped; `store_url`
   null until a `store_id` exists (D-032); status `published` once the store says so, else
   `unlisted` — pages live + noindex, hidden from the hub index (D-035); zero entries → file untouched; writes only
-  `<hub_repo>/src/content/extensions.json`, never commits. Lint `hub-urls`: listing has
-  privacy + support URLs; `--release` probes both for HTTP 200.
+  `<hub_repo>/src/content/extensions.json` and `privacy.json`, never commits. Lint `hub-urls`:
+  listing has the privacy + support URLs; `--release` probes both for HTTP 200 and the privacy
+  page for "Policy version N".
+- **Shared privacy policy** (v1.G, D-036): `privacy-policy.yaml` (version, updated, permission →
+  reason) is the one policy for every extension; `privacy.py` loads it (pydantic `Policy`, mirror
+  of lamill.io `privacySchema`) and `hub` always writes it to `<hub_repo>/src/content/privacy.json`
+  first — even with zero entries — so `lamill.io/extensions/privacy` is live before any tool page.
+  Lint `privacy-coverage` (warn dev / error release): recipe permissions ⊆ policy, no host
+  permissions, analytics, remote code, or `data_collected`.
 - **maps-overlay template** (v1.J, D-031): background `action.onClicked` → inject
   `content-scripts/overlay.js` (shadow-root panel + `renderShell`, toggles); `tabmill:open-page`
   message → `tabs.create` for extension pages; `overlay-preview.html` renders the panel for

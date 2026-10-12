@@ -21,8 +21,10 @@ user runs it.
    listing draft (kept if it exists) → release lint → zip → slot-cap warning → adds
    `HUMAN: publish <slug> <version>` to the workspace TODO.md → `tabmill hub`.
 4. On `✗`: fix and re-run. Typical blockers: `‹FILL›` in the recipe or `listing.md` (finish
-   the description with `tabmill-store-listing`), placeholder CTA (D-015), privacy/support pages
-   not live on lamill.io (D-029), store image sizes, keyword repetition, bundle rules
+   the description with `tabmill-store-listing`), placeholder CTA (D-015), the shared privacy page
+   (`lamill.io/extensions/privacy`) or support page not live, or showing an older policy version
+   (D-029, D-036), `privacy-coverage` (the recipe does more than `privacy-policy.yaml` covers —
+   update the policy, bump its version, `hub`, deploy lamill.io), store image sizes, keyword repetition, bundle rules
    (`chrome-store-policy`).
 5. **Manual check.** `uv run tabmill try <slug>` on real pages; look at `.output/store/`.
 6. **Hub.** If `hub` wrote lamill.io's `src/content/extensions.json`, the human reviews,

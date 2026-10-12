@@ -21,6 +21,10 @@ time-to-first-build logged.
 - CLI: `assets` (Playwright icons 16/32/48/128, screenshots 1280×800, promo tile 440×280),
   `listing`, `publish` (CWS API **v2**, updates `registry.json`). CI release zips on tag.
 - Finalize `tabmill-release` and `tabmill-store-listing`.
+- Shared privacy policy (D-036): `privacy-policy.yaml` → `hub` writes lamill.io
+  `src/content/privacy.json` → one page `lamill.io/extensions/privacy`. Release lint
+  `privacy-coverage` fails when a recipe does more than the policy covers; `hub-urls` checks
+  the live page shows the current policy version.
 
 Done = #1 fully prepared via CLI; operator does the first real publish (dashboard "Add new item").
 

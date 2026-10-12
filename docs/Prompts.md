@@ -64,3 +64,11 @@ The dated H2 is what `lamill project status` parses. Append-only.
 > "too many options, hard to know which to use" → proposed six verbs (new/try/check/ship/status/setup)
 > → "yes, slot it after v1.K"
 > → D-034: new v1.L lifecycle CLI; extensions #4–#5 move to v1.M.
+
+## 2026-10-12 — v1.G: one shared privacy page + `privacy-coverage` lint
+
+> "can i use one shared privacy page in lamill.io?" → options: shared page vs. per-extension pages
+> without the tool-page dependency → "A but add a check in release or somewhere if the new
+> extensions privacy meets our privacy page" → "put it in v1.G"
+> → D-036: `privacy-policy.yaml` → `hub` → lamill.io `/extensions/privacy`; release lint
+> `privacy-coverage` + live "Policy version N" check.

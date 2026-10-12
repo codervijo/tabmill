@@ -25,6 +25,7 @@ Re-verify on each tier kickoff; policies change.
 | keyword-lists | warn | Comma lists of many brands/sites/regions (threshold = Tabmill heuristic) | pp/listing-requirements |
 | no-false-badges | error | "#1", "Editor's Choice", "Number One", "official" in listing | pp/impersonation-and-intellectual-property |
 | brand-in-name | warn | Third-party trademark (denylist) in name | pp/impersonation-and-intellectual-property |
+| privacy-coverage | error (release) | Recipe stays inside the shared policy (`privacy-policy.yaml`, D-036): permissions listed there, no host permissions / analytics / remote code / collected data | Tabmill D-036 |
 | privacy-policy-url | error | If analytics or any data category: `privacy_policy_url` set, https, 200 | pp/privacy |
 | data-categories-declared | error | If analytics on: YAML data categories non-empty and match bundle | /docs/webstore/cws-dashboard-privacy |
 | limited-use-certs | error | All three Limited Use certifications true in YAML | pp/limited-use |

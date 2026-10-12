@@ -83,7 +83,7 @@ internal links; follow the site's own `AI_AGENTS.md` / `docs/CLAUDE.md` and stac
 - The page is useful on its own (a real how-to or web tool); the extension is the
   "do it in one click from any page" option.
 - {install}
-- Hub page: {hub.HUB_BASE}/{ext["slug"]} · Privacy: {hub.privacy_url(ext["slug"])}
+- Hub page: {hub.HUB_BASE}/{ext["slug"]} · Privacy: {hub.PRIVACY_URL}
 - Privacy, in plain words: {ext.get("privacy_line") or generate.DEFAULT_PRIVACY}
 - "Built by Lamill".
 

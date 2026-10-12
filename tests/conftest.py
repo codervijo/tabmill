@@ -14,6 +14,7 @@ def tool_dir(tmp_path: Path) -> Path:
     root = tmp_path / "projects" / "droyfun" / "tabmill"
     for name in ("skills", "templates", "ci"):
         shutil.copytree(TOOL_DIR / name, root / name)
+    shutil.copy(TOOL_DIR / "privacy-policy.yaml", root / "privacy-policy.yaml")
     return root
 
 

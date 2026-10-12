@@ -59,7 +59,7 @@ as v1.D (D-021) → v1.A–v1.H; `try` inserted as v1.F (D-023) → v1.A–v1.I;
 | v1.D | ✅ done | CLI `list` (all extensions + state) and `create` (starter recipe) |
 | v1.E | ✅ done | Extension #2 local-seo-checker recipe; shared packages; typed schema; CLI dev/test/zip/lint |
 | v1.F | ✅ done | CLI `try`: interactive Chromium in docker with the extension loaded |
-| v1.G | 🔄 in progress | CLI assets/listing/publish; CI release zips on tag |
+| v1.G | 🔄 in progress | CLI assets/listing/publish; CI release zips on tag; one shared privacy policy + `privacy-coverage` lint (D-036) |
 | v1.H | ✅ done | CLI `settings apikeys` (tabmill.env, probes) + `preflight` |
 | v1.I | ✅ done | Publisher slots; CLI `status`, `release`, `hub` (lamill.io extensions.json); listing-URL lint |
 | v1.J | 🔄 in progress | Extension pressure-wash-quote recipe (+ `maps-overlay` template) |

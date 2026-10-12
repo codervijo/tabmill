@@ -270,6 +270,20 @@ trailing slash markpdf.dev canonicalizes to. (2) `hub` used to export pre-store 
 the sitemap); `hub` exports every entry not yet PUBLISHED as `unlisted`. lamill.io changed in
 the same session (uncommitted there); `hub` must not run against a lamill.io without it.
 
+## D-036 — One shared privacy policy for all extensions (Accepted, 2026-10-12) — supersedes D-029's privacy URL
+
+Operator decision (v1.G). The privacy URL is `https://lamill.io/extensions/privacy` for every
+extension, not `/<slug>/privacy`: one page that is live independent of any tool page, so a
+first release is no longer blocked on the portfolio-site page (hub skipped entries without
+`tool_page_url`, so the per-slug privacy page couldn't go live). Source of truth is
+`tabmill/privacy-policy.yaml`; `hub` exports it to lamill.io `src/content/privacy.json` and the
+page renders from it. Release lint `privacy-coverage` fails when a recipe does more than the
+policy covers (a permission not listed, analytics, remote code, host permissions, collected
+data) — fix by updating the policy (bump `version`), `hub`, deploy lamill.io. `hub-urls` checks
+the live page shows `Policy version <N>`, so an undeployed policy change blocks release.
+Per-extension permission reasons stay on the extension's hub page and listing. Support URL
+unchanged (D-029).
+
 ## D-009 — Store API: V2 only, service-account auth (Proposed, 2026-10-03)
 
 V1 dies 2026-10-15; V2 can't create items, so first uploads are a HUMAN step by design.

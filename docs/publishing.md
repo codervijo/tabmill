@@ -34,13 +34,17 @@ it never runs unattended or in CI.
 
 ## 2. Make the lamill.io pages live (before the dashboard)
 
-The CWS form needs a working privacy URL:
-`https://lamill.io/extensions/<slug>/privacy`.
+Every extension uses one privacy policy: `https://lamill.io/extensions/privacy` (D-036). Its
+source is `tabmill/privacy-policy.yaml`; release lint blocks if the page isn't live, shows an
+older `Policy version`, or the extension does more than the policy covers (`privacy-coverage`).
 
-1. `tabmill hub` (run by `release`) writes `lamill.io/src/content/extensions.json` with
-   status `unlisted`: the pages are live with noindex and hidden from `/extensions` (D-035).
-2. In lamill.io: review, commit, and deploy. Tabmill never commits there.
-3. Check: `curl -sI https://lamill.io/extensions/<slug>/privacy` → 200.
+1. If `privacy-coverage` fails: extend `privacy-policy.yaml` only if the policy should really
+   promise that, bump `version`, set `updated`.
+2. `uv run tabmill hub` → writes `lamill.io/src/content/privacy.json` (always) and
+   `extensions.json` (entries with a tool page, as `unlisted` until published — D-035).
+3. In lamill.io: review, commit, and deploy. Tabmill never commits there.
+4. Check: `curl -s https://lamill.io/extensions/privacy | grep -o 'Policy version [0-9]*'`.
+5. Re-run `uv run tabmill release <slug>`.
 
 ## 3. First publish (manual; the API can't create items)
 
@@ -79,7 +83,7 @@ In https://chrome.google.com/webstore/devconsole (signed in as Lamill):
 
 ## Order gotchas
 
-- lamill.io's code must support the status in `extensions.json` before (or in the same
-  deploy as) the JSON itself; otherwise the entry disappears and the privacy URL 404s.
+- lamill.io's code must support what `extensions.json` / `privacy.json` contain before (or in
+  the same deploy as) the JSON itself; otherwise the entry or the policy page disappears.
 - `landing --check` only after the tool page is live.
 - Don't push anything while a `‹FILL›` or placeholder remains; `release` blocks on them.

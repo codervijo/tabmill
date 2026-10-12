@@ -149,6 +149,19 @@ Plan (all code in `recipes/save-page-pdf-md/`; workspace only via `tabmill new/b
 8. [x] Skills: tabmill-release + tabmill-store-listing finalized; docs.
        Verified against mocks only — real publish needs operator credentials (HUMAN).
 
+10. [x] Shared privacy policy (D-036) — lamill.io side uncommitted there (operator commits):
+    a. `privacy-policy.yaml` (version, updated, covered permissions + plain reasons; nothing
+       collected, no analytics, no remote code, no host permissions) + `privacy.py` loader.
+    b. `privacy-coverage` lint: recipe permissions ⊆ policy, `analytics`/`remote_code` false,
+       no host permissions, `data_collected` empty → ✗ in release, ↷ in dev.
+    c. `hub` also writes lamill.io `src/content/privacy.json`, even with no entries exported
+       (breaks the tool-page → privacy-URL chain).
+    d. One URL `https://lamill.io/extensions/privacy` in listing, landing brief, lint;
+       `hub-urls` checks it's live AND shows `Policy version N`.
+    e. lamill.io: `/extensions/privacy` route from privacy.json; `$slug/privacy` → 301 to it;
+       `privacy` reserved slug; README contract. (uncommitted there — operator commits)
+    f. Tests; docs/publishing.md, architecture.md.
+
 9. [ ] HUMAN: CWS credentials in `tabmill/.env` (see `.env.example`) + first dashboard upload →
        then a real `tabmill publish --check` to verify the client against the live API.
 

@@ -21,13 +21,8 @@ HUB_FILE = "src/content/extensions.json"
 DEFAULT_HUB_REPO = "~/work/projects/sites/lamill.io"
 HUB_BASE = "https://lamill.io/extensions"
 STORE_DETAIL = "https://chromewebstore.google.com/detail"
-RESERVED_SLUGS = {"support"}
-
-
-def privacy_url(slug: str) -> str:
-    return f"{HUB_BASE}/{slug}/privacy"
-
-
+RESERVED_SLUGS = {"support", "privacy"}
+PRIVACY_URL = f"{HUB_BASE}/privacy"  # one shared policy for every extension (D-036)
 SUPPORT_URL = f"{HUB_BASE}/support"
 
 

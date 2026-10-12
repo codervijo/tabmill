@@ -150,7 +150,7 @@ Built by Lamill — {ext["portfolio_site"]}. {ext["cta_text"]}: {ext["cta_url"]}
 - **Data collected:** {data}
 - **Limited Use certifications:** all three (no selling/transfer, no unrelated use,
   no creditworthiness)
-- **Privacy policy URL:** {hub.privacy_url(ext["slug"])}
+- **Privacy policy URL:** {hub.PRIVACY_URL}
 - **Support URL:** {hub.SUPPORT_URL}
 
 | Permission | Justification |

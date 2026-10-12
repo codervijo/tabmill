@@ -1,0 +1,14 @@
+# Lamill's one privacy policy for every extension (D-036).
+# Source of truth for https://lamill.io/extensions/privacy — `tabmill hub` exports it to
+# lamill.io src/content/privacy.json and the page renders from it.
+# Release lint `privacy-coverage` fails when an extension does more than this covers.
+# Changing what it promises: edit, bump `version`, set `updated`, `tabmill hub`, deploy lamill.io.
+version: 1
+updated: 2026-10-12
+# Permissions any Lamill extension may request, each with a plain-language reason that holds
+# for every extension using it. Per-extension reasons live on the extension's own hub page.
+permissions:
+  activeTab: Read the page you're on, only after you click the extension — never other tabs, never in the background.
+  scripting: Run the extension's own code in that page, under the same activeTab limit.
+  storage: Keep settings, or pass data between the extension's own pages, on your device only.
+  sidePanel: Show the extension in Chrome's side panel.

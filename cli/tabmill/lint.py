@@ -13,7 +13,7 @@ from typing import Any, Literal
 
 import httpx
 
-from . import catalog, extension, generate, hub, listing
+from . import catalog, extension, generate, hub, listing, privacy
 
 Severity = Literal["error", "warn"]
 BROAD_HOSTS = {"<all_urls>", "*://*/*", "https://*/*", "http://*/*"}
@@ -75,6 +75,7 @@ RULES = {
         Rule("store-images", "warn", "error"),
         Rule("keyword-repeat", "warn", "error"),
         Rule("hub-urls", "warn", "error"),
+        Rule("privacy-coverage", "warn", "error"),
     )
 }
 
@@ -95,11 +96,13 @@ def similarity(a: str, b: str) -> float:
     return len(wa & wb) / len(wa | wb) if wa | wb else 0.0
 
 
-def _http_status(url: str) -> int | None:
+def _fetch(url: str) -> tuple[int | None, str]:
+    """(HTTP status, body); status None when unreachable."""
     try:
-        return httpx.get(url, timeout=10, follow_redirects=True).status_code
+        r = httpx.get(url, timeout=10, follow_redirects=True)
     except httpx.HTTPError:
-        return None
+        return None, ""
+    return r.status_code, r.text
 
 
 def lint(tool_dir: Path, workspace: Path | None, slug: str, *, release: bool) -> list[Finding]:
@@ -122,6 +125,18 @@ def lint(tool_dir: Path, workspace: Path | None, slug: str, *, release: bool) ->
         for p in ext.get(key) or []:
             if isinstance(p, dict) and p.get("name") in BROAD_HOSTS:
                 add("perm-broad-host", f"`{p['name']}` in {key} — prefer activeTab (longer review)")
+    policy: privacy.Policy | None = None
+    try:
+        policy = privacy.load(tool_dir)
+    except privacy.PolicyError as e:
+        add("privacy-coverage", str(e), "error")
+    if policy is not None:
+        for gap in privacy.coverage(ext, policy):
+            add(
+                "privacy-coverage",
+                f"{gap} — the shared policy doesn't cover it: update {privacy.POLICY_FILE} "
+                "(bump version), `tabmill hub`, deploy lamill.io (D-036)",
+            )
     for field in catalog.fill_fields(ext):
         add("fill-placeholder", f"`{field}` is still ‹FILL›")
     for field in extension.placeholder_fields(ext):
@@ -151,7 +166,7 @@ def lint(tool_dir: Path, workspace: Path | None, slug: str, *, release: bool) ->
         for problem in problems or []:
             add("store-images", problem)
         draft = listing.store_dir(workspace, slug) / listing.LISTING_FILE
-        urls = (hub.privacy_url(slug), hub.SUPPORT_URL)
+        urls = (hub.PRIVACY_URL, hub.SUPPORT_URL)
         if not draft.exists():
             add("hub-urls", "no listing.md — run `tabmill listing` (privacy + support URLs)")
         else:
@@ -164,9 +179,15 @@ def lint(tool_dir: Path, workspace: Path | None, slug: str, *, release: bool) ->
                     add("hub-urls", f"listing.md lacks {url}")
             if release:
                 for url in urls:
-                    code = _http_status(url)
+                    code, body = _fetch(url)
                     if code != 200:
                         add("hub-urls", f"{url} not live (HTTP {code or 'unreachable'})")
+                    elif url == hub.PRIVACY_URL and policy and policy.marker not in body:
+                        add(
+                            "hub-urls",
+                            f"{url} doesn't show “{policy.marker}” — run `tabmill hub`, "
+                            "deploy lamill.io",
+                        )
         if draft.exists():
             for word, n in listing.keyword_repeats(draft.read_text()).items():
                 add("keyword-repeat", f"`{word}` appears {n}× in listing.md (store limit: 5)")

@@ -25,6 +25,7 @@ from . import (
     listing,
     output,
     preflight,
+    privacy,
     registry,
     sync,
     workspace,
@@ -592,28 +593,46 @@ def _hub(cfg: config.Config) -> None:
     if not (cfg.hub_repo / ".git").exists():
         output.fail(f"hub repo {cfg.hub_repo} not found — set `hub_repo` in tabmill.config.json")
         raise typer.Exit(1)
+    # The shared privacy policy goes first and always: its page must be live before any
+    # extension's first store review, tool page or not (D-036).
+    try:
+        policy = privacy.load(cfg.tool_dir)
+    except privacy.PolicyError as e:
+        output.fail(str(e))
+        raise typer.Exit(1) from e
+    ppath, pchanged = privacy.write(cfg.hub_repo, policy)
+    note = "" if pchanged else " (unchanged)"
+    output.ok(
+        f"hub: privacy policy v{policy.version} → {cfg.hub_repo.name}/"
+        f"{ppath.relative_to(cfg.hub_repo)}{note}"
+    )
     export = hub.build(cfg.tool_dir, cfg.workspace)
     for slug, why in export.skipped.items():
         output.skip(f"hub: {slug} skipped — {why}")
     if not export.entries:
-        output.skip(f"hub: nothing to export — {cfg.hub_repo.name}/{hub.HUB_FILE} left untouched")
-        return
+        output.skip(f"hub: no entries — {cfg.hub_repo.name}/{hub.HUB_FILE} left untouched")
+        changed = False
+    else:
+        changed = _hub_entries(cfg, export)
+    if changed or pchanged:
+        output.console.print(
+            f"  HUMAN: review + commit {cfg.hub_repo.name}, push to main (Vercel deploys); "
+            "tabmill never commits there"
+        )
+
+
+def _hub_entries(cfg: config.Config, export: hub.Export) -> bool:
     path, changed = hub.write(cfg.hub_repo, export)
     rel = path.relative_to(cfg.hub_repo)
     n = len(export.entries)
     note = "" if changed else " (unchanged)"
     output.ok(f"hub: {n} entr{'y' if n == 1 else 'ies'} → {cfg.hub_repo.name}/{rel}{note}")
-    if changed:
+    published = [e["slug"] for e in export.entries if e["status"] == "published"]
+    if changed and published:
         output.console.print(
-            f"  HUMAN: review + commit {cfg.hub_repo.name}, push to main (Vercel deploys); "
-            "tabmill never commits there"
+            f"  HUMAN: add /extensions/<slug> to public/sitemap.xml for: {', '.join(published)}"
         )
-        published = [e["slug"] for e in export.entries if e["status"] == "published"]
-        if published:
-            output.console.print(
-                "  HUMAN: add /extensions/<slug> and /extensions/<slug>/privacy to "
-                f"public/sitemap.xml for: {', '.join(published)}"
-            )
+    return changed
 
 
 @app.command("hub")

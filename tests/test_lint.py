@@ -13,7 +13,7 @@ SLUG = "save-page-pdf-md"
 
 @pytest.fixture(autouse=True)
 def _offline(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setattr(lint, "_http_status", lambda url: 200)
+    monkeypatch.setattr(lint, "_fetch", lambda url: (200, "Policy version 1"))
 
 
 @pytest.fixture
@@ -137,11 +137,11 @@ def test_hub_urls_present_and_live(setup: Config, monkeypatch: pytest.MonkeyPatc
     _build(setup, {"a.js": "browser.scripting; browser.storage"})
     draft = listing.store_dir(setup.workspace, SLUG) / listing.LISTING_FILE
     draft.parent.mkdir(parents=True, exist_ok=True)
-    draft.write_text(f"{hub.privacy_url(SLUG)}\n")
+    draft.write_text(f"{hub.PRIVACY_URL}\n")
     msgs = [f.message for f in lint.lint(setup.tool_dir, setup.workspace, SLUG, release=False)]
     assert any("lacks https://lamill.io/extensions/support" in m for m in msgs)
-    draft.write_text(f"{hub.privacy_url(SLUG)}\n{hub.SUPPORT_URL}\n")
-    monkeypatch.setattr(lint, "_http_status", lambda url: 404)
+    draft.write_text(f"{hub.PRIVACY_URL}\n{hub.SUPPORT_URL}\n")
+    monkeypatch.setattr(lint, "_fetch", lambda url: (404, ""))
     found = [
         f
         for f in lint.lint(setup.tool_dir, setup.workspace, SLUG, release=True)
@@ -162,7 +162,7 @@ def test_fill_in_listing_blocks_release(setup: Config) -> None:
     _build(setup, {"a.js": "browser.scripting; browser.storage"})
     draft = listing.store_dir(setup.workspace, SLUG) / listing.LISTING_FILE
     draft.parent.mkdir(parents=True, exist_ok=True)
-    draft.write_text(f"‹FILL› steps\n{hub.privacy_url(SLUG)}\n{hub.SUPPORT_URL}\n")
+    draft.write_text(f"‹FILL› steps\n{hub.PRIVACY_URL}\n{hub.SUPPORT_URL}\n")
     msgs = [f.message for f in lint.lint(setup.tool_dir, setup.workspace, SLUG, release=True)]
     assert "listing.md has 1 unfilled ‹FILL›" in msgs
 

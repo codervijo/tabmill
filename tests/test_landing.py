@@ -34,7 +34,7 @@ def test_brief_without_store_says_coming_soon(tool: Path) -> None:
     text = landing.brief(_ext(tool), None, None)
     assert "Primary query: **save webpage as pdf**" in text
     assert "Coming soon" in text and "utm_" not in text
-    assert "https://lamill.io/extensions/save-page-pdf-md/privacy" in text
+    assert "https://lamill.io/extensions/privacy" in text
     assert "Invent numbers" in text
 
 
