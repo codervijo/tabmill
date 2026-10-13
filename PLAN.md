@@ -60,3 +60,9 @@ README, and `docs/creating-an-extension.md` reference only them.
 ## v1.M — local-schema-generator, jwt-inspector
 
 Recipes; jwt-inspector never takes an early slot.
+
+## v2.A — WordPress plugins: planning / decisions lock (D-037)
+
+Not started. Target: the wordpress.org plugin directory. Spikes: plugin directory rules +
+submission flow, PHP build/test in docker, how recipes carry a platform. Open: which plugin is
+first (v2.C). Build phases v2.B–v2.E: `docs/prd.md` § 5.

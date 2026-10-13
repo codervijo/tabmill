@@ -284,6 +284,15 @@ the live page shows `Policy version <N>`, so an undeployed policy change blocks 
 Per-extension permission reasons stay on the extension's hub page and listing. Support URL
 unchanged (D-029).
 
+## D-037 — WordPress plugin support slotted as tier v2 (Accepted, 2026-10-12)
+
+Operator: do WordPress plugins with the same tool. Same funnel in a second channel —
+single-purpose free plugins generated from recipes, "Built by Lamill" + CTA, tracked in the
+same registry / hub / landing flow. New tier v2 after v1 rather than a v1 phase: a second
+platform, and v1.L reshapes the command surface first. Distribution: the wordpress.org plugin
+directory. v2.A = planning / decisions lock; build phases v2.B–v2.E in `docs/prd.md` § 5. First
+plugin not chosen yet.
+
 ## D-009 — Store API: V2 only, service-account auth (Proposed, 2026-10-03)
 
 V1 dies 2026-10-15; V2 can't create items, so first uploads are a HUMAN step by design.

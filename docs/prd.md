@@ -46,6 +46,7 @@ installed skills. End users of the extensions are not Tabmill users.
 Strict two-level versioning: `vN` tier, `vN.X` phase. Kickoff "Phase 0–5" = v1.A–v1.F (D-003);
 reslotted 2026-10-03 for generated extensions (ADR-0008) → v1.A–v1.G; `list`/`create` inserted
 as v1.D (D-021) → v1.A–v1.H; `try` inserted as v1.F (D-023) → v1.A–v1.I; reslotted for D-025–D-029 → v1.A–v1.L; lifecycle CLI inserted as v1.L (D-034) → v1.A–v1.M.
+WordPress plugin support slotted as tier v2 (D-037).
 
 ### v1 — First extension portfolio
 
@@ -70,6 +71,22 @@ as v1.D (D-021) → v1.A–v1.H; `try` inserted as v1.F (D-023) → v1.A–v1.I;
 #### Design notes
 
 See `PLAN.md` (per-phase scope + done criteria) and `NOTES.md` (v1.A spike findings).
+
+### v2 — WordPress plugins
+
+Same funnel in a second channel (D-037): single-purpose free WordPress plugins generated from
+recipes, each with "Built by Lamill" and a CTA to a portfolio site, tracked in the same
+registry / hub / landing flow. Distribution: the wordpress.org plugin directory. §§ 1–3 and 6 are Chrome-only until v2.A rewrites them.
+
+#### Phases
+
+| Phase | Status | Title |
+|---|---|---|
+| v2.A | ⏳ planned | Planning / decisions lock — spikes: wordpress.org plugin rules + submission, PHP build/test in docker, how recipes carry a platform |
+| v2.B | ⏳ planned | Platform field in the recipe schema; first WordPress template; generate + build a plugin zip |
+| v2.C | ⏳ planned | First plugin recipe (plugin not chosen yet); tried in a WordPress container |
+| v2.D | ⏳ planned | WordPress lint rules; release folder with `readme.txt` + assets; manual first submission to wordpress.org |
+| v2.E | ⏳ planned | Registry, `status`, `hub`, `landing`, privacy policy cover plugins |
 
 ## 6. Conformance rules
 

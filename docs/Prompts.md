@@ -78,3 +78,10 @@ The dated H2 is what `lamill project status` parses. Append-only.
 > "commit and deploy the markpdf.dev page" → page live at markpdf.dev/save-webpage-as-pdf/;
 > `landing --check` set `landing_page_url`; `hub` would have linked the store listing while the
 > item was still in review → store_url now exported only when `published_state` is PUBLISHED.
+
+## 2026-10-12 — v2 slotted: WordPress plugins
+
+> "let us plan asupport for doing wp plugins with same tool" → options: new tier v2 / v1.N /
+> before v1.L → "yes, slot it as v2"
+> → D-037: tier v2 (WordPress plugins), v2.A planning row only; build phases not defined yet.
+> "yes wordpress.org, add the phases to the PRD" → v2.B–v2.E added; first plugin not chosen yet.
