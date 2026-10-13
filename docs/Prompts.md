@@ -72,3 +72,9 @@ The dated H2 is what `lamill project status` parses. Append-only.
 > extensions privacy meets our privacy page" → "put it in v1.G"
 > → D-036: `privacy-policy.yaml` → `hub` → lamill.io `/extensions/privacy`; release lint
 > `privacy-coverage` + live "Policy version N" check.
+
+## 2026-10-12 — v1.G: #1 submitted; tool page live; hub store link only once published
+
+> "commit and deploy the markpdf.dev page" → page live at markpdf.dev/save-webpage-as-pdf/;
+> `landing --check` set `landing_page_url`; `hub` would have linked the store listing while the
+> item was still in review → store_url now exported only when `published_state` is PUBLISHED.

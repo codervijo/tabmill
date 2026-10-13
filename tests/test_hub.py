@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import re
 import shutil
 
 import pytest
@@ -14,6 +15,9 @@ SLUG = "save-page-pdf-md"
 @pytest.fixture
 def setup(cfg: Config) -> Config:
     shutil.copytree(TOOL_DIR / "recipes" / SLUG, cfg.tool_dir / "recipes" / SLUG)
+    # Start from "no tool page yet", whatever the real recipe holds.
+    path = cfg.tool_dir / "recipes" / SLUG / "extension.yaml"
+    path.write_text(re.sub(r"(?m)^landing_page_url: .*$", 'landing_page_url: ""', path.read_text()))
     cfg.workspace.mkdir(parents=True)
     return cfg
 
@@ -33,6 +37,13 @@ def test_not_in_store_yet_exports_null_store_url(setup: Config) -> None:
     _set_landing(setup, "https://markpdf.dev/webpage-to-pdf")
     (entry,) = hub.build(setup.tool_dir, setup.workspace).entries
     hub.HubEntry.model_validate(entry)
+    assert entry["store_url"] is None and entry["status"] == "unlisted"
+
+
+def test_in_review_keeps_store_url_null(setup: Config) -> None:
+    _set_landing(setup, "https://markpdf.dev/webpage-to-pdf")
+    registry.upsert(setup.workspace, SLUG, {"store_id": "abc123", "review_state": "PENDING_REVIEW"})
+    (entry,) = hub.build(setup.tool_dir, setup.workspace).entries
     assert entry["store_url"] is None and entry["status"] == "unlisted"
 
 

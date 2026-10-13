@@ -82,7 +82,12 @@ def build(tool_dir: Path, workspace: Path) -> Export:
     for slug in catalog.recipe_slugs(tool_dir):
         ext = extension.load_file(generate.recipe_dir(tool_dir, slug) / generate.RECIPE_FILE)
         row = rows.get(slug, {})
-        store_url = f"{STORE_DETAIL}/{row['store_id']}" if row.get("store_id") else None
+        # store_id exists from the first manual upload, but the listing is only public once
+        # published — linking it during review would send visitors to a dead store page.
+        published = row.get("published_state") == "PUBLISHED"
+        store_url = (
+            f"{STORE_DETAIL}/{row['store_id']}" if published and row.get("store_id") else None
+        )
         tool_page = _real_url(ext.get("landing_page_url"))
         if not tool_page:
             out.skipped[slug] = "no tool_page_url yet (set `landing_page_url` in its recipe)"
@@ -102,7 +107,7 @@ def build(tool_dir: Path, workspace: Path) -> Export:
             "data_collected": list(ext.get("data_collected") or []),
             "analytics": bool(ext.get("analytics")),
             "changelog": list(ext.get("changelog") or []),
-            "status": "published" if row.get("published_state") == "PUBLISHED" else "unlisted",
+            "status": "published" if published else "unlisted",
         }
         try:
             HubEntry.model_validate(entry)
