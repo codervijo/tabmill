@@ -86,7 +86,7 @@ def report(result: SyncResult, *, force: bool) -> None:
             output.fail(f"{rel}: edited in the workspace (tabmill-managed, read-only)")
         output.fail(
             "sync refused — move the edit into the tabmill repo (skills/, templates/, ci/) and "
-            "re-run, or `tabmill skills sync --force` to discard workspace edits"
+            "re-run, or `tabmill settings skills sync --force` to discard workspace edits"
         )
         return
     for rel in result.drift:

@@ -1,4 +1,7 @@
-"""`tabmill` commands — see `tabmill --help` (README § Commands)."""
+"""`tabmill` commands — see `tabmill --help` (README § Commands).
+
+Top level is the extension lifecycle (D-034, D-038): new → try → check → ship → status.
+`settings` holds setup; `advanced` holds the single steps those commands run."""
 
 from __future__ import annotations
 
@@ -21,6 +24,7 @@ from . import (
     generate,
     hub,
     landing,
+    lifecycle,
     lint,
     listing,
     output,
@@ -35,13 +39,16 @@ from .constants import ENV_WORKSPACE
 app = typer.Typer(
     help="Create, release, and track Lamill's Chrome MV3 extensions.",
     no_args_is_help=True,
+    add_completion=False,
 )
-skills_app = typer.Typer(help="Workspace skills + other tabmill-managed files (read-only there).")
-app.add_typer(skills_app, name="skills")
-settings_app = typer.Typer(help="Setup: credentials.", no_args_is_help=True)
+settings_app = typer.Typer(help="Setup: workspace, credentials, checks.", no_args_is_help=True)
+skills_app = typer.Typer(help="Tabmill-managed workspace files.", no_args_is_help=True)
 apikeys_app = typer.Typer(help="Credentials in tabmill/tabmill.env.", no_args_is_help=True)
+settings_app.add_typer(skills_app, name="skills")
 settings_app.add_typer(apikeys_app, name="apikeys")
+advanced_app = typer.Typer(help="Single steps the commands above run.", no_args_is_help=True)
 app.add_typer(settings_app, name="settings")
+app.add_typer(advanced_app, name="advanced")
 
 
 def _preflight(kind: str) -> None:
@@ -80,7 +87,7 @@ def _sync(cfg: config.Config, force: bool) -> None:
         raise typer.Exit(1)
 
 
-@app.command()
+@settings_app.command()
 def init(
     directory: Path | None = typer.Argument(  # noqa: B008 — typer's documented idiom
         None, help=f"Workspace dir (default: ${ENV_WORKSPACE} / tabmill.config.json)."
@@ -108,7 +115,7 @@ def skills_sync(
     """Update tabmill-managed workspace files: skills, CLAUDE.md, Makefiles, pnpm workspace, CI."""
     cfg = _load()
     if not cfg.workspace.exists():
-        output.fail(f"workspace {cfg.workspace} does not exist — run `tabmill init` first")
+        output.fail(f"workspace {cfg.workspace} does not exist — run `tabmill settings init` first")
         raise typer.Exit(1)
     _sync(cfg, force)
 
@@ -127,13 +134,21 @@ def _recipe(cfg: config.Config, slug: str) -> dict[str, object]:
 
 @app.command()
 def new(
-    slug: str = typer.Argument(..., help="Recipe slug (tabmill/recipes/<slug>/)."),
+    slug: str = typer.Argument(..., help="Extension slug, e.g. jwt-inspector."),
+    template: str = typer.Option(
+        "", "--template", "-t", help="Surface template for a new recipe (default: popup)."
+    ),
     force: bool = typer.Option(False, "--force", help="Discard edits to managed files."),
 ) -> None:
-    """Generate extensions/<slug>/ in the workspace from its recipe + template (ADR-0008)."""
-    cfg = _load()
-    if not cfg.workspace.exists():
-        output.fail(f"workspace {cfg.workspace} does not exist — run `tabmill init` first")
+    """Start an extension: first run writes its recipe, later runs generate it."""
+    cfg, ws = _config_and_workspace()
+    if not (generate.recipe_dir(cfg.tool_dir, slug) / generate.RECIPE_FILE).exists():
+        _create(cfg, ws, slug, template or "popup")
+        return
+    if template:
+        output.skip(f"recipes/{slug}/ exists — --template ignored (it's set in the recipe)")
+    if ws is None:
+        output.fail("no workspace to generate into — run `tabmill settings init` first")
         raise typer.Exit(1)
     ext = _recipe(cfg, slug)
     changed = registry.upsert(
@@ -141,9 +156,10 @@ def new(
     )
     output.ok(f"registry.json: {slug} {'registered' if changed else 'already registered'}")
     _sync(cfg, force)
+    output.console.print(f"  next: tabmill try {slug}")
 
 
-@app.command()
+@advanced_app.command()
 def build(
     slug: str = typer.Argument(..., help="Extension slug."),
 ) -> None:
@@ -186,7 +202,7 @@ STATUS_STYLE = {
 }
 
 
-@app.command("list")
+@advanced_app.command("list")
 def list_(
     as_json: bool = typer.Option(False, "--json", help="Machine-readable output."),
 ) -> None:
@@ -197,7 +213,7 @@ def list_(
         typer.echo(json.dumps([r.to_dict() for r in rows], indent=2))
         return
     if not rows:
-        output.skip("no extensions yet — start one with `tabmill create <slug>`")
+        output.skip("no extensions yet — start one with `tabmill new <slug>`")
         return
     table = Table(show_edge=False, pad_edge=False, box=None, header_style="bold")
     for col in ("slug", "status", "version", "template", "store id"):
@@ -216,13 +232,7 @@ def list_(
     output.console.print(table)
 
 
-@app.command()
-def create(
-    slug: str = typer.Argument(..., help="New extension slug, e.g. jwt-inspector."),
-    template: str = typer.Option("popup", "--template", "-t", help="Surface template."),
-) -> None:
-    """Start a new extension: write a starter recipe in tabmill/recipes/<slug>/."""
-    cfg, ws = _config_and_workspace()
+def _create(cfg: config.Config, ws: Path | None, slug: str, template: str) -> None:
     try:
         path = catalog.create(cfg.tool_dir, ws, slug, template)
     except catalog.CreateError as e:
@@ -231,8 +241,18 @@ def create(
     output.ok(f"created {path.relative_to(cfg.tool_dir)}")
     output.console.print(
         f"  next: fill every ‹FILL› in it (feature code goes in recipes/{slug}/src/feature/), "
-        f"then `tabmill new {slug}`"
+        f"then `tabmill new {slug}` again"
     )
+
+
+@advanced_app.command()
+def create(
+    slug: str = typer.Argument(..., help="New extension slug, e.g. jwt-inspector."),
+    template: str = typer.Option("popup", "--template", "-t", help="Surface template."),
+) -> None:
+    """Write a starter recipe in tabmill/recipes/<slug>/."""
+    cfg, ws = _config_and_workspace()
+    _create(cfg, ws, slug, template)
 
 
 def _registered(slug: str) -> config.Config:
@@ -269,7 +289,7 @@ def _lint(cfg: config.Config, slug: str, release: bool) -> bool:
     return True
 
 
-@app.command("lint")
+@advanced_app.command("lint")
 def lint_cmd(
     slug: str = typer.Argument(..., help="Extension slug."),
     release: bool = typer.Option(
@@ -282,18 +302,22 @@ def lint_cmd(
         raise typer.Exit(1)
 
 
-@app.command()
-def test(slug: str = typer.Argument(..., help="Extension slug.")) -> None:
-    """Regenerate, then typecheck + unit tests + build + smoke test, in docker."""
-    cfg = _registered(slug)
-    _recipe(cfg, slug)
-    _sync(cfg, force=False)
+def _test(cfg: config.Config, slug: str) -> None:
     for target in ("typecheck", "test", "smoke"):
         _make(cfg, target, slug)
     output.ok(f"{slug}: typecheck, unit, smoke passed")
 
 
-@app.command()
+@advanced_app.command()
+def test(slug: str = typer.Argument(..., help="Extension slug.")) -> None:
+    """Regenerate, then typecheck + unit tests + build + smoke test, in docker."""
+    cfg = _registered(slug)
+    _recipe(cfg, slug)
+    _sync(cfg, force=False)
+    _test(cfg, slug)
+
+
+@advanced_app.command()
 def zip(
     slug: str = typer.Argument(..., help="Extension slug."),
     release: bool = typer.Option(False, "--release", help="Block on release-severity lint."),
@@ -310,7 +334,7 @@ def zip(
     output.ok(f"zip: {zips[-1].relative_to(cfg.workspace) if zips else '(not found)'}")
 
 
-@app.command()
+@advanced_app.command()
 def dev(slug: str = typer.Argument(..., help="Extension slug.")) -> None:
     """WXT dev server with hot reload in docker; load the dev build in your own Chrome."""
     cfg = _registered(slug)
@@ -330,7 +354,7 @@ def try_(
     url: str = typer.Option("", "--url", help="Page to open first (default: chrome://extensions)."),
     dev: bool = typer.Option(False, "--dev", help="Use the hot-reload dev build."),
 ) -> None:
-    """Open Chromium in docker (window on your desktop) with the extension loaded."""
+    """Build it and open Chromium with the extension loaded."""
     cfg = _registered(slug)
     _recipe(cfg, slug)
     _sync(cfg, force=False)
@@ -338,6 +362,32 @@ def try_(
 
 
 @app.command()
+def check(
+    slug: str = typer.Argument("", help="Extension slug (default: every extension)."),
+) -> None:
+    """Tests + store-policy lint for one extension, or all of them."""
+    cfg = _registered(slug) if slug else _load()
+    slugs = [slug] if slug else registry.slugs(cfg.workspace)
+    if not slugs:
+        output.skip("no extensions generated yet — start one with `tabmill new <slug>`")
+        return
+    _sync(cfg, force=False)
+    failed: list[str] = []
+    for s in slugs:
+        try:
+            _recipe(cfg, s)
+            _test(cfg, s)
+            if not _lint(cfg, s, release=False):
+                raise typer.Exit(1)
+        except typer.Exit:
+            failed.append(s)
+    if failed:
+        output.fail(f"check: {len(failed)} of {len(slugs)} failed — {', '.join(failed)}")
+        raise typer.Exit(1)
+    output.ok(f"check: {len(slugs)} passed")
+
+
+@advanced_app.command()
 def assets(slug: str = typer.Argument(..., help="Extension slug.")) -> None:
     """Render icons, promo tile, and 1280×800 screenshots into .output/store/ (docker)."""
     cfg = _registered(slug)
@@ -352,7 +402,7 @@ def assets(slug: str = typer.Argument(..., help="Extension slug.")) -> None:
     output.ok(f"store images: extensions/{slug}/{listing.STORE_DIR}/")
 
 
-@app.command("listing")
+@advanced_app.command("listing")
 def listing_cmd(
     slug: str = typer.Argument(..., help="Extension slug."),
     force: bool = typer.Option(False, "--force", help="Regenerate, discarding edits to the draft."),
@@ -375,7 +425,8 @@ FIRST_PUBLISH = """  First publish of a new item is manual (the API can't create
   1. https://chrome.google.com/webstore/devconsole → Add new item → upload {zip}
   2. Fill Store listing + Privacy practices from {listing}
   3. Set visibility; submit
-  4. Put the item ID in registry.json → extensions.{slug}.store_id"""
+  4. Put the item ID in registry.json → extensions.{slug}.store_id
+  5. tabmill status {slug} --refresh"""
 
 
 def _store_call(fn: object) -> dict[str, object]:
@@ -386,33 +437,31 @@ def _store_call(fn: object) -> dict[str, object]:
         raise typer.Exit(1) from e
 
 
-@app.command()
-def publish(
-    slug: str = typer.Argument(..., help="Extension slug."),
-    staged: bool = typer.Option(
-        False, "--staged", help="After approval, wait for a manual release."
-    ),
-    check: bool = typer.Option(
-        False, "--check", help="Only fetch review status into registry.json."
-    ),
-) -> None:
-    """Upload the release zip and submit for review. Attended only — never in CI."""
-    cfg = _registered(slug)
-    row = registry.read(cfg.workspace)["extensions"][slug]
-    store_id = row.get("store_id")
-    if not check and (os.environ.get("CI") or not sys.stdin.isatty()):
+def _attended() -> None:
+    if os.environ.get("CI") or not sys.stdin.isatty():
         output.fail("publish never runs unattended — run it yourself in a terminal")
         raise typer.Exit(1)
-    if not store_id:
-        zips = sorted((cfg.workspace / "extensions" / slug / ".output").glob("*.zip"))
-        output.fail(f"{slug} has no store_id yet")
-        output.console.print(
-            FIRST_PUBLISH.format(
-                zip=zips[-1] if zips else f"(run `tabmill zip {slug} --release`)",
-                listing=listing.store_dir(cfg.workspace, slug) / listing.LISTING_FILE,
-                slug=slug,
-            )
+
+
+def _first_publish(cfg: config.Config, slug: str) -> None:
+    zips = sorted((cfg.workspace / "extensions" / slug / ".output").glob("*.zip"))
+    output.console.print(
+        FIRST_PUBLISH.format(
+            zip=zips[-1] if zips else f"(run `tabmill ship {slug}`)",
+            listing=listing.store_dir(cfg.workspace, slug) / listing.LISTING_FILE,
+            slug=slug,
         )
+    )
+
+
+def _publish(cfg: config.Config, slug: str, staged: bool, check: bool) -> None:
+    row = registry.read(cfg.workspace)["extensions"][slug]
+    store_id = row.get("store_id")
+    if not check:
+        _attended()
+    if not store_id:
+        output.fail(f"{slug} has no store_id yet")
+        _first_publish(cfg, slug)
         raise typer.Exit(1)
     _preflight("publish")
     try:
@@ -428,7 +477,7 @@ def publish(
             (cfg.workspace / "extensions" / slug / ".output").glob(f"*-{ext['version']}-*.zip")
         )
         if not zips:
-            output.fail(f"no zip for {ext['version']} — run `tabmill zip {slug} --release`")
+            output.fail(f"no zip for {ext['version']} — run `tabmill ship {slug}`")
             raise typer.Exit(1)
         kind = "staged" if staged else "default"
         if not typer.confirm(f"Upload {zips[-1].name} to item {store_id} and submit ({kind})?"):
@@ -452,6 +501,20 @@ def publish(
     )
     if status["taken_down"] or status["warned"]:
         output.fail("item is taken down or warned for policy — check the Developer Dashboard")
+
+
+@advanced_app.command()
+def publish(
+    slug: str = typer.Argument(..., help="Extension slug."),
+    staged: bool = typer.Option(
+        False, "--staged", help="After approval, wait for a manual release."
+    ),
+    check: bool = typer.Option(
+        False, "--check", help="Only fetch review status into registry.json."
+    ),
+) -> None:
+    """Upload the release zip and submit for review. Attended only — never in CI."""
+    _publish(_registered(slug), slug, staged, check)
 
 
 PROBE_STYLE = {
@@ -536,7 +599,7 @@ def apikeys_delete(
         output.skip(f"{key} was not set")
 
 
-@app.command("preflight")
+@settings_app.command("preflight")
 def preflight_cmd() -> None:
     """Check everything tabmill depends on: workspace, builder, docker, X11, credentials."""
     checks = preflight.run()
@@ -546,47 +609,6 @@ def preflight_cmd() -> None:
         )
     if any(c.status == "fail" for c in checks):
         raise typer.Exit(1)
-
-
-@app.command()
-def status(
-    refresh: bool = typer.Option(False, "--refresh", help="Fetch review state from the store."),
-) -> None:
-    """Every extension's version, store state, and the publisher slot count."""
-    cfg = _load()
-    rows = registry.read(cfg.workspace)["extensions"]
-    if refresh:
-        _preflight("publish")
-        try:
-            client = cws.connect(cfg.tool_dir)
-        except cws.CwsError as e:
-            output.fail(str(e))
-            raise typer.Exit(1) from e
-        for slug, row in rows.items():
-            if row.get("store_id"):
-                state = cws.summarize(_store_call(lambda r=row: client.fetch_status(r["store_id"])))
-                registry.upsert(cfg.workspace, slug, state)
-        rows = registry.read(cfg.workspace)["extensions"]
-    slots = registry.save_slots(cfg.workspace)
-    table = Table(show_edge=False, pad_edge=False, box=None, header_style="bold")
-    for col in ("slug", "version", "store id", "review", "published", "submitted"):
-        table.add_column(col, no_wrap=True)
-    for slug in sorted(rows):
-        r = rows[slug]
-        table.add_row(
-            slug,
-            str(r.get("version", "")),
-            r.get("store_id") or "—",
-            r.get("review_state") or "—",
-            r.get("published_state") or "—",
-            r.get("submitted_version") or "—",
-        )
-    output.console.print(table)
-    line = f"slots: {slots['used']}/{slots['limit']} published"
-    if slots["used"] >= slots["limit"]:
-        output.skip(f"{line} — at the cap: request more in the Developer Dashboard")
-    else:
-        output.ok(line)
 
 
 def _hub(cfg: config.Config) -> None:
@@ -635,17 +657,14 @@ def _hub_entries(cfg: config.Config, export: hub.Export) -> bool:
     return changed
 
 
-@app.command("hub")
+@advanced_app.command("hub")
 def hub_cmd() -> None:
     """Export extensions to the lamill.io hub (src/content/extensions.json, its zod contract)."""
     _hub(_load())
 
 
-@app.command()
-def release(slug: str = typer.Argument(..., help="Extension slug.")) -> None:
-    """Prepare a release: test, assets, listing, release zip, slot check, hub. Never publishes."""
-    cfg = _registered(slug)
-    ext = _recipe(cfg, slug)
+def _release(cfg: config.Config, slug: str, ext: dict[str, object], tool_page: bool) -> None:
+    """Everything up to (never including) the store upload. `tool_page` adds the landing step."""
     _sync(cfg, force=False)
     for target in ("typecheck", "test", "smoke", "assets"):
         _make(cfg, target, slug)
@@ -653,8 +672,10 @@ def release(slug: str = typer.Argument(..., help="Extension slug.")) -> None:
     output.ok(
         f"listing draft {'written' if written else 'kept'}: {path.relative_to(cfg.workspace)}"
     )
+    if tool_page:
+        _landing_brief(cfg, slug, ext)
     if not _lint(cfg, slug, release=True):
-        output.fail("release blocked — fix the errors above, then re-run `tabmill release`")
+        output.fail(f"release blocked — fix the errors above, then re-run `tabmill ship {slug}`")
         raise typer.Exit(1)
     _make(cfg, "zip", slug)
     out = listing.collect_release(cfg.workspace, slug, str(ext["version"]))
@@ -669,7 +690,8 @@ def release(slug: str = typer.Argument(..., help="Extension slug.")) -> None:
             "(Developer Dashboard → request an increase)"
         )
     todo = cfg.workspace / "TODO.md"
-    line = f"- [ ] HUMAN: publish {slug} {ext['version']} — `uv run tabmill publish {slug}`"
+    cmd = f"uv run tabmill ship {slug} --publish"
+    line = f"- [ ] HUMAN: publish {slug} {ext['version']} — `{cmd}`"
     if line not in todo.read_text():
         with todo.open("a") as f:
             f.write(f"\n{line}\n")
@@ -677,7 +699,23 @@ def release(slug: str = typer.Argument(..., help="Extension slug.")) -> None:
     _hub(cfg)
 
 
-@app.command("landing")
+@advanced_app.command()
+def release(slug: str = typer.Argument(..., help="Extension slug.")) -> None:
+    """Prepare a release: test, assets, listing, release zip, slot check, hub. Never publishes."""
+    cfg = _registered(slug)
+    _release(cfg, slug, _recipe(cfg, slug), tool_page=False)
+
+
+def _landing_brief(cfg: config.Config, slug: str, ext: dict[str, object]) -> Path:
+    store_id = registry.read(cfg.workspace)["extensions"][slug].get("store_id")
+    draft = listing.store_dir(cfg.workspace, slug) / listing.LISTING_FILE
+    text = landing.brief(ext, store_id, draft.read_text() if draft.exists() else None)
+    path = landing.write_brief(cfg.workspace, slug, text)
+    output.ok(f"tool-page brief: {path}")
+    return path
+
+
+@advanced_app.command("landing")
 def landing_cmd(
     slug: str = typer.Argument(..., help="Extension slug."),
     check: bool = typer.Option(
@@ -694,15 +732,11 @@ def landing_cmd(
         raise typer.Exit(1)
     url = landing.landing_url(ext)
     if not check:
-        store_id = registry.read(cfg.workspace)["extensions"][slug].get("store_id")
-        draft = listing.store_dir(cfg.workspace, slug) / listing.LISTING_FILE
-        text = landing.brief(ext, store_id, draft.read_text() if draft.exists() else None)
-        path = landing.write_brief(cfg.workspace, slug, text)
-        output.ok(f"brief: {path}")
+        _landing_brief(cfg, slug, ext)
         output.console.print(
             f'  next: cd {landing.site_dir(ext)} && claude → "Write the page in this brief" '
             f"(attach the file); page goes at {url}\n"
-            f"  then: uv run tabmill landing {slug} --check"
+            f"  then: uv run tabmill ship {slug}"
         )
         return
     code = landing.is_live(url)
@@ -710,6 +744,12 @@ def landing_cmd(
         output.fail(f"{url} not live (HTTP {code or 'unreachable'}) — deploy the site first")
         raise typer.Exit(1)
     output.ok(f"{url} is live")
+    _record_landing(cfg, slug, ext, url)
+    output.console.print(f"  next: uv run tabmill ship {slug}")
+
+
+def _record_landing(cfg: config.Config, slug: str, ext: dict[str, object], url: str) -> None:
+    """The tool page is live: write its URL into the recipe, resubmit the sitemap (soft-fail)."""
     changed = landing.set_landing_url(cfg.tool_dir, slug, url)
     output.ok(f"recipe landing_page_url {'set' if changed else 'already set'}")
     site = str(ext["portfolio_site"])
@@ -729,4 +769,130 @@ def landing_cmd(
             "sitemap resubmit failed — run "
             f"`lamill settings gsc submit-sitemap --site {site} --force`"
         )
-    output.console.print("  next: uv run tabmill hub")
+
+
+def _tool_page(cfg: config.Config, slug: str, ext: dict[str, object]) -> dict[str, object]:
+    """ship's tool-page step: already recorded → ✓; live → record it; else ↷ (brief follows)."""
+    problems = landing.precheck(ext)
+    for problem in problems:
+        output.skip(f"tool page: {problem}")
+    if problems:
+        return ext
+    url = landing.landing_url(ext)
+    if ext.get("landing_page_url") == url:
+        output.ok(f"tool page: {url}")
+        return ext
+    code = landing.is_live(url)
+    if code != 200:
+        output.skip(
+            f"tool page: {url} not live (HTTP {code or 'unreachable'}) — write it from the "
+            f"brief below in {landing.site_dir(ext)}, deploy, re-run `tabmill ship {slug}`"
+        )
+        return ext
+    output.ok(f"tool page: {url} is live")
+    _record_landing(cfg, slug, ext, url)
+    return generate.load_recipe(cfg.tool_dir, slug)
+
+
+@app.command()
+def ship(
+    slug: str = typer.Argument(..., help="Extension slug."),
+    publish: bool = typer.Option(
+        False, "--publish", help="Then upload and submit for review (asks first)."
+    ),
+    staged: bool = typer.Option(
+        False, "--staged", help="With --publish: after approval, wait for a manual release."
+    ),
+) -> None:
+    """Prepare the store upload; `--publish` submits it. Safe to re-run."""
+    cfg = _registered(slug)
+    first = not registry.read(cfg.workspace)["extensions"][slug].get("store_id")
+    if publish and first:
+        output.skip(f"{slug} has no store_id — first publish is manual; preparing the upload")
+        publish = False
+    if publish:
+        _attended()
+    ext = _tool_page(cfg, slug, _recipe(cfg, slug))
+    _release(cfg, slug, ext, tool_page=True)
+    if publish:
+        _publish(cfg, slug, staged, check=False)
+    elif first:
+        _first_publish(cfg, slug)
+    else:
+        output.console.print(f"  next: tabmill ship {slug} --publish")
+
+
+@app.command()
+def status(
+    slug: str = typer.Argument("", help="Extension slug (default: every extension)."),
+    refresh: bool = typer.Option(False, "--refresh", help="Fetch review state from the store."),
+    as_json: bool = typer.Option(False, "--json", help="Machine-readable output."),
+) -> None:
+    """Where each extension stands, and the next command to run for it."""
+    cfg, ws = _config_and_workspace()
+    reg = registry.read(ws)["extensions"] if ws else {}
+    if slug and slug not in reg and slug not in catalog.recipe_slugs(cfg.tool_dir):
+        output.fail(f"{slug}: no recipe and not registered — start it with `tabmill new {slug}`")
+        raise typer.Exit(1)
+    if refresh and ws:
+        _refresh(cfg, {k: v for k, v in reg.items() if not slug or k == slug})
+        reg = registry.read(ws)["extensions"]
+    rows = [r for r in catalog.rows(cfg.tool_dir, ws) if not slug or r.slug == slug]
+    steps = {
+        r.slug: lifecycle.next_step(
+            r,
+            reg.get(r.slug, {}),
+            released=bool(ws and (ws / listing.RELEASES_DIR / f"{r.slug}-{r.version}").is_dir()),
+        )
+        for r in rows
+    }
+    if as_json:
+        typer.echo(
+            json.dumps(
+                [{**reg.get(r.slug, {}), **r.to_dict(), "next": steps[r.slug]} for r in rows],
+                indent=2,
+            )
+        )
+        return
+    if not rows:
+        output.skip("no extensions yet — start one with `tabmill new <slug>`")
+        return
+    width = max(len(r.slug) for r in rows)
+    for r in rows:
+        # Two lines per extension: where it stands, then the next command — fits 80 columns.
+        output.console.print(
+            f"[bold]{r.slug.ljust(width)}[/bold]  {r.version or '—':<8}"
+            f"{STATUS_STYLE[r.status]} · {lifecycle.store_state(reg.get(r.slug, {}))}"
+        )
+        if r.error:
+            output.fail(f"{r.slug}: {r.error}")
+        if slug and r.store_id:
+            output.console.print(f"  store id: {r.store_id}")
+        output.console.print(f"  next: {steps[r.slug]}")
+    if ws is None:
+        return
+    slots = registry.save_slots(ws)
+    line = f"slots: {slots['used']}/{slots['limit']} published"
+    if slots["used"] >= slots["limit"]:
+        output.skip(f"{line} — at the cap: request more in the Developer Dashboard")
+    else:
+        output.ok(line)
+
+
+def _refresh(cfg: config.Config, rows: dict[str, dict[str, object]]) -> None:
+    """Review + published state from the store into registry.json, for rows with a store_id."""
+    wanted = {k: str(v["store_id"]) for k, v in rows.items() if v.get("store_id")}
+    if not wanted:
+        output.skip("refresh: nothing has a store_id yet")
+        return
+    _preflight("publish")
+    try:
+        client = cws.connect(cfg.tool_dir)
+    except cws.CwsError as e:
+        output.fail(str(e))
+        raise typer.Exit(1) from e
+    for slug, store_id in wanted.items():
+        state = cws.summarize(_store_call(lambda i=store_id: client.fetch_status(i)))
+        registry.upsert(cfg.workspace, slug, state)
+        if state["taken_down"] or state["warned"]:
+            output.fail(f"{slug}: taken down or warned for policy — check the Developer Dashboard")

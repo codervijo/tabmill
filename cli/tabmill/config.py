@@ -52,7 +52,7 @@ def load(tool_dir: Path = TOOL_DIR, *, require_workspace: bool = True) -> Config
         if require_workspace:
             raise ConfigError(
                 f"No workspace configured. Set {ENV_WORKSPACE} or add "
-                f'"workspace" to {tool_dir / CONFIG_FILE}, or run `tabmill init <dir>`.'
+                f'"workspace" to {tool_dir / CONFIG_FILE}, or run `tabmill settings init <dir>`.'
             )
         ws_raw = "."
     builder_raw = os.environ.get(ENV_BUILDER) or file_cfg.get("builder") or DEFAULT_BUILDER

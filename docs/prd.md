@@ -65,7 +65,7 @@ WordPress plugin support slotted as tier v2 (D-037).
 | v1.I | ✅ done | Publisher slots; CLI `status`, `release`, `hub` (lamill.io extensions.json); listing-URL lint |
 | v1.J | 🔄 in progress | Extension pressure-wash-quote recipe (+ `maps-overlay` template) |
 | v1.K | 🔄 in progress | CLI `landing`; analytics package |
-| v1.L | ⏳ planned | Lifecycle CLI: `new` · `try` · `check` · `ship` · `status` · `setup`; old commands folded in |
+| v1.L | 🔄 in progress | Lifecycle CLI: `new` · `try` · `check` · `ship` · `status` · `settings`; old commands under `advanced` (D-038) |
 | v1.M | ⏳ planned | Extensions local-schema-generator, jwt-inspector as recipes |
 
 #### Design notes

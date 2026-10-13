@@ -1,13 +1,14 @@
 ---
 name: chrome-store-policy
-description: Chrome Web Store policy checklist for Tabmill extensions — single purpose, spam/repetitive content, remote code, permission justification, privacy/analytics disclosure, CTA/ads rules, listing metadata limits — and how to read `tabmill lint` output. Use before writing or changing any extension.yaml, manifest permission, CTA, analytics setting, or listing text; when `tabmill lint` reports a rule id; when deciding whether a new extension idea is distinct enough to publish; or when the user asks "will this pass review?"
+description: Chrome Web Store policy checklist for Tabmill extensions — single purpose, spam/repetitive content, remote code, permission justification, privacy/analytics disclosure, CTA/ads rules, listing metadata limits — and how to read the lint output of `tabmill check` / `tabmill ship`. Use before writing or changing any extension.yaml, manifest permission, CTA, analytics setting, or listing text; when `tabmill check` or `tabmill ship` reports a rule id; when deciding whether a new extension idea is distinct enough to publish; or when the user asks "will this pass review?"
 ---
 
 # Chrome Web Store policy (Tabmill)
 
 > DRAFT (v1.A, 2026-10-03). Verified against developer.chrome.com policy pages on
 > 2026-10-03 — sources and the full rule table are in [reference.md](reference.md).
-> `tabmill lint` does not exist yet (planned v1.E); until then run this checklist by hand.
+> `uv run tabmill check <slug>` runs the mechanical rules (dev severities); `tabmill ship` runs
+> them at release severity. The rest of this checklist is still by hand.
 
 Policy is priority #1 for Tabmill — above speed. When in doubt, choose the reading that
 asks for less permission and discloses more.
@@ -71,11 +72,11 @@ stop and tell the user.
       1280×800 or 640×400; small promo tile 440×280 (mandatory).
 - [ ] Listing text matches what the extension actually does.
 
-## Reading `tabmill lint` output (planned format)
+## Reading lint output
 
 Each finding is one line: `✗ <rule-id> <file>: <message>` (error — blocks zip/release) or
 `↷ <rule-id> <file>: <message>` (warning — review it, may be acknowledged in YAML).
-`tabmill lint --release` escalates rules that have a release severity — e.g. `cta-placeholder`
+`tabmill ship` escalates rules that have a release severity — e.g. `cta-placeholder`
 (`https://rankmill.example/…`) is a warning while developing and an error at release.
 `✓ lint` means all rules passed. Look up any rule id in [reference.md](reference.md) for the
 source policy and the fix. Never silence an error by editing generated `manifest.json` —

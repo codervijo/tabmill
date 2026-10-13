@@ -1,4 +1,4 @@
-"""`tabmill hub`: registry + recipes → lamill.io `src/content/extensions.json` (D-028).
+"""Hub export (`ship`, `advanced hub`): registry + recipes → lamill.io extensions.json (D-028).
 
 The contract is lamill.io's zod schema (`src/lib/extensions.ts`, README § Extensions data
 contract); `HubEntry` mirrors it so tabmill refuses to write anything lamill.io would drop.

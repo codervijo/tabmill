@@ -4,7 +4,7 @@ CLI + templates + Claude Code skills for building, releasing, and tracking Lamil
 portfolio of single-purpose Chrome (Manifest V3) extensions, each paired with an SEO landing
 page on a Lamill portfolio site.
 
-**Status:** v1.B — generator works (`new` + `build` → loadable extension, smoke-tested). See `docs/prd.md` for phases and open questions.
+**Status:** see `docs/prd.md` § 5 for phases and open questions.
 
 ## Two directories
 
@@ -19,32 +19,23 @@ page on a Lamill portfolio site.
 ## Commands
 
 ```
-uv run tabmill list                 # every extension: status, version, what still needs filling
-uv run tabmill create <slug>        # starter recipe in recipes/<slug>/extension.yaml
-uv run tabmill new <slug>           # generate it into the workspace
-uv run tabmill build <slug>         # regenerate + WXT build in docker
-uv run tabmill test <slug>          # typecheck + unit + smoke (docker)
-uv run tabmill try <slug> [--url URL] [--dev]  # Chromium in docker, window on your desktop
-uv run tabmill dev <slug>           # hot reload; load .output/chrome-mv3-dev in Chrome
-uv run tabmill assets <slug>        # store icon, promo tile, screenshots (docker)
-uv run tabmill listing <slug>       # store listing draft (.output/store/listing.md)
-uv run tabmill release <slug>       # test → assets → listing → release lint → zip → hub; never publishes
-uv run tabmill status [--refresh]   # versions, store review state, publisher slots used/limit
-uv run tabmill hub                  # export to lamill.io src/content/extensions.json
-uv run tabmill landing <slug> [--check]  # tool-page brief; --check records it once live
-uv run tabmill publish <slug> [--staged|--check]  # attended only
-uv run tabmill lint <slug> [--release]
-uv run tabmill zip <slug> [--release]
-uv run tabmill skills sync          # refresh all tabmill-managed workspace files
-uv run tabmill preflight            # workspace, builder, docker, X11, credentials
-uv run tabmill settings apikeys list|set|delete   # store credentials in tabmill.env
+uv run tabmill new <slug>           # first run: starter recipe; after filling it: generate
+uv run tabmill try <slug> [--url URL] [--dev]  # build + Chromium in docker, window on your desktop
+uv run tabmill check [slug]         # typecheck + unit + smoke + store-policy lint (no slug = all)
+uv run tabmill ship <slug>          # assets, listing, tool page, release lint, zip, upload folder, hub
+uv run tabmill ship <slug> --publish  # …then upload + submit for review (attended only)
+uv run tabmill status [slug] [--refresh]  # where each extension stands + the next command
+```
+
+Setup lives under `settings`; the single steps the commands above run live under `advanced`:
+
+```
+uv run tabmill settings init | skills sync | preflight | apikeys list|set|delete
+uv run tabmill advanced create|build|dev|test|lint|zip|assets|listing|landing|release|publish|hub|list
 ```
 Anywhere: `uv tool install --editable ~/work/projects/droyfun/tabmill`, then `tabmill …`.
 
-
-Shipped: `init` · `skills sync` · `create` · `new` · `build` · `list` · `test` · `try` · `dev` · `lint` · `zip` · `assets` · `listing` · `publish` · `preflight` · `settings apikeys` · `release` · `status` · `hub` · `landing`. Planned:
-
-analytics
+Planned: analytics.
 
 ## Docs
 

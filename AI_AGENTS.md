@@ -15,7 +15,7 @@ Target layout (directories appear as phases need them):
 - `cli/` — `tabmill` commands
 - `packages/` — `@tabmill/*` shared code (brand, funnel, messaging, analytics, policy), extracted only when two extensions need it
 - `templates/` — popup | side-panel | devtools | context-menu | maps-overlay
-- `skills/` — workspace skill sources (installed by `tabmill init` / `skills sync`)
+- `skills/` — workspace skill sources (installed by `tabmill settings init` / `settings skills sync`)
 - `ci/` — GitHub Actions templates for the workspace
 - `.claude/skills/tabmill-dev/` — tool-repo-only skill
 - `docs/` — Lamill-standard docs; `docs/kickoff.md` is the original brief
@@ -45,7 +45,8 @@ Makefile (Python stack) with `Makefile.local` overrides (D-018). Workspace (`$TA
 - **Notes**: CWS credentials in `TOOL_DIR/.env` (never committed) — see `skills/tabmill-release/reference.md`
 
 ## How to run
-`make run ARGS="init"` · `make run ARGS="skills sync"` (or `uv run tabmill …`).
+`uv run tabmill --help` — `new` · `try` · `check` · `ship` · `status`, plus `settings` (setup) and
+`advanced` (single steps). Via make: `make run ARGS="status"`.
 
 ## Key conventions
 - TOOL_DIR / WORKSPACE_DIR boundary is absolute (`CLAUDE.md` § Rules).

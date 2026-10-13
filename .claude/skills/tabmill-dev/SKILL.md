@@ -12,10 +12,10 @@ skill is the how-to around them.
 
 | Thing | Location |
 |---|---|
-| `tabmill` command | `cli/` |
+| `tabmill` command | `cli/` — top level stays the lifecycle (`new try check ship status`); a new single step goes under `advanced`, setup under `settings` (D-038) |
 | code used by ≥ 2 extensions | `packages/<name>/` (`@tabmill/<name>`) |
 | per-surface starter code | `templates/<popup\|side-panel\|devtools\|context-menu\|maps-overlay>/` |
-| GitHub Actions for the workspace | `ci/` (installed by `tabmill init`) |
+| GitHub Actions for the workspace | `ci/` (installed by `tabmill settings init`) |
 | workspace skills | `skills/<name>/SKILL.md` (+ reference files) |
 | an extension (extension.yaml + feature code) | `recipes/<slug>/` (ADR-0008) |
 | generic surface code | `templates/extension/<template>/` |
@@ -54,7 +54,7 @@ it — and say which two in the commit/PLAN entry.
 - ≤ ~150 lines; long reference material in a sibling file, linked relatively.
 - Facts must be verified against official docs with a date; mark the rest UNVERIFIED.
 - After changing a skill or anything in `templates/workspace/managed/` or `ci/`: `make run
-  ARGS="skills sync"`, and note the gap that prompted it. Seed templates only affect new workspaces.
+  ARGS="settings skills sync"`, and note the gap that prompted it. Seed templates only affect new workspaces.
 
 ## Tests
 

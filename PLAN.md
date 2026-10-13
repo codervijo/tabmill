@@ -37,25 +37,26 @@ roof pitch) → WashCalc quote, PDF export.
 
 CLI `landing` (via `lamill`); `packages/analytics` opt-in; finalize `tabmill-landing-page`.
 
-## v1.L — Lifecycle CLI (D-034)
+## v1.L — Lifecycle CLI (in progress; D-034, D-038)
 
 Operator (2026-10-08): ~20 commands, hard to know which to use. One path per extension:
-start → publish → track health over its store life.
+start → publish → track health over its store life. Shape amended 2026-10-12 (D-038).
 
 | Command | Absorbs |
 |---|---|
 | `new <slug>` | `create` (first run writes the starter recipe), `new` (later runs regenerate) |
 | `try <slug> [--dev]` | `build`, `dev`, `try` |
-| `check <slug>` | `test`, `lint` |
+| `check [slug]` | `test`, `lint`; no slug = every extension |
 | `ship <slug> [--publish]` | `assets`, `listing`, `landing`, `zip`, `release`, `hub`; `--publish` = attended upload |
-| `status [slug]` | `list`, `status`, `publish --check`; prints the next command per extension |
-| `setup` | `init`, `skills sync`, `preflight`, `settings apikeys` |
+| `status [slug]` | `list`, `status`, `publish --check` (`--refresh`); prints the next command per extension |
+| `settings …` | `init`, `skills sync`, `preflight` join `apikeys` (no `setup` verb) |
+| `advanced …` | every old single-step command, unchanged, one level down |
 
-Open at v1.L start: old commands removed vs hidden under an "advanced" group; skills and docs
-rewritten to the six verbs.
+Built 2026-10-12: suite green. Still owed before this ships: operator runs the six commands on
+a real extension (docker `check`, `ship`, a `--publish` update once #1 is approved).
 
-Done = an extension goes recipe → store → health check using only the six commands; skills,
-README, and `docs/creating-an-extension.md` reference only them.
+Done = an extension goes recipe → store → health check using only the top-level commands;
+skills, README, and `docs/creating-an-extension.md` lead with them.
 
 ## v1.M — local-schema-generator, jwt-inspector
 

@@ -50,7 +50,7 @@ def test_brief_drops_repeated_and_unfilled_listing_copy(tool: Path) -> None:
     ext = _ext(tool)
     draft = f"## Detailed description\n{ext['summary']}\n\n‹FILL› — how to use it\n\nReal copy.\n"
     text = landing.brief(ext, None, draft)
-    assert text.count(ext["summary"]) == 1
+    assert text.count(str(ext["summary"])) == 1
     assert "‹FILL›" not in text and "Real copy." in text
 
 

@@ -85,3 +85,11 @@ The dated H2 is what `lamill project status` parses. Append-only.
 > before v1.L → "yes, slot it as v2"
 > → D-037: tier v2 (WordPress plugins), v2.A planning row only; build phases not defined yet.
 > "yes wordpress.org, add the phases to the PRD" → v2.B–v2.E added; first plugin not chosen yet.
+
+## 2026-10-12 — v1.L started: lifecycle CLI, shape amended after `lamill --help`
+
+> "nvm, let us fix the CLI first. let us streamline it" → old commands: "Hide under `tabmill
+> advanced`" → "look at lamill --help … what can you learn from it? (dont copy anything
+> verbatim-just lessons)" → proposed `settings` instead of `setup`, slug-less `check`/`status`
+> = all → "yes, both changes"
+> → D-038; `new` · `try` · `check` · `ship` · `status` · `settings` · `advanced` built.

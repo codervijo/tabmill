@@ -65,6 +65,29 @@ Plan (all code in `recipes/save-page-pdf-md/`; workspace only via `tabmill new/b
        while ‹FILL› → filled → `new` generated → `list` shows it; removed afterwards. WXT `build`
        of a created recipe not re-run (same path as #1, verified in v1.B/v1.C).
 
+## v1.L — Lifecycle CLI (in progress; D-034, D-038)
+
+Top level: `new` · `try` · `check` · `ship` · `status` · `settings` · `advanced`.
+
+1. [x] `cli/tabmill/lifecycle.py`: `next_step(row, registry row, released)` — the one next
+       command per extension (pure, unit-tested).
+2. [x] `new <slug> [-t]`: no recipe → starter recipe (old `create`); recipe → register + generate.
+3. [x] `check [slug]`: typecheck + unit + smoke + dev lint; no slug = every registered extension,
+       keeps going after a failure, summary line.
+4. [x] `ship <slug> [--publish] [--staged]`: old `release` + tool-page step (probe → record +
+       sitemap, else brief); `--publish` = attended upload, refused up front without a TTY.
+5. [x] `status [slug] [--refresh] [--json]`: old `list` + `status` + `publish --check` in one
+       table with a `next` column; slots line.
+6. [x] `settings`: `init`, `skills sync`, `preflight` move in beside `apikeys`.
+7. [x] `advanced`: `create build dev test lint zip assets listing landing release publish hub list`
+       — same code, one level down.
+8. [x] Hints printed by the CLI, generated files, and templates name only the new commands.
+9. [x] Tests (CliRunner: help surface, `new` two-step, `status` next column, `ship --publish`
+       refusal, `check` all); README, docs, skills → `settings skills sync`.
+
+10. [ ] HUMAN: use only the top-level commands on a real extension — `uv run tabmill check`,
+        `uv run tabmill ship <slug>`, and `ship <slug> --publish` for the first update of #1.
+
 ## v1.K — Landing + analytics (in progress)
 
 1. [x] Schema `landing_path` (optional); `cli/tabmill/landing.py`: URL, brief, recipe update.

@@ -98,6 +98,14 @@ Two repos, related by a computed relative layout (ADR-0007):
   (default first keyword), self-contained brief → `.output/store/landing-brief.md`; `--check`
   probes 200, rewrites only the recipe's `landing_page_url` line, runs lamill's
   `settings gsc submit-sitemap` (soft-fail).
+- **Lifecycle CLI** (v1.L, D-034/D-038): the five verbs compose the single steps, which stay
+  callable under `advanced`. `new` = starter recipe when none exists, else register +
+  generate. `check` = typecheck + unit + smoke + dev lint, every registered extension when no
+  slug (keeps going, summary). `ship` = tool-page step (recorded → ✓; live → set
+  `landing_page_url` + sitemap; else ↷) → release steps → brief → release lint → zip →
+  upload folder → hub; `--publish` checks for a TTY before any work, then uploads; no
+  `store_id` → prints the dashboard steps. `status` = catalog rows + registry store state +
+  `lifecycle.next_step` (one next command each); `--refresh` = fetchStatus.
 - **Catalog** (`cli/tabmill/catalog.py`, v1.D): `list` rows = `recipes/*/` ∪ workspace
   registry — status `recipe` / `generated` / `built` (`.output/chrome-mv3/manifest.json`) /
   `orphan` (registered, no recipe) / `invalid` (YAML error); placeholders = any `‹FILL›` value
@@ -140,13 +148,14 @@ Two repos, related by a computed relative layout (ADR-0007):
 `cli/tabmill/`: `cli` (typer app), `config`, `constants`, `output` (✓ ↷ ✗), `templates`,
 `skills` (skill sources), `sync` (manifest engine), `workspace` (seed + managed files),
 `extension` (YAML load/validate/manifest fields), `generate` (template + recipe), `registry`,
-`catalog` (list rows, starter recipes). Planned packages: brand, funnel, messaging, analytics, policy (extracted in v1.E/v1.H).
+`catalog` (list rows, starter recipes), `lifecycle` (next step per extension). Planned packages: brand, funnel, messaging, analytics, policy (extracted in v1.E/v1.H).
 
 ## 5. CLI / UX surface
 
-`init`, `skills sync`, `new`, `build` (minimal) (v1.B) · `list`, `create` (v1.D) ·
-`dev`, `test`, `zip`, `lint`, full `build` (v1.E) · `assets`, `listing`, `publish` (v1.G) ·
-`landing`, `status` (v1.H). Output uses `✓ ↷ ✗`.
+Lifecycle at the top level (v1.L, D-034/D-038): `new` · `try` · `check [slug]` · `ship
+[--publish]` · `status [slug]`. `settings`: `init`, `skills sync`, `preflight`, `apikeys`.
+`advanced` (the single steps): `create build dev test lint zip assets listing landing release
+publish hub list`. Output uses `✓ ↷ ✗`.
 
 ## 6. Integrations / external APIs
 

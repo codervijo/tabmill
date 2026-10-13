@@ -53,8 +53,8 @@ No real CTA destination yet → reserved placeholder host (`https://<name>.examp
 
 ## 7. Write the recipe
 
-Start from the starter: `uv run tabmill create <slug> [--template popup]` (refuses bad or
-existing slugs), then fill every `‹FILL›`. Resulting shape:
+Start from the starter: `uv run tabmill new <slug> [--template popup]` — the first run writes
+the recipe (refuses bad slugs). Then fill every `‹FILL›`. Resulting shape:
 
 ```yaml
 name: Save Page as Markdown or PDF          # ≤ 75 chars
@@ -85,8 +85,8 @@ tests under `recipes/<slug>/tests/`. A recipe file replaces the template file at
 
 ## 8. Generate and verify
 
-`uv run tabmill new <slug>` (refuses while name / summary / single_purpose are `‹FILL›`) →
-`uv run tabmill build <slug>` → in the workspace
-`make in-docker-test EXT=<slug>` and `make in-docker-smoke EXT=<slug>`. Record start/first-build
-times in NOTES.md (time-to-first-build). `uv run tabmill list` shows status and remaining
-placeholders. Run the `chrome-store-policy` checklist before feature work.
+`uv run tabmill new <slug>` again (generates; refuses while name / summary / single_purpose
+are `‹FILL›`) → `uv run tabmill check <slug>` (typecheck, unit, smoke, lint) →
+`uv run tabmill try <slug>` to use it in Chromium. Record start/first-build times in NOTES.md
+(time-to-first-build). `uv run tabmill status` shows where each extension stands and the
+next command. Run the `chrome-store-policy` checklist before feature work.

@@ -1,4 +1,4 @@
-"""All extensions in one view (`tabmill list`) and starter recipes (`tabmill create`)."""
+"""All extensions in one view (`tabmill status`) and starter recipes (`tabmill new`)."""
 
 from __future__ import annotations
 

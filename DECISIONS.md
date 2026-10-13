@@ -293,6 +293,17 @@ platform, and v1.L reshapes the command surface first. Distribution: the wordpre
 directory. v2.A = planning / decisions lock; build phases v2.B–v2.E in `docs/prd.md` § 5. First
 plugin not chosen yet.
 
+## D-038 — v1.L shape: `settings` not `setup`; old commands under `advanced` (Accepted, 2026-10-12)
+
+Amends D-034 after comparing with `lamill --help` (lessons, not a copy): a tiny top level, depth
+one level down, the same verb at one-extension and all-extensions scope, setup under one word.
+- Top level: `new` · `try` · `check` · `ship` · `status` · `settings` · `advanced`.
+- No `setup` verb: `init`, `skills sync`, `preflight` join `apikeys` under `settings` (same
+  word as lamill; one home for setup).
+- `check` and `status` with no slug run across every extension.
+- Old single-step commands stay, visible, under `tabmill advanced` (operator's choice over
+  hidden or removed).
+
 ## D-009 — Store API: V2 only, service-account auth (Proposed, 2026-10-03)
 
 V1 dies 2026-10-15; V2 can't create items, so first uploads are a HUMAN step by design.

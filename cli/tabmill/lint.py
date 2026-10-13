@@ -1,4 +1,5 @@
-"""`tabmill lint`: mechanical Chrome Web Store checks (skills/chrome-store-policy/reference.md).
+"""Lint (`check`, `ship`, `advanced lint`): mechanical Chrome Web Store checks
+(skills/chrome-store-policy/reference.md).
 
 Each rule has a dev and a release severity (D-015): placeholders warn while developing and
 block a release. Bundle rules read the last build (`.output/chrome-mv3/`).
@@ -135,7 +136,7 @@ def lint(tool_dir: Path, workspace: Path | None, slug: str, *, release: bool) ->
             add(
                 "privacy-coverage",
                 f"{gap} — the shared policy doesn't cover it: update {privacy.POLICY_FILE} "
-                "(bump version), `tabmill hub`, deploy lamill.io (D-036)",
+                "(bump version), `tabmill ship`, deploy lamill.io (D-036)",
             )
     for field in catalog.fill_fields(ext):
         add("fill-placeholder", f"`{field}` is still ‹FILL›")
@@ -162,13 +163,13 @@ def lint(tool_dir: Path, workspace: Path | None, slug: str, *, release: bool) ->
     if workspace is not None:
         problems = listing.image_problems(workspace, slug)
         if problems is None:
-            add("store-images", "no store images — run `tabmill assets`")
+            add("store-images", "no store images — run `tabmill ship`")
         for problem in problems or []:
             add("store-images", problem)
         draft = listing.store_dir(workspace, slug) / listing.LISTING_FILE
         urls = (hub.PRIVACY_URL, hub.SUPPORT_URL)
         if not draft.exists():
-            add("hub-urls", "no listing.md — run `tabmill listing` (privacy + support URLs)")
+            add("hub-urls", "no listing.md — run `tabmill ship` (privacy + support URLs)")
         else:
             text = draft.read_text()
             if extension.FILL_MARKER in text:
@@ -185,7 +186,7 @@ def lint(tool_dir: Path, workspace: Path | None, slug: str, *, release: bool) ->
                     elif url == hub.PRIVACY_URL and policy and policy.marker not in body:
                         add(
                             "hub-urls",
-                            f"{url} doesn't show “{policy.marker}” — run `tabmill hub`, "
+                            f"{url} doesn't show “{policy.marker}” — run `tabmill ship`, "
                             "deploy lamill.io",
                         )
         if draft.exists():
@@ -194,7 +195,7 @@ def lint(tool_dir: Path, workspace: Path | None, slug: str, *, release: bool) ->
 
     built = workspace / "extensions" / slug / ".output" / "chrome-mv3" if workspace else None
     if built is None or not (built / "manifest.json").exists():
-        add("not-built", "no build to inspect — run `tabmill build` (bundle rules skipped)")
+        add("not-built", "no build to inspect — run `tabmill try` (bundle rules skipped)")
         return out
     bundle = {
         f: f.read_text(errors="replace") for f in built.rglob("*") if f.suffix in {".js", ".html"}

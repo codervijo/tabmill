@@ -1,6 +1,6 @@
 # tabmill-release — Chrome Web Store API reference
 
-Verified 2026-10-03 against developer.chrome.com. Re-verify before building `tabmill publish`.
+Verified 2026-10-03 against developer.chrome.com. Re-verify before changing the store client (`cws.py`).
 
 ## Version
 

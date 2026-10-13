@@ -5,7 +5,8 @@ description: Write the Chrome Web Store listing for a Tabmill extension — titl
 
 # Tabmill store listing
 
-> Start from `uv run tabmill listing <slug>` — it writes `extensions/<slug>/.output/store/listing.md`
+> Start from `uv run tabmill ship <slug>` (or `uv run tabmill advanced listing <slug>` for
+> the draft alone) — it writes `extensions/<slug>/.output/store/listing.md`
 > with title, summary, captions, justifications, and privacy answers filled from the recipe.
 > Limits verified 2026-10-03; see `chrome-store-policy` for sources.
 
@@ -49,5 +50,5 @@ rest against this list. Sections, in order:
 
 ## Self-check before handing back
 
-Run the listing items of the `chrome-store-policy` checklist. Re-run `uv run tabmill lint <slug> --release` — it
+Run the listing items of the `chrome-store-policy` checklist. Re-run `uv run tabmill ship <slug>` — it
 counts title/summary length and flags any word repeated more than 5 times in the visible text. Flag any claim the extension doesn't actually deliver.

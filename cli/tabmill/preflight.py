@@ -1,5 +1,6 @@
-"""`tabmill preflight` + per-command preflights (D-025). Each check is cheap, read-only, and
-returns a status plus the fix — commands run only the checks they depend on, before acting."""
+"""`tabmill settings preflight` + per-command preflights (D-025). Each check is cheap,
+read-only, and returns a status plus the fix — commands run only the checks they depend on,
+before acting."""
 
 from __future__ import annotations
 
@@ -41,9 +42,11 @@ def workspace(cfg: config.Config | None) -> Check:
             "or log in again",
         )
     if not cfg.workspace.exists():
-        return Check("workspace", "fail", f"{cfg.workspace} missing — run `tabmill init`")
+        return Check("workspace", "fail", f"{cfg.workspace} missing — run `tabmill settings init`")
     if not (cfg.workspace / "registry.json").exists():
-        return Check("workspace", "fail", f"{cfg.workspace} not initialized — run `tabmill init`")
+        return Check(
+            "workspace", "fail", f"{cfg.workspace} not initialized — run `tabmill settings init`"
+        )
     return Check("workspace", "ok", str(cfg.workspace))
 
 
@@ -112,7 +115,8 @@ def credentials(cfg: config.Config | None) -> Check:
         return Check(
             "credentials",
             "warn",
-            "not configured — only `publish` needs them (`tabmill settings apikeys set`)",
+            "not configured — only `ship --publish` and `status --refresh` need them "
+            "(`tabmill settings apikeys set`)",
         )
     return Check(
         "credentials",
