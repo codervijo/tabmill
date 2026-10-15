@@ -13,3 +13,11 @@ tabmill.env
 tabmill.config.local.json
 docs/handoff.md
 .DS_Store
+__pycache__/
+*.py[cod]
+.venv/
+*.egg-info/
+build/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
