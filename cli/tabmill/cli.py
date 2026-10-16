@@ -1,6 +1,7 @@
 """`tabmill` commands — see `tabmill --help` (README § Commands).
 
-Top level is the extension lifecycle (D-034, D-038): new → try → check → ship → status.
+Top level (D-034, D-038, D-040): idea stage (`new`, v2.B on) → build stage (`bootstrap` → `try` →
+`check` → `ship` → `publish`) → portfolio (`status`, `slots`, `templates`, `doctor`).
 `settings` holds setup; `advanced` holds the single steps those commands run."""
 
 from __future__ import annotations
@@ -8,6 +9,7 @@ from __future__ import annotations
 import dataclasses
 import json
 import os
+import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -28,9 +30,12 @@ from . import (
     lint,
     listing,
     output,
+    portfolio,
     preflight,
     privacy,
+    recipe_v2,
     registry,
+    surfaces,
     sync,
     workspace,
 )
@@ -134,13 +139,41 @@ def _recipe(cfg: config.Config, slug: str) -> dict[str, object]:
 
 @app.command()
 def new(
+    idea: list[str] = typer.Argument(  # noqa: B008 — typer's documented idiom
+        None, help="A rough idea in words (idea stage: v2.B on)."
+    ),
+    template: str = typer.Option(
+        "", "--template", "-t", help="Surface template for a new recipe (default: popup)."
+    ),
+    force: bool = typer.Option(False, "--force", help="Discard edits to managed files."),
+) -> None:
+    """Start from an idea. (`new <slug>` is a deprecated alias for `bootstrap <slug>`.)"""
+    words = idea or []
+    if len(words) == 1 and catalog.SLUG_RE.match(words[0]):
+        # Through v2 a single slug keeps today's path (D-040); removed in v3.A.
+        output.skip(
+            f"`tabmill new {words[0]}` is deprecated — use `tabmill bootstrap {words[0]}` "
+            "(removed in v3.A)"
+        )
+        _bootstrap(words[0], template, force)
+        return
+    output.skip("the idea stage arrives in v2.B — for now: `tabmill bootstrap <slug>`")
+    raise typer.Exit(1)
+
+
+@app.command()
+def bootstrap(
     slug: str = typer.Argument(..., help="Extension slug, e.g. jwt-inspector."),
     template: str = typer.Option(
         "", "--template", "-t", help="Surface template for a new recipe (default: popup)."
     ),
     force: bool = typer.Option(False, "--force", help="Discard edits to managed files."),
 ) -> None:
-    """Start an extension: first run writes its recipe, later runs generate it."""
+    """Generate the extension from its recipe (no recipe yet: write a starter recipe)."""
+    _bootstrap(slug, template, force)
+
+
+def _bootstrap(slug: str, template: str, force: bool) -> None:
     cfg, ws = _config_and_workspace()
     if not (generate.recipe_dir(cfg.tool_dir, slug) / generate.RECIPE_FILE).exists():
         _create(cfg, ws, slug, template or "popup")
@@ -151,6 +184,10 @@ def new(
         output.fail("no workspace to generate into — run `tabmill settings init` first")
         raise typer.Exit(1)
     ext = _recipe(cfg, slug)
+    surface = surfaces.SURFACES[str(ext["template"])]
+    if surface.status != "implemented":
+        output.fail(f"template {surface.name} isn't built yet — pick another in the recipe")
+        raise typer.Exit(1)
     changed = registry.upsert(
         cfg.workspace, slug, {"version": str(ext["version"]), "status": "generated"}
     )
@@ -166,7 +203,7 @@ def build(
     """Regenerate managed files, then build with WXT in the builder docker (never on the host)."""
     cfg = _load()
     if slug not in registry.slugs(cfg.workspace):
-        output.fail(f"{slug} is not in registry.json — run `tabmill new {slug}` first")
+        output.fail(f"{slug} is not in registry.json — run `tabmill bootstrap {slug}` first")
         raise typer.Exit(1)
     _recipe(cfg, slug)
     _sync(cfg, force=False)
@@ -213,7 +250,7 @@ def list_(
         typer.echo(json.dumps([r.to_dict() for r in rows], indent=2))
         return
     if not rows:
-        output.skip("no extensions yet — start one with `tabmill new <slug>`")
+        output.skip("no extensions yet — start one with `tabmill bootstrap <slug>`")
         return
     table = Table(show_edge=False, pad_edge=False, box=None, header_style="bold")
     for col in ("slug", "status", "version", "template", "store id"):
@@ -241,7 +278,7 @@ def _create(cfg: config.Config, ws: Path | None, slug: str, template: str) -> No
     output.ok(f"created {path.relative_to(cfg.tool_dir)}")
     output.console.print(
         f"  next: fill every ‹FILL› in it (feature code goes in recipes/{slug}/src/feature/), "
-        f"then `tabmill new {slug}` again"
+        f"then `tabmill bootstrap {slug}`"
     )
 
 
@@ -258,7 +295,7 @@ def create(
 def _registered(slug: str) -> config.Config:
     cfg = _load()
     if slug not in registry.slugs(cfg.workspace):
-        output.fail(f"{slug} is not in registry.json — run `tabmill new {slug}` first")
+        output.fail(f"{slug} is not in registry.json — run `tabmill bootstrap {slug}` first")
         raise typer.Exit(1)
     return cfg
 
@@ -369,18 +406,21 @@ def check(
     cfg = _registered(slug) if slug else _load()
     slugs = [slug] if slug else registry.slugs(cfg.workspace)
     if not slugs:
-        output.skip("no extensions generated yet — start one with `tabmill new <slug>`")
+        output.skip("no extensions generated yet — start one with `tabmill bootstrap <slug>`")
         return
     _sync(cfg, force=False)
     failed: list[str] = []
     for s in slugs:
         try:
-            _recipe(cfg, s)
+            ext = _recipe(cfg, s)
             _test(cfg, s)
             if not _lint(cfg, s, release=False):
                 raise typer.Exit(1)
         except typer.Exit:
             failed.append(s)
+            continue
+        if ext.get("version"):
+            registry.upsert(cfg.workspace, s, {"checked_version": str(ext["version"])})
     if failed:
         output.fail(f"check: {len(failed)} of {len(slugs)} failed — {', '.join(failed)}")
         raise typer.Exit(1)
@@ -503,7 +543,6 @@ def _publish(cfg: config.Config, slug: str, staged: bool, check: bool) -> None:
         output.fail("item is taken down or warned for policy — check the Developer Dashboard")
 
 
-@advanced_app.command()
 def publish(
     slug: str = typer.Argument(..., help="Extension slug."),
     staged: bool = typer.Option(
@@ -513,7 +552,7 @@ def publish(
         False, "--check", help="Only fetch review status into registry.json."
     ),
 ) -> None:
-    """Upload the release zip and submit for review. Attended only — never in CI."""
+    """Upload the release zip and submit for review. Attended only — `ship` never uploads."""
     _publish(_registered(slug), slug, staged, check)
 
 
@@ -690,7 +729,7 @@ def _release(cfg: config.Config, slug: str, ext: dict[str, object], tool_page: b
             "(Developer Dashboard → request an increase)"
         )
     todo = cfg.workspace / "TODO.md"
-    cmd = f"uv run tabmill ship {slug} --publish"
+    cmd = f"uv run tabmill publish {slug}"
     line = f"- [ ] HUMAN: publish {slug} {ext['version']} — `{cmd}`"
     if line not in todo.read_text():
         with todo.open("a") as f:
@@ -797,29 +836,23 @@ def _tool_page(cfg: config.Config, slug: str, ext: dict[str, object]) -> dict[st
 @app.command()
 def ship(
     slug: str = typer.Argument(..., help="Extension slug."),
-    publish: bool = typer.Option(
-        False, "--publish", help="Then upload and submit for review (asks first)."
-    ),
-    staged: bool = typer.Option(
-        False, "--staged", help="With --publish: after approval, wait for a manual release."
-    ),
+    publish: bool = typer.Option(False, "--publish", hidden=True),
 ) -> None:
-    """Prepare the store upload; `--publish` submits it. Safe to re-run."""
+    """Prepare the store upload. Never uploads — that's `tabmill publish`. Safe to re-run."""
+    if publish:
+        output.fail(f"`ship` never uploads (D-040) — run `tabmill publish {slug}`")
+        raise typer.Exit(1)
     cfg = _registered(slug)
     first = not registry.read(cfg.workspace)["extensions"][slug].get("store_id")
-    if publish and first:
-        output.skip(f"{slug} has no store_id — first publish is manual; preparing the upload")
-        publish = False
-    if publish:
-        _attended()
     ext = _tool_page(cfg, slug, _recipe(cfg, slug))
     _release(cfg, slug, ext, tool_page=True)
-    if publish:
-        _publish(cfg, slug, staged, check=False)
-    elif first:
+    if first:
         _first_publish(cfg, slug)
     else:
-        output.console.print(f"  next: tabmill ship {slug} --publish")
+        output.console.print(f"  next: tabmill publish {slug}")
+
+
+app.command()(publish)  # registered after `ship` so help reads in pipeline order
 
 
 @app.command()
@@ -832,37 +865,51 @@ def status(
     cfg, ws = _config_and_workspace()
     reg = registry.read(ws)["extensions"] if ws else {}
     if slug and slug not in reg and slug not in catalog.recipe_slugs(cfg.tool_dir):
-        output.fail(f"{slug}: no recipe and not registered — start it with `tabmill new {slug}`")
+        output.fail(
+            f"{slug}: no recipe and not registered — start it with `tabmill bootstrap {slug}`"
+        )
         raise typer.Exit(1)
     if refresh and ws:
         _refresh(cfg, {k: v for k, v in reg.items() if not slug or k == slug})
         reg = registry.read(ws)["extensions"]
     rows = [r for r in catalog.rows(cfg.tool_dir, ws) if not slug or r.slug == slug]
-    steps = {
-        r.slug: lifecycle.next_step(
-            r,
-            reg.get(r.slug, {}),
-            released=bool(ws and (ws / listing.RELEASES_DIR / f"{r.slug}-{r.version}").is_dir()),
-        )
-        for r in rows
+    items = _portfolio(cfg).items
+
+    def released(r: catalog.Row) -> bool:
+        return bool(ws and (ws / listing.RELEASES_DIR / f"{r.slug}-{r.version}").is_dir())
+
+    steps = {r.slug: lifecycle.next_step(r, reg.get(r.slug, {}), released(r)) for r in rows}
+    stages = {
+        r.slug: lifecycle.stage(r, reg.get(r.slug, {}), r.slug in items, released(r)) for r in rows
     }
     if as_json:
         typer.echo(
             json.dumps(
-                [{**reg.get(r.slug, {}), **r.to_dict(), "next": steps[r.slug]} for r in rows],
+                [
+                    {
+                        **reg.get(r.slug, {}),
+                        **r.to_dict(),
+                        "lifecycle": stages[r.slug],
+                        "next": steps[r.slug],
+                    }
+                    for r in rows
+                ],
                 indent=2,
             )
         )
         return
     if not rows:
-        output.skip("no extensions yet — start one with `tabmill new <slug>`")
+        output.skip("no extensions yet — start one with `tabmill bootstrap <slug>`")
         return
     width = max(len(r.slug) for r in rows)
     for r in rows:
         # Two lines per extension: where it stands, then the next command — fits 80 columns.
+        store = lifecycle.store_state(reg.get(r.slug, {}))
+        stage = stages[r.slug]
         output.console.print(
             f"[bold]{r.slug.ljust(width)}[/bold]  {r.version or '—':<8}"
-            f"{STATUS_STYLE[r.status]} · {lifecycle.store_state(reg.get(r.slug, {}))}"
+            f"{STAGE_STYLE.get(stage, stage)}"
+            + ("" if stage in ("published", "maintained") else f" · {store}")
         )
         if r.error:
             output.fail(f"{r.slug}: {r.error}")
@@ -871,12 +918,127 @@ def status(
         output.console.print(f"  next: {steps[r.slug]}")
     if ws is None:
         return
-    slots = registry.save_slots(ws)
-    line = f"slots: {slots['used']}/{slots['limit']} published"
-    if slots["used"] >= slots["limit"]:
+    registry.save_slots(ws)
+    _slots_line(portfolio.slots(cfg.tool_dir, ws))
+
+
+STAGE_STYLE = {
+    "invalid": "[red]✗ invalid[/red]",
+    "orphan": "[red]✗ orphan[/red]",
+    "shaped": "[yellow]↷ shaped[/yellow]",
+    "approved": "[yellow]↷ approved[/yellow]",
+    "bootstrapped": "[green]✓ bootstrapped[/green]",
+    "checked": "[green]✓ checked[/green]",
+    "shipped": "[green]✓ shipped[/green]",
+    "published": "[green]✓ published[/green]",
+    "maintained": "[green]✓ maintained[/green]",
+}
+
+
+def _portfolio(cfg: config.Config) -> portfolio.Portfolio:
+    try:
+        return portfolio.read(cfg.tool_dir)
+    except portfolio.PortfolioError as e:
+        output.fail(str(e))
+        raise typer.Exit(1) from e
+
+
+def _slots_line(view: portfolio.SlotView) -> None:
+    used = len(view.published) + len(view.reserved)
+    line = f"slots: {len(view.published)} published + {len(view.reserved)} reserved of {view.limit}"
+    if used >= view.limit:
         output.skip(f"{line} — at the cap: request more in the Developer Dashboard")
     else:
-        output.ok(line)
+        output.ok(f"{line} — {view.free} free")
+
+
+@app.command()
+def slots() -> None:
+    """Store slots: published, reserved by `approve`, and free (portfolio.yaml + registry)."""
+    cfg, ws = _config_and_workspace()
+    _portfolio(cfg)
+    view = portfolio.slots(cfg.tool_dir, ws)
+    for slug in view.published:
+        output.ok(f"published: {slug}")
+    for slug in view.reserved:
+        output.skip(f"reserved: {slug} (approved, not yet published)")
+    _slots_line(view)
+
+
+@app.command("templates")
+def templates_cmd() -> None:
+    """Surface templates: what each is for, the permissions its code needs, built or not."""
+    table = Table(show_edge=False, pad_edge=False, box=None, header_style="bold")
+    for col in ("template", "status", "trigger", "needs", "use for"):
+        table.add_column(col, overflow="fold")
+    for s in surfaces.SURFACES.values():
+        table.add_row(
+            s.name,
+            "[green]✓ built[/green]" if s.status == "implemented" else "[yellow]↷ stub[/yellow]",
+            s.trigger,
+            ", ".join(p for p, _ in s.permissions) or "—",
+            s.use_for,
+        )
+    output.console.print(table)
+    output.console.print(f"  target: {surfaces.TARGET} (the only one until v2.G)")
+
+
+@app.command()
+def doctor(
+    fix: bool = typer.Option(
+        False, "--fix", help="Migrate recipes to schema v2 and seed portfolio.yaml."
+    ),
+) -> None:
+    """Everything `settings preflight` checks, plus recipes, portfolio.yaml, claude and lamill."""
+    failed = False
+    for c in preflight.run():
+        {"ok": output.ok, "warn": output.skip, "fail": output.fail}[c.status](
+            f"{c.name}: {c.detail}"
+        )
+        failed = failed or c.status == "fail"
+    for tool, why in (("claude", "idea stage AI (v2.B)"), ("lamill", "demand data, sitemaps")):
+        if shutil.which(tool):
+            output.ok(f"{tool}: on PATH")
+        else:
+            output.skip(f"{tool}: not on PATH — needed for {why}")
+    cfg, ws = _config_and_workspace()
+    for slug in catalog.recipe_slugs(cfg.tool_dir):
+        path = generate.recipe_dir(cfg.tool_dir, slug) / generate.RECIPE_FILE
+        try:
+            ext = extension.load_file(path)
+        except extension.ExtensionError as e:
+            output.fail(str(e))
+            failed = True
+            continue
+        if recipe_v2.version_of(ext) >= 2:
+            output.ok(f"recipes/{slug}: schema v2")
+        elif fix:
+            recipe_v2.migrate(cfg.tool_dir, slug)
+            output.ok(f"recipes/{slug}: migrated to schema v2")
+        else:
+            output.skip(f"recipes/{slug}: schema v1 — `tabmill doctor --fix` migrates it")
+    pf = portfolio.path(cfg.tool_dir)
+    try:
+        missing = [
+            s
+            for s in catalog.recipe_slugs(cfg.tool_dir)
+            if s not in portfolio.read(cfg.tool_dir).items
+        ]
+    except portfolio.PortfolioError as e:
+        output.fail(str(e))
+        raise typer.Exit(1) from e
+    if fix and (missing or not pf.exists()):
+        added = portfolio.seed(cfg.tool_dir, ws)
+        output.ok(f"{portfolio.PORTFOLIO_FILE}: seeded ({', '.join(added) or 'slots only'})")
+    elif missing or not pf.exists():
+        output.skip(
+            f"{portfolio.PORTFOLIO_FILE}: missing {', '.join(missing) or 'file'} — "
+            "`tabmill doctor --fix` seeds it"
+        )
+    else:
+        output.ok(f"{portfolio.PORTFOLIO_FILE}: every recipe listed")
+    if failed:
+        raise typer.Exit(1)
 
 
 def _refresh(cfg: config.Config, rows: dict[str, dict[str, object]]) -> None:

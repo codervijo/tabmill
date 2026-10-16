@@ -21,3 +21,6 @@ build/
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/
+
+# v2 idea sessions: raw AI output stays local (D-040)
+ideas/*/raw/

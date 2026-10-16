@@ -7,63 +7,16 @@ ships, its section moves to `docs/shipping-history.md`.
 Core principle: **extract, don't design upfront.** #1 is built in the workspace with minimal
 tooling; packages and CLI commands move into TOOL_DIR only when #2 needs them.
 
-## v1.C — Extension #1 recipe (save-page-pdf-md) (in progress)
+## v2 — Idea stage (D-039, D-040)
 
-- Recipe feature code: article extraction (`@mozilla/readability`), HTML→Markdown (`turndown`),
-  local branded PDF via a MarkPDF-style print page (D-013). Deps justified in DECISIONS.md first.
-- Re-verify v1.A WXT spike checks in docker. Zip.
+Full plan, phases v2.A–v2.H, open decisions: `docs/v2-plan.md` (accepted 2026-10-15).
+Build one phase at a time; stop for review after each. v2.A ✅ 2026-10-16; v2.B in progress.
 
-Done = #1 works on 10 real test URLs (listed in NOTES.md with results); smoke passes; zip builds;
-time-to-first-build logged.
+Carried from v1: first real CWS API upload + publish (#1's first update); v1.L real-use
+validation. Idea candidates: local-schema-generator, jwt-inspector.
 
-## v1.G — Assets, listing, publish, release CI (in progress)
-
-- CLI: `assets` (Playwright icons 16/32/48/128, screenshots 1280×800, promo tile 440×280),
-  `listing`, `publish` (CWS API **v2**, updates `registry.json`). CI release zips on tag.
-- Finalize `tabmill-release` and `tabmill-store-listing`.
-- Shared privacy policy (D-036): `privacy-policy.yaml` → `hub` writes lamill.io
-  `src/content/privacy.json` → one page `lamill.io/extensions/privacy`. Release lint
-  `privacy-coverage` fails when a recipe does more than the policy covers; `hub-urls` checks
-  the live page shows the current policy version.
-
-Done = #1 fully prepared via CLI; operator does the first real publish (dashboard "Add new item").
-
-## v1.J — pressure-wash-quote (new #2 by publish order, D-027)
-
-`maps-overlay` template; recipe: trace surfaces on Google Maps satellite → sq ft (optional
-roof pitch) → WashCalc quote, PDF export.
-
-## v1.K — Landing, analytics (in progress)
-
-CLI `landing` (via `lamill`); `packages/analytics` opt-in; finalize `tabmill-landing-page`.
-
-## v1.L — Lifecycle CLI (in progress; D-034, D-038)
-
-Operator (2026-10-08): ~20 commands, hard to know which to use. One path per extension:
-start → publish → track health over its store life. Shape amended 2026-10-12 (D-038).
-
-| Command | Absorbs |
-|---|---|
-| `new <slug>` | `create` (first run writes the starter recipe), `new` (later runs regenerate) |
-| `try <slug> [--dev]` | `build`, `dev`, `try` |
-| `check [slug]` | `test`, `lint`; no slug = every extension |
-| `ship <slug> [--publish]` | `assets`, `listing`, `landing`, `zip`, `release`, `hub`; `--publish` = attended upload |
-| `status [slug]` | `list`, `status`, `publish --check` (`--refresh`); prints the next command per extension |
-| `settings …` | `init`, `skills sync`, `preflight` join `apikeys` (no `setup` verb) |
-| `advanced …` | every old single-step command, unchanged, one level down |
-
-Built 2026-10-12: suite green. Still owed before this ships: operator runs the six commands on
-a real extension (docker `check`, `ship`, a `--publish` update once #1 is approved).
-
-Done = an extension goes recipe → store → health check using only the top-level commands;
-skills, README, and `docs/creating-an-extension.md` lead with them.
-
-## v1.M — local-schema-generator, jwt-inspector
-
-Recipes; jwt-inspector never takes an early slot.
-
-## v2.A — WordPress plugins: planning / decisions lock (D-037)
+## v4.A — WordPress plugins: planning / decisions lock (D-037; renumbered by D-039, D-040)
 
 Not started. Target: the wordpress.org plugin directory. Spikes: plugin directory rules +
 submission flow, PHP build/test in docker, how recipes carry a platform. Open: which plugin is
-first (v2.C). Build phases v2.B–v2.E: `docs/prd.md` § 5.
+first (v4.C). Build phases v4.B–v4.E: `docs/prd.md` § 5.

@@ -1,4 +1,4 @@
-"""All extensions in one view (`tabmill status`) and starter recipes (`tabmill new`)."""
+"""All extensions in one view (`tabmill status`) and starter recipes (`tabmill bootstrap`)."""
 
 from __future__ import annotations
 
@@ -7,7 +7,7 @@ from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any
 
-from . import extension, generate, registry
+from . import extension, generate, registry, surfaces
 from .templates import render
 
 RECIPE_TEMPLATE = "templates/recipe/extension.yaml.tmpl"
@@ -16,10 +16,6 @@ SLUG_MAX = 40
 BUILT_MANIFEST = ".output/chrome-mv3/manifest.json"
 # Manifest-facing fields: `new` / `build` refuse while these hold ‹FILL›.
 MANIFEST_FIELDS = ("name", "summary", "single_purpose")
-TEMPLATE_PERMISSION_REASONS = {
-    "sidePanel": "Show results in Chrome's side panel, opened from the toolbar button.",
-    "scripting": "Add the overlay to the current tab when the user clicks the toolbar button.",
-}
 
 
 class CreateError(Exception):
@@ -106,7 +102,7 @@ def rows(tool_dir: Path, workspace: Path | None) -> list[Row]:
 
 def implemented_templates(tool_dir: Path) -> list[str]:
     root = tool_dir / generate.EXT_TEMPLATES_DIR
-    return [t for t in extension.TEMPLATES if (root / t).is_dir()]
+    return [t for t in surfaces.IMPLEMENTED if (root / t).is_dir()]
 
 
 def create(tool_dir: Path, workspace: Path | None, slug: str, template: str) -> Path:
@@ -127,8 +123,8 @@ def create(tool_dir: Path, workspace: Path | None, slug: str, template: str) -> 
     if workspace and workspace.exists() and slug in registry.slugs(workspace):
         raise CreateError(f"`{slug}` is already registered in {workspace / 'registry.json'}")
     extra = "".join(
-        f"  - name: {perm}\n    justification: {TEMPLATE_PERMISSION_REASONS[perm]}\n"
-        for perm in extension.TEMPLATE_PERMISSIONS.get(template, ())
+        f"  - name: {perm}\n    justification: {reason}\n"
+        for perm, reason in surfaces.SURFACES[template].permissions
     )
     text = render(
         (tool_dir / RECIPE_TEMPLATE).read_text(),

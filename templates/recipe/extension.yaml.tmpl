@@ -1,6 +1,10 @@
 # Recipe for {{slug}} — source of truth for the generated extension (ADR-0008).
-# Fill every ‹FILL›: `tabmill new` refuses while name / summary / single_purpose are unfilled,
-# and release lint blocks on any that remain (D-015). Then: tabmill new {{slug}}
+# Fill every ‹FILL›: `tabmill bootstrap` refuses while name / summary / single_purpose are
+# unfilled, and release lint blocks on any that remain (D-015). Then: tabmill bootstrap {{slug}}
+schema_version: 2  # recipe schema (D-040)
+target: chrome-mv3
+recipe_revision: 1  # bump to change frozen fields after `tabmill approve`
+trigger: toolbar
 name: ‹FILL›            # store title, ≤ 75 chars — lead with the job, not the brand
 slug: {{slug}}
 version: 0.1.0

@@ -1,0 +1,10 @@
+# Tabmill portfolio (D-040): store slots + approval per extension.
+# Written by `tabmill doctor --fix` and `tabmill approve`; store state lives in the
+# workspace registry.json.
+items:
+  local-seo-checker:
+    approval: migrated
+  pressure-wash-quote:
+    approval: migrated
+  save-page-pdf-md:
+    approval: migrated

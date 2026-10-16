@@ -14,6 +14,8 @@ Two repos, related by a computed relative layout (ADR-0007):
 │   ├── Makefile + Makefile.local    tool build via builder Python stack (D-018)
 │   ├── pyproject.toml  cli/tabmill/ Python CLI (ADR-0002)
 │   ├── recipes/<slug>/              extension source: extension.yaml + feature code (ADR-0008)
+│   ├── portfolio.yaml               slot limit + approval per extension (D-040)
+│   ├── schemas/                     JSON Schemas generated from the pydantic models (D-040)
 │   ├── templates/extension/<tpl>/   generic surface code (popup today)
 │   ├── templates/workspace/  ci/    rendered into the workspace by `tabmill init`
 │   ├── skills/  packages/ (v1.E)  docs/
@@ -116,7 +118,7 @@ Two repos, related by a computed relative layout (ADR-0007):
   rendered) + `recipes/<slug>/**` overlay (same path wins; `extension.yaml` excluded) +
   generated `manifest.gen.json`, `package.json` (base dev toolchain + YAML `dependencies`),
   `src/generated/config.ts` (name, single purpose, privacy line, UTM CTA + footer URLs),
-  `README.md`. `tabmill new` registers the slug; `build` = validate + sync + `make in-docker-build`.
+  `README.md`. `tabmill bootstrap` registers the slug; `build` = validate + sync + `make in-docker-build`.
 - **popup template**: WXT `srcDir: src`, `wxt.config.ts` passes `manifest.gen.json`; popup shell
   (`src/lib/brand.ts`) renders title, `src/feature/` mount (stub unless the recipe supplies it),
   privacy line, CTA, "Built by Lamill" mark + footer; typed `createMessenger` helper; Vitest
@@ -132,7 +134,21 @@ Two repos, related by a computed relative layout (ADR-0007):
 
 ## 3. Data shapes / schemas
 
-- **extension.yaml** (kickoff field list; typed schema lands in v1.E): `name`, `slug`,
+- **Recipe schema v2** (D-040, `cli/tabmill/schema.py`, `schemas/recipe_v2.schema.json`):
+  v1 fields plus `schema_version: 2`, `target: chrome-mv3`, `recipe_revision` (integer; bump
+  to change frozen fields after `approve`), `idea_id`, `trigger`, `restricted_pages`,
+  `provenance[] {claim, value, source, date, kind}`. A recipe without `schema_version` is v1:
+  it still loads; `tabmill doctor --fix` migrates it by inserting the v2 keys as text, so
+  comments survive (`recipe_v2.py`).
+- **portfolio.yaml** (TOOL_DIR, `portfolio.py`): `slots.limit` (default 2) and `items.<slug>
+  {approval: migrated|approved|override, idea_id, recipe_revision, frozen_sha256,
+  approved_at, slot: none|reserved}`. Slow-changing tabmill-side record; store state stays
+  in registry.json. Free slots = limit − PUBLISHED − reserved.
+- **Lifecycle** (`lifecycle.stage`): idea → shaped → evidenced → verdict → approved →
+  bootstrapped → checked (registry `checked_version` = recipe version, set by `check`) →
+  shipped (release folder or store_id) → published → maintained (an API publish after the
+  manual first one).
+- **extension.yaml** (original v1.A field list; superseded by the schema above): `name`, `slug`,
   `version`, `single_purpose`, `template`, `permissions[] {name, justification}`,
   `optional_permissions[]`, `portfolio_site`, `landing_page_url`, `target_keywords[]`,
   `cta_text`, `cta_url`, `utm_campaign`, `store_category`, `analytics` (default `false`),
@@ -148,14 +164,17 @@ Two repos, related by a computed relative layout (ADR-0007):
 `cli/tabmill/`: `cli` (typer app), `config`, `constants`, `output` (✓ ↷ ✗), `templates`,
 `skills` (skill sources), `sync` (manifest engine), `workspace` (seed + managed files),
 `extension` (YAML load/validate/manifest fields), `generate` (template + recipe), `registry`,
-`catalog` (list rows, starter recipes), `lifecycle` (next step per extension). Planned packages: brand, funnel, messaging, analytics, policy (extracted in v1.E/v1.H).
+`catalog` (list rows, starter recipes), `lifecycle` (stage + next step per extension),
+`surfaces` (template registry), `provenance` (Fact), `recipe_v2` (migration, JSON Schema),
+`portfolio` (portfolio.yaml, slots). v2.B+ adds the idea-stage modules (`docs/v2-plan.md` § 4). Planned packages: brand, funnel, messaging, analytics, policy (extracted in v1.E/v1.H).
 
 ## 5. CLI / UX surface
 
-Lifecycle at the top level (v1.L, D-034/D-038): `new` · `try` · `check [slug]` · `ship
-[--publish]` · `status [slug]`. `settings`: `init`, `skills sync`, `preflight`, `apikeys`.
-`advanced` (the single steps): `create build dev test lint zip assets listing landing release
-publish hub list`. Output uses `✓ ↷ ✗`.
+Top level (D-034, D-038, D-040): `new` (idea stage from v2.B; `new <slug>` = deprecated alias
+for `bootstrap` until v3.A) · `bootstrap` · `try` · `check [slug]` · `ship` (never uploads) ·
+`publish` (attended upload) · `status [slug]` · `slots` · `templates` · `doctor [--fix]`.
+`settings`: `init`, `skills sync`, `preflight`, `apikeys`. `advanced` (the single steps):
+`create build dev test lint zip assets listing landing release hub list`. Output uses `✓ ↷ ✗`.
 
 ## 6. Integrations / external APIs
 
@@ -189,4 +208,8 @@ See `PLAN.md`.
 
 ## 10. Tracked refactors
 
-(none)
+- **Build-stage logic lives in `cli.py`** (2026-10-15, D-040). `_release`, `_publish`,
+  `_tool_page`, `_hub`, `_refresh` hold business logic inside the typer module (~1,000 lines).
+  v2's rule is a thin CLI; new idea-stage code follows it, but these helpers stay put in v2 to
+  keep the working ship path safe. Move them to a `build` module when one of them next needs a
+  real change.

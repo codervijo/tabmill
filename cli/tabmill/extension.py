@@ -12,7 +12,7 @@ from urllib.parse import urlparse
 
 import yaml
 
-from . import schema
+from . import schema, surfaces
 
 GENERATED_MANIFEST = "manifest.gen.json"
 NAME_MAX = 75  # developer.chrome.com/docs/extensions/reference/manifest/name
@@ -30,9 +30,7 @@ REQUIRED = (
     "cta_url",
     "utm_campaign",
 )
-TEMPLATES = ("popup", "side-panel", "devtools", "context-menu", "maps-overlay")
-# Permissions a template's own code needs; the recipe must declare + justify them.
-TEMPLATE_PERMISSIONS = {"side-panel": ("sidePanel",), "maps-overlay": ("scripting",)}
+TEMPLATES = surfaces.NAMES
 # RFC 2606 / RFC 6761 reserved names → placeholder URLs (D-015).
 _RESERVED_TLDS = (".example", ".test", ".invalid", ".localhost")
 _RESERVED_HOSTS = ("example.com", "example.net", "example.org")
@@ -78,7 +76,8 @@ def validate(ext: dict[str, Any], slug: str) -> list[str]:
     if ext.get("analytics", False) is not False:
         errors.append("`analytics` opt-in isn't supported until v1.H")
     declared = {p.get("name") for p in ext["permissions"] if isinstance(p, dict)}
-    for need in TEMPLATE_PERMISSIONS.get(str(ext["template"]), ()):
+    # Permissions a template's own code needs; the recipe must declare + justify them.
+    for need in surfaces.needed_permissions(str(ext["template"])):
         if need not in declared:
             errors.append(f"template `{ext['template']}` needs permission `{need}`")
     for key in ("permissions", "optional_permissions", "host_permissions"):

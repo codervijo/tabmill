@@ -1,6 +1,6 @@
 ---
 name: tabmill-new-extension
-description: Turn a Chrome extension idea into a tabmill recipe — recipes/<slug>/extension.yaml with one narrow single purpose, a template (popup, side-panel, devtools, context-menu, maps-overlay), minimal permissions with justifications, funnel fields, analytics opt-in (default off), plus feature code under recipes/<slug>/src/ — then generate it with `tabmill new <slug>`. Use in the tabmill repo when the user proposes a new extension, says "new extension", "extension idea", "let's build a tool that…", or asks to scaffold one. Refuses ideas that duplicate an entry in the workspace registry.json or an existing recipe.
+description: Turn a Chrome extension idea into a tabmill recipe — recipes/<slug>/extension.yaml with one narrow single purpose, a template (popup, side-panel, maps-overlay; see `tabmill templates`), minimal permissions with justifications, funnel fields, analytics opt-in (default off), plus feature code under recipes/<slug>/src/ — then generate it with `tabmill bootstrap <slug>`. Use in the tabmill repo when the user proposes a new extension, says "new extension", "extension idea", "let's build a tool that…", or asks to scaffold one. Refuses ideas that duplicate an entry in the workspace registry.json or an existing recipe.
 ---
 
 # tabmill: new extension (recipe)
@@ -26,12 +26,12 @@ sentences → two extensions, or one is out of scope. Confirm with the user.
 | template | when | status |
 |---|---|---|
 | `popup` | one action on the current page | ✅ `templates/extension/popup/` |
-| `side-panel` | persistent results while browsing | planned |
-| `devtools` | developer inspection | planned |
-| `context-menu` | act on a selection or link | planned |
-| `maps-overlay` | content-script UI on google.com/maps | planned |
+| `side-panel` | persistent results while browsing | ✅ `templates/extension/side-panel/` |
+| `maps-overlay` | content-script UI on google.com/maps | ✅ `templates/extension/maps-overlay/` |
+| `page-overlay` | measure / annotate on top of any page | stub — nameable, not buildable |
 
-A planned template must be added to `templates/extension/` first (it's a tabmill change —
+`uv run tabmill templates` is the live list (`cli/tabmill/surfaces.py`). A stub must be built
+in `templates/extension/` first (it's a tabmill change —
 plan it in TODO.md).
 
 ## 4. Permissions (minimal)
@@ -53,7 +53,7 @@ No real CTA destination yet → reserved placeholder host (`https://<name>.examp
 
 ## 7. Write the recipe
 
-Start from the starter: `uv run tabmill new <slug> [--template popup]` — the first run writes
+Start from the starter: `uv run tabmill bootstrap <slug> [--template popup]` — the first run writes
 the recipe (refuses bad slugs). Then fill every `‹FILL›`. Resulting shape:
 
 ```yaml
@@ -85,7 +85,7 @@ tests under `recipes/<slug>/tests/`. A recipe file replaces the template file at
 
 ## 8. Generate and verify
 
-`uv run tabmill new <slug>` again (generates; refuses while name / summary / single_purpose
+`uv run tabmill bootstrap <slug>` again (generates; refuses while name / summary / single_purpose
 are `‹FILL›`) → `uv run tabmill check <slug>` (typecheck, unit, smoke, lint) →
 `uv run tabmill try <slug>` to use it in Chromium. Record start/first-build times in NOTES.md
 (time-to-first-build). `uv run tabmill status` shows where each extension stands and the

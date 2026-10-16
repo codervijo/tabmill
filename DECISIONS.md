@@ -284,7 +284,7 @@ the live page shows `Policy version <N>`, so an undeployed policy change blocks 
 Per-extension permission reasons stay on the extension's hub page and listing. Support URL
 unchanged (D-029).
 
-## D-037 — WordPress plugin support slotted as tier v2 (Accepted, 2026-10-12)
+## D-037 — WordPress plugin support slotted as tier v2 (Accepted, 2026-10-12; tier renumbered v3 by D-039)
 
 Operator: do WordPress plugins with the same tool. Same funnel in a second channel —
 single-purpose free plugins generated from recipes, "Built by Lamill" + CTA, tracked in the
@@ -303,6 +303,37 @@ one level down, the same verb at one-extension and all-extensions scope, setup u
 - `check` and `status` with no slug run across every extension.
 - Old single-step commands stay, visible, under `tabmill advanced` (operator's choice over
   hidden or removed).
+
+## D-039 — v1 closed; v2 = AI-assisted idea intake; WordPress plugins move to v3 (Accepted, 2026-10-14)
+
+Operator, after #1 was approved and published (store, lamill.io hub page, markpdf.dev tool page
+all live): "call v1 done first and plan this for v2 (make room)". The next extension starts
+from a rough idea, not a slug, so tabmill needs an idea stage before `new` writes a recipe:
+AI asks clarifying questions and drafts the recipe (lessons from `lamill new`: free-text topic,
+research before scaffold, `claude -p` without tools, versioned prompt files, real data labelled
+apart from AI guesses). Shape set by the operator's spec — D-040.
+- v1 closed with leftovers carried (operator's choice): v1.C, v1.G, v1.J, v1.K, v1.L marked done
+  as built. Carried into v2.A: the first real CWS API upload + publish (`tabmill ship
+  save-page-pdf-md --publish` on the first update) and v1.L real-use validation. v1.C's 10-URL
+  check was never run (superseded by store approval); v1.J's real-Maps try was never run;
+  the v1.K analytics package is dropped until an extension needs analytics.
+- v1.M dropped as a phase; local-schema-generator and jwt-inspector stay as idea candidates
+  for v2. local-seo-checker and pressure-wash-quote (built, not in the store) are not being
+  pursued now.
+- WordPress plugins (D-037) renumbered v2 → v3 unchanged: v3.A–v3.E (then → v4 by D-040).
+
+## D-040 — v2 shape: idea stage per the operator's spec (Accepted, 2026-10-15)
+
+Operator spec (2026-10-15): `new` takes a rough idea or a pasted "Tabmill brief" (claude.ai
+research) → stage engine clarify → shape → evidence → check → verdict → write; `approve` (human
+gate) freezes the recipe and reserves a slot; today's `new <slug>` becomes `bootstrap` (alias
+through v2, removed in v3.A). AI proposes, code decides (allowlist, limits, slots, verdict cap);
+every fact carries provenance; synthesis-only demand/competition caps the verdict at GO-IF.
+Phases v2.A–v2.H, v2.I–v2.Z reserved. Plan: `docs/v2-plan.md`. Operator resolved § 9 there
+("1a, 2a, 3a, 4 ok"): v2.A stays as specified (plan + build, an explicit exception to "vN.A is
+planning only"); v3 = v2 follow-ups, WordPress → v4; `ship` never uploads — the attended upload
+is top-level `tabmill publish <slug>` (amends D-038), `ship --publish` errors with that hint;
+`ideas/` committed except `raw/`.
 
 ## D-009 — Store API: V2 only, service-account auth (Proposed, 2026-10-03)
 

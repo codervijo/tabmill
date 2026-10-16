@@ -1,6 +1,10 @@
 # Recipe for local-seo-checker — source of truth for the generated extension (ADR-0008).
 # Fill every ‹FILL›: `tabmill new` refuses while name / summary / single_purpose are unfilled,
 # and release lint blocks on any that remain (D-015). Then: tabmill new local-seo-checker
+schema_version: 2  # recipe schema (D-040)
+target: chrome-mv3
+recipe_revision: 1  # bump to change frozen fields after `tabmill approve`
+trigger: toolbar
 name: Local SEO Checker
 slug: local-seo-checker
 version: 0.1.0

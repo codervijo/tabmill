@@ -81,7 +81,7 @@ def managed_files(cfg: Config) -> dict[str, bytes]:
     for rel, text in _render_tree(cfg.tool_dir / CI_TEMPLATE_DIR, values).items():
         wanted[f"{CI_DST_DIR}/{rel}"] = text.encode()
     wanted.update(skills.installed_files(loaded))
-    # Every extension registered by `tabmill new` is regenerated from its recipe (ADR-0008).
+    # Every extension registered by `tabmill bootstrap` is regenerated from its recipe (ADR-0008).
     for slug in registry.slugs(cfg.workspace):
         for rel, data in generate.extension_files(cfg.tool_dir, slug).items():
             wanted[f"extensions/{slug}/{rel}"] = data

@@ -1,4 +1,4 @@
-"""The one next command per extension (`tabmill status`, D-034): recipe → store → live."""
+"""Where each extension stands and the one next command (`tabmill status`, D-034, D-040)."""
 
 from __future__ import annotations
 
@@ -8,6 +8,36 @@ from . import catalog
 from .listing import RELEASES_DIR
 
 LIVE = "—"
+# D-040. Ideas before a recipe exists are read from ideas/<id>/ (v2.B on).
+STAGES = (
+    "idea",
+    "shaped",
+    "evidenced",
+    "verdict",
+    "approved",
+    "bootstrapped",
+    "checked",
+    "shipped",
+    "published",
+    "maintained",
+)
+
+
+def stage(row: catalog.Row, reg: dict[str, Any], approved: bool, released: bool) -> str:
+    """Lifecycle stage of a recipe-backed extension; `invalid` / `orphan` pass through.
+    `approved` = portfolio.yaml has an approval (or `migrated`) for it."""
+    if row.status in ("invalid", "orphan"):
+        return row.status
+    if row.status == "recipe":
+        return "approved" if approved else "shaped"
+    if reg.get("published_state") == "PUBLISHED":
+        # submitted_version is only set by an API publish = an update after the manual first one.
+        return "maintained" if reg.get("submitted_version") else "published"
+    if released or reg.get("store_id"):
+        return "shipped"
+    if reg.get("checked_version") and str(reg["checked_version"]) == row.version:
+        return "checked"
+    return "bootstrapped"
 
 
 def store_state(reg: dict[str, Any]) -> str:
@@ -31,8 +61,8 @@ def next_step(row: catalog.Row, reg: dict[str, Any], released: bool) -> str:
         return f"restore recipes/{slug}/ or remove it from registry.json"
     if row.status == "recipe":
         if any(f in row.placeholders for f in catalog.MANIFEST_FIELDS):
-            return f"fill ‹FILL› in {recipe}, then `tabmill new {slug}`"
-        return f"tabmill new {slug}"
+            return f"fill ‹FILL› in {recipe}, then `tabmill bootstrap {slug}`"
+        return f"tabmill bootstrap {slug}"
     if row.status == "generated":
         return f"tabmill try {slug}"
     if not reg.get("store_id"):
@@ -50,5 +80,5 @@ def next_step(row: catalog.Row, reg: dict[str, Any], released: bool) -> str:
         return f"tabmill status {slug} --refresh"
     submitted = reg.get("submitted_version")
     if submitted and str(submitted) != row.version:
-        return f"tabmill ship {slug} --publish"
+        return f"tabmill publish {slug}"
     return LIVE

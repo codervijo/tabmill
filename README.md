@@ -19,19 +19,24 @@ page on a Lamill portfolio site.
 ## Commands
 
 ```
-uv run tabmill new <slug>           # first run: starter recipe; after filling it: generate
+uv run tabmill bootstrap <slug>     # first run: starter recipe; after filling it: generate
 uv run tabmill try <slug> [--url URL] [--dev]  # build + Chromium in docker, window on your desktop
 uv run tabmill check [slug]         # typecheck + unit + smoke + store-policy lint (no slug = all)
 uv run tabmill ship <slug>          # assets, listing, tool page, release lint, zip, upload folder, hub
-uv run tabmill ship <slug> --publish  # …then upload + submit for review (attended only)
-uv run tabmill status [slug] [--refresh]  # where each extension stands + the next command
+uv run tabmill publish <slug>       # upload + submit for review (attended only; ship never uploads)
+uv run tabmill status [slug] [--refresh]  # lifecycle stage + the next command
+uv run tabmill slots | templates | doctor [--fix]  # store slots · surface templates · full check
 ```
+
+v2 (D-040, `docs/v2-plan.md`) puts an idea stage in front: `tabmill new "<rough idea>"` or a
+pasted Tabmill brief → clarify → shape → evidence → check → verdict → `approve` (from v2.B on).
+`tabmill new <slug>` still works through v2 as a deprecated alias for `bootstrap`.
 
 Setup lives under `settings`; the single steps the commands above run live under `advanced`:
 
 ```
 uv run tabmill settings init | skills sync | preflight | apikeys list|set|delete
-uv run tabmill advanced create|build|dev|test|lint|zip|assets|listing|landing|release|publish|hub|list
+uv run tabmill advanced create|build|dev|test|lint|zip|assets|listing|landing|release|hub|list
 ```
 Anywhere: `uv tool install --editable ~/work/projects/droyfun/tabmill`, then `tabmill …`.
 

@@ -115,7 +115,7 @@ def credentials(cfg: config.Config | None) -> Check:
         return Check(
             "credentials",
             "warn",
-            "not configured — only `ship --publish` and `status --refresh` need them "
+            "not configured — only `publish` and `status --refresh` need them "
             "(`tabmill settings apikeys set`)",
         )
     return Check(

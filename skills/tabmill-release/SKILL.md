@@ -9,8 +9,8 @@ Store-API facts: [reference.md](reference.md) (verified 2026-10-03). Commands ru
 tabmill repo; all Node work happens in the builder container.
 
 **Hard rule: this skill never publishes.** It ends at "zip built + checks passing + listing
-drafted". `tabmill ship <slug> --publish` refuses without a terminal and asks for
-confirmation — only the user runs it.
+drafted". `ship` never uploads (D-040); `tabmill publish <slug>` refuses without a terminal
+and asks for confirmation — only the user runs it.
 
 ## Steps
 
@@ -38,8 +38,9 @@ confirmation — only the user runs it.
 - **New item (no `store_id`)**: `uv run tabmill ship <slug>` ends with the dashboard steps —
   Add new item, paste listing + privacy answers, set visibility, then put the item ID in
   `registry.json`. New publishers can publish only two extensions until more are requested.
-- **Existing item**: `uv run tabmill ship <slug> --publish [--staged]` → the steps above, then
-  confirm, upload, submit, status into `registry.json`. Later:
+- **Existing item**: `uv run tabmill ship <slug>` (the steps above), then the user runs
+  `uv run tabmill publish <slug> [--staged]` → confirm, upload, submit, status into
+  `registry.json`. Later:
   `uv run tabmill status <slug> --refresh`.
 - Credentials: `uv run tabmill settings apikeys set <KEY>`; check with `uv run tabmill settings apikeys list`.
 

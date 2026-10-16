@@ -30,10 +30,15 @@ def test_top_level_is_the_lifecycle() -> None:
     assert isinstance(group, typer.core.TyperGroup)
     assert list(group.commands) == [
         "new",
+        "bootstrap",
         "try",
         "check",
         "ship",
+        "publish",
         "status",
+        "slots",
+        "templates",
+        "doctor",
         "settings",
         "advanced",
     ]
@@ -50,7 +55,7 @@ def test_old_commands_live_under_advanced_and_settings() -> None:
     [
         (Row("a", "invalid"), {}, False, "fix recipes/a/extension.yaml"),
         (Row("a", "recipe", placeholders=["name"]), {}, False, "fill ‹FILL›"),
-        (Row("a", "recipe", placeholders=["cta_url"]), {}, False, "tabmill new a"),
+        (Row("a", "recipe", placeholders=["cta_url"]), {}, False, "tabmill bootstrap a"),
         (Row("a", "generated"), {}, False, "tabmill try a"),
         (Row("a", "built", placeholders=["cta_url"]), {}, False, "fill cta_url"),
         (Row("a", "built"), {}, False, "tabmill ship a"),
@@ -61,7 +66,7 @@ def test_old_commands_live_under_advanced_and_settings() -> None:
             Row("a", "built", "1.1"),
             {"store_id": "x", "published_state": "PUBLISHED", "submitted_version": "1.0"},
             True,
-            "tabmill ship a --publish",
+            "tabmill publish a",
         ),
         (Row("a", "built"), {"store_id": "x", "published_state": "PUBLISHED"}, True, "—"),
     ],
@@ -91,7 +96,7 @@ def _register(ws: Path, slug: str, **fields: Any) -> None:
     registry.upsert(ws, slug, {"version": "0.1.0", "status": "generated", **fields})
 
 
-def test_ship_publish_refuses_unattended_before_any_work(
+def test_publish_refuses_unattended_before_any_work(
     app_cfg: Config, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     _register(app_cfg.workspace, "demo", store_id="abc")
@@ -99,10 +104,13 @@ def test_ship_publish_refuses_unattended_before_any_work(
     def no_work(*_: object, **__: object) -> None:
         raise AssertionError("work started before the attended check")
 
-    for name in ("_recipe", "_release", "_make"):
+    for name in ("_recipe", "_release", "_make", "_preflight"):
         monkeypatch.setattr(cli, name, no_work)
-    result = runner.invoke(cli.app, ["ship", "demo", "--publish"])
+    result = runner.invoke(cli.app, ["publish", "demo"])
     assert result.exit_code == 1 and "unattended" in result.stdout
+    # D-040: ship never uploads.
+    result = runner.invoke(cli.app, ["ship", "demo", "--publish"])
+    assert result.exit_code == 1 and "tabmill publish demo" in result.stdout
 
 
 def test_check_without_slug_runs_every_extension_and_keeps_going(

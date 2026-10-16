@@ -93,3 +93,32 @@ The dated H2 is what `lamill project status` parses. Append-only.
 > verbatim-just lessons)" → proposed `settings` instead of `setup`, slug-less `check`/`status`
 > = all → "yes, both changes"
 > → D-038; `new` · `try` · `check` · `ship` · `status` · `settings` · `advanced` built.
+
+## 2026-10-14 — v1 closed; v2 slotted (idea stage); WordPress → v3
+
+> After #1 went live (store, lamill.io hub page, markpdf.dev tool page): "decided not to pursue
+> either of those 2 extensions now but go with another idea. how do i get started with a new
+> idea?" → "check lamill tool's shape for new idea - i may have only a rough idea, tabmill
+> may need to use AI to get clarity" → "let us call v1 done first and plan this for v2 (make
+> room)" → open v1 work: "Done; leftovers carried"; v1.M: "Keep as a candidate list"
+> → D-039. Also "gitignore pycache and any build artifacts, commit and push" → `655d4fb`.
+
+## 2026-10-15 — v2 spec: idea stage in front of the build pipeline
+
+> Operator spec: plan and build tabmill v2 — `new` takes a rough idea or a pasted "Tabmill
+> brief" (claude.ai research); stages clarify → shape → evidence → check → verdict → write;
+> `approve` gate; `new <slug>` → `bootstrap`; prompts/, rules/lamill.yaml, schemas/, targets/,
+> portfolio.yaml, ideas/<id>/; principles (AI proposes, code decides; provenance; verdict cap;
+> two human gates); phases v2.A–v2.H. "Write docs/v2-plan.md … Stop for my review."
+> → D-040; `docs/v2-plan.md` drafted with four open decisions.
+
+## 2026-10-15 — v2.A built
+
+> "1a, 2a, 3a, 4 ok — start v2.A" → v2.A stays plan + build; WordPress → v4, v3 = v2
+> follow-ups; `ship` never uploads, `publish` top level; `ideas/` committed except `raw/`.
+> → recipe schema v2 + migration, `portfolio.yaml`, `bootstrap`, `slots`, `templates`, `doctor`.
+
+## 2026-10-16 — v2.A done, v2.B started
+
+> "Commit, call 2a done and start 2b" → v2.A committed and marked done; v2.B (stage engine,
+> AI runner, clarify) started.

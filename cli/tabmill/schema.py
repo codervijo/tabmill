@@ -7,7 +7,12 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
-Template = Literal["popup", "side-panel", "devtools", "context-menu", "maps-overlay"]
+from .provenance import Fact
+
+# surfaces.NAMES — a Literal needs the values spelled out; tests keep the two in step.
+Template = Literal["popup", "side-panel", "maps-overlay", "page-overlay"]
+Trigger = Literal["toolbar", "shortcut", "context_menu", "side_panel"]
+SCHEMA_VERSION = 2
 
 
 class Permission(BaseModel):
@@ -31,6 +36,15 @@ class Change(BaseModel):
 
 class Recipe(BaseModel):
     model_config = ConfigDict(extra="forbid")
+    # v2 (D-040). Absent schema_version = a v1 recipe: still loads; `tabmill doctor --fix`
+    # migrates it.
+    schema_version: Literal[1, 2] = 1
+    target: Literal["chrome-mv3"] = "chrome-mv3"
+    recipe_revision: int = Field(default=1, ge=1)  # bump to change frozen fields after approve
+    idea_id: str = ""  # ideas/<id>/ this recipe came from; empty for pre-v2 recipes
+    trigger: Trigger = "toolbar"
+    restricted_pages: str = ""  # behaviour on chrome:// and Web Store pages
+    provenance: list[Fact] = []
     name: str
     slug: str
     version: str = Field(pattern=r"^\d+\.\d+\.\d+$")

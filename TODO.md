@@ -14,11 +14,31 @@ blocker to `NOTES.md`, mark it BLOCKED, move on.
 - [x] WXT (ADR-0004), local PDF (D-013), Makefile.local overrides (ADR-0005)
 - [x] Linking (ADR-0006), skip IndexNow (D-016), tabmill private, placeholder-CTA lint (D-015)
 - [x] HUMAN: CTA for local-seo-checker → `https://lamill.io/extensions`, `portfolio_site: lamill.io` (Rankmill is internal, 2026-10-12)
-- [ ] HUMAN: `git init` TOOL_DIR (+ GitHub repo if wanted)
+- [x] HUMAN: `git init` TOOL_DIR (+ GitHub repo) — origin codervijo/tabmill
 
 ## v1.B — Tool + generator ✅ (2026-10-03; details in docs/shipping-history.md)
 
-## v1.C — Extension #1 recipe: save-page-pdf-md (in progress)
+## v2.A — Plan, recipe schema v2, portfolio.yaml, bootstrap ✅ (2026-10-16; D-040)
+
+Plan: `docs/v2-plan.md` (accepted 2026-10-15).
+
+1. [x] `docs/v2-plan.md`: keep / change / migrate, architecture, phases v2.A–v2.H, open decisions.
+2. [x] Recipe schema v2 (`schema_version`, `target`, `recipe_revision`, `idea_id`, `trigger`,
+       `restricted_pages`, `provenance`) + comment-preserving v1→v2 migration; loader accepts v1;
+       `schemas/recipe_v2.schema.json`. 3 recipes migrated (12 added lines, nothing else).
+3. [x] `portfolio.yaml` seeded (3 × `approval: migrated`, limit 2); lifecycle stages.
+4. [x] `bootstrap <slug>`; `new <slug>` → deprecated alias with warning.
+5. [x] `status` lifecycle stage · `slots` · `templates` (`surfaces.py`; page-overlay stub;
+       devtools / context-menu dropped) · `doctor [--fix]`.
+6. [x] `publish` top level; `ship` never uploads (`--publish` → ✗ with the hint) — D-040 § 9.3.
+7. [x] Tests (`tests/test_v2a.py`, 26 new; 5 existing assertions updated for the agreed
+       renames); docs, skills, README; `ideas/*/raw/` gitignored.
+8. [x] HUMAN: review v2.A (operator, 2026-10-16: "call 2a done").
+
+Carried from v1: real CWS API publish on #1's first update; v1.L real-use validation;
+`TABMILL_PAT` for workspace CI.
+
+## v1.C — Extension #1 recipe: save-page-pdf-md ✅ (closed 2026-10-14, D-039)
 
 Plan (all code in `recipes/save-page-pdf-md/`; workspace only via `tabmill new/build`):
 
@@ -34,10 +54,10 @@ Plan (all code in `recipes/save-page-pdf-md/`; workspace only via `tabmill new/b
 5. [x] Tests: unit (filename, markdown header, sanitizer allowlist via a minimal DOM if needed);
        smoke: print page renders a seeded article and strips `<script>`/`on*` attrs.
 6. [x] Build + typecheck + test + smoke in docker; confirm turndown's browser build excludes domino.
-7. [ ] ⏸ ON HOLD (operator, 2026-10-03) — HUMAN: validate on the 10 approved URLs in real Chrome (load `.output/chrome-mv3` unpacked);
+7. [-] Not run — v1 closed, #1 published (D-039). Was: ⏸ ON HOLD (operator, 2026-10-03) — HUMAN: validate on the 10 approved URLs in real Chrome (load `.output/chrome-mv3` unpacked);
        record results in NOTES.md. Zip via `make in-docker-zip EXT=save-page-pdf-md`.
 
-- [ ] HUMAN (when the workspace repo exists): create a fine-grained PAT, repo access = tabmill only,
+- [ ] → v2 carry-over. HUMAN (when the workspace repo exists): create a fine-grained PAT, repo access = tabmill only,
       permission Contents: read-only — https://github.com/settings/personal-access-tokens/new — and save
       it as secret `TABMILL_PAT` in the `codervijo/chrome-extension-projects` repo (Settings → Secrets and variables → Actions)
 
@@ -65,7 +85,7 @@ Plan (all code in `recipes/save-page-pdf-md/`; workspace only via `tabmill new/b
        while ‹FILL› → filled → `new` generated → `list` shows it; removed afterwards. WXT `build`
        of a created recipe not re-run (same path as #1, verified in v1.B/v1.C).
 
-## v1.L — Lifecycle CLI (in progress; D-034, D-038)
+## v1.L — Lifecycle CLI ✅ (closed 2026-10-14; D-034, D-038, D-039)
 
 Top level: `new` · `try` · `check` · `ship` · `status` · `settings` · `advanced`.
 
@@ -85,17 +105,17 @@ Top level: `new` · `try` · `check` · `ship` · `status` · `settings` · `adv
 9. [x] Tests (CliRunner: help surface, `new` two-step, `status` next column, `ship --publish`
        refusal, `check` all); README, docs, skills → `settings skills sync`.
 
-10. [ ] HUMAN: use only the top-level commands on a real extension — `uv run tabmill check`,
+10. [ ] → v2 carry-over. HUMAN: use only the top-level commands on a real extension — `uv run tabmill check`,
         `uv run tabmill ship <slug>`, and `ship <slug> --publish` for the first update of #1.
 
-## v1.K — Landing + analytics (in progress)
+## v1.K — Landing + analytics ✅ (closed 2026-10-14, D-039)
 
 1. [x] Schema `landing_path` (optional); `cli/tabmill/landing.py`: URL, brief, recipe update.
 2. [x] `tabmill landing <slug> [--check]`: brief → print next steps; `--check` probe → set
        `landing_page_url` in the recipe → `lamill settings gsc submit-sitemap` (soft-fail).
 3. [x] Rewrite `tabmill-landing-page` skill around the brief; tests; docs.
-4. [ ] Analytics package (opt-in) — plan separately before code.
-5. [ ] save-page-pdf-md tool page (operator 2026-10-11: "save webpage as pdf" at
+4. [-] Analytics package — dropped until an extension needs it (D-039).
+5. [x] save-page-pdf-md tool page (operator 2026-10-11: "save webpage as pdf" at
        `/save-webpage-as-pdf`, not "markdown to pdf" — that's markpdf.dev's home query; D-035):
    a. [x] Recipe `target_keywords` reordered (primary first → default `landing_path`).
    b. [x] Bug: brief repeats summary + includes the listing's `‹FILL›` how-to → brief takes
@@ -104,7 +124,7 @@ Top level: `new` · `try` · `check` · `ship` · `status` · `settings` · `adv
           needs it live before submit. New status `unlisted` (pages live, hidden from the hub
           index + sitemap) for any entry not yet PUBLISHED (D-035). lamill.io zod + routes too.
    d. [x] Write the page in sites/markpdf.dev (write-lamill-seo-page skill), uncommitted.
-   e. [ ] HUMAN: review + commit/push markpdf.dev and lamill.io → `tabmill landing
+   e. [x] HUMAN: review + commit/push markpdf.dev and lamill.io → `tabmill landing
           save-page-pdf-md --check` → `tabmill hub` → commit/push lamill.io.
 
 ## v1.I — Slots, status, release, hub, listing URLs ✅ (2026-10-03)
@@ -123,7 +143,7 @@ Top level: `new` · `try` · `check` · `ship` · `status` · `settings` · `adv
        `HUMAN: publish <slug> <version>` in workspace TODO.md → `hub`. Never publishes.
 6. [x] Tests; docs; tabmill-release skill uses `tabmill release`.
 
-7. [ ] HUMAN: lamill.io — publish /extensions/<slug>/privacy + /extensions/support pages
+7. [x] HUMAN: lamill.io — publish /extensions/<slug>/privacy + /extensions/support pages
        (release lint probes them), choose its deploy path; then `tabmill hub` output can ship.
 
 ## Slotted 2026-10-03 (v1.H–v1.M after D-034, see PLAN.md) — operator brief items
@@ -142,12 +162,12 @@ Top level: `new` · `try` · `check` · `ship` · `status` · `settings` · `adv
       or the hub page isn't live.
 - [x] **v1.J** pressure-wash-quote recipe + maps-overlay template (D-031): unit 6, smoke 2,
       lint dev clean except store_category; first build 1 min 34 s.
-- [ ] **v1.J** HUMAN: try it on real Google Maps satellite view —
+- [-] Not run — pressure-wash-quote not pursued now (D-039). **v1.J** HUMAN: try it on real Google Maps satellite view —
       `uv run tabmill try pressure-wash-quote --url https://www.google.com/maps` → click the
       toolbar icon → calibrate on the scale bar → trace a driveway → Save estimate as PDF.
 - [x] Rankmill CTA placeholder blocks release (D-015); HUMAN line below.
 
-## v1.G — Assets, listing, publish (in progress)
+## v1.G — Assets, listing, publish ✅ (closed 2026-10-14, D-039)
 
 1. [x] `templates/extension/_shared/scripts/assets.mjs` (Playwright, docker): icon SVG →
        PNG 16/32/48/128 (+ store icon 128 = 96 art + 16 px transparent pad); promo tile
@@ -185,7 +205,7 @@ Top level: `new` · `try` · `check` · `ship` · `status` · `settings` · `adv
        `privacy` reserved slug; README contract. (uncommitted there — operator commits)
     f. Tests; docs/publishing.md, architecture.md.
 
-9. [ ] HUMAN: CWS credentials in `tabmill/.env` (see `.env.example`) + first dashboard upload →
+9. [ ] → v2 carry-over (credentials + first upload done; real API publish owed). HUMAN: CWS credentials in `tabmill/.env` (see `.env.example`) + first dashboard upload →
        then a real `tabmill publish --check` to verify the client against the live API.
 
 ## v1.F — CLI `try` ✅ (2026-10-03)

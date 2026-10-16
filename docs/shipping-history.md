@@ -11,6 +11,79 @@ tradeoffs, and links to commits / ADRs.
 
 ---
 
+## v2.A — Plan, recipe schema v2, portfolio.yaml, bootstrap (shipped 2026-10-16, D-040)
+
+`docs/v2-plan.md` accepted (exception to "vN.A is planning only", § 9.1). Recipe schema v2 with a
+comment-preserving text migration (3 recipes: 4 added lines each, nothing else); `portfolio.yaml`
+(3 × `migrated`, limit 2); `surfaces.py` registry (page-overlay stub; devtools / context-menu
+dropped); `bootstrap` + deprecated `new <slug>` alias; `publish` top level, `ship` never uploads;
+`status` lifecycle stage, `slots`, `templates`, `doctor [--fix]`. Generated workspace output
+byte-identical except the 3 README hints. 148 tests. Not verified in real use: `publish`, `ship`
+end to end.
+
+## v1 closed — v1.C, v1.G, v1.J, v1.K, v1.L (closed 2026-10-14, D-039)
+
+#1 save-page-pdf-md approved and published (store id aknmbookdcobogmhhnppjofghdjepice); hub page
+lamill.io/extensions/save-page-pdf-md and tool page markpdf.dev/save-webpage-as-pdf/ live and
+linked. Operator closed v1 with leftovers carried into v2.A. Never verified in real use: the
+CWS API upload/publish path (mocks only; fetchStatus is real), v1.L top-level commands end to end,
+v1.C's 10-URL check, v1.J's real-Maps try. v1.K analytics package dropped; v1.M dropped (its two
+extensions are v2 idea candidates).
+
+### Plans at close (from PLAN.md)
+
+#### v1.C — Extension #1 recipe (save-page-pdf-md) (in progress)
+
+- Recipe feature code: article extraction (`@mozilla/readability`), HTML→Markdown (`turndown`),
+  local branded PDF via a MarkPDF-style print page (D-013). Deps justified in DECISIONS.md first.
+- Re-verify v1.A WXT spike checks in docker. Zip.
+
+Done = #1 works on 10 real test URLs (listed in NOTES.md with results); smoke passes; zip builds;
+time-to-first-build logged.
+
+#### v1.G — Assets, listing, publish, release CI (in progress)
+
+- CLI: `assets` (Playwright icons 16/32/48/128, screenshots 1280×800, promo tile 440×280),
+  `listing`, `publish` (CWS API **v2**, updates `registry.json`). CI release zips on tag.
+- Finalize `tabmill-release` and `tabmill-store-listing`.
+- Shared privacy policy (D-036): `privacy-policy.yaml` → `hub` writes lamill.io
+  `src/content/privacy.json` → one page `lamill.io/extensions/privacy`. Release lint
+  `privacy-coverage` fails when a recipe does more than the policy covers; `hub-urls` checks
+  the live page shows the current policy version.
+
+Done = #1 fully prepared via CLI; operator does the first real publish (dashboard "Add new item").
+
+#### v1.J — pressure-wash-quote (new #2 by publish order, D-027)
+
+`maps-overlay` template; recipe: trace surfaces on Google Maps satellite → sq ft (optional
+roof pitch) → WashCalc quote, PDF export.
+
+#### v1.K — Landing, analytics (in progress)
+
+CLI `landing` (via `lamill`); `packages/analytics` opt-in; finalize `tabmill-landing-page`.
+
+#### v1.L — Lifecycle CLI (in progress; D-034, D-038)
+
+Operator (2026-10-08): ~20 commands, hard to know which to use. One path per extension:
+start → publish → track health over its store life. Shape amended 2026-10-12 (D-038).
+
+| Command | Absorbs |
+|---|---|
+| `new <slug>` | `create` (first run writes the starter recipe), `new` (later runs regenerate) |
+| `try <slug> [--dev]` | `build`, `dev`, `try` |
+| `check [slug]` | `test`, `lint`; no slug = every extension |
+| `ship <slug> [--publish]` | `assets`, `listing`, `landing`, `zip`, `release`, `hub`; `--publish` = attended upload |
+| `status [slug]` | `list`, `status`, `publish --check` (`--refresh`); prints the next command per extension |
+| `settings …` | `init`, `skills sync`, `preflight` join `apikeys` (no `setup` verb) |
+| `advanced …` | every old single-step command, unchanged, one level down |
+
+Built 2026-10-12: suite green. Still owed before this ships: operator runs the six commands on
+a real extension (docker `check`, `ship`, a `--publish` update once #1 is approved).
+
+Done = an extension goes recipe → store → health check using only the top-level commands;
+skills, README, and `docs/creating-an-extension.md` lead with them.
+
+
 ## v1.I — Slots, status, release, hub, listing URLs (shipped 2026-10-03)
 
 D-026, D-028–D-030. Hub export empty until store IDs + tool pages exist; lamill.io pages 404.

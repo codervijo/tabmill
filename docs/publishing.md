@@ -1,8 +1,8 @@
 # Publishing an extension
 
 How an extension goes from built to live in the Chrome Web Store (CWS), and how updates
-ship afterwards. Commands run from the tabmill repo. `tabmill ship --publish` is attended
-only; it never runs unattended or in CI.
+ship afterwards. Commands run from the tabmill repo. `tabmill publish` is attended
+only; it never runs unattended or in CI, and `ship` never uploads (D-040).
 
 ## 0. One-time: publisher account
 
@@ -81,9 +81,10 @@ In https://chrome.google.com/webstore/devconsole (signed in as Lamill):
 ## Updates (item already has a `store_id`)
 
 1. Bump `version` in `recipes/<slug>/extension.yaml` and add a `changelog:` entry.
-2. `uv run tabmill ship <slug> --publish` (add `--staged` to release manually after
-   approval). Runs the release steps, asks for confirmation, uploads, submits.
-3. `uv run tabmill status <slug> --refresh` until approved, then `uv run tabmill ship <slug>`
+2. `uv run tabmill ship <slug>` — release steps, release zip, upload folder.
+3. `uv run tabmill publish <slug>` (add `--staged` to release manually after approval) —
+   release lint, asks for confirmation, uploads the zip, submits.
+4. `uv run tabmill status <slug> --refresh` until approved, then `uv run tabmill ship <slug>`
    for the hub.
 
 ## Order gotchas

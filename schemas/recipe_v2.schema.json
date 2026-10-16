@@ -1,0 +1,367 @@
+{
+  "$defs": {
+    "Change": {
+      "additionalProperties": false,
+      "properties": {
+        "date": {
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+          "title": "Date",
+          "type": "string"
+        },
+        "notes": {
+          "title": "Notes",
+          "type": "string"
+        },
+        "version": {
+          "title": "Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "version",
+        "date",
+        "notes"
+      ],
+      "title": "Change",
+      "type": "object"
+    },
+    "Fact": {
+      "additionalProperties": false,
+      "properties": {
+        "claim": {
+          "title": "Claim",
+          "type": "string"
+        },
+        "date": {
+          "default": "",
+          "title": "Date",
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "real",
+            "external",
+            "external_suggestion",
+            "user",
+            "synthesis",
+            "missing"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "source": {
+          "default": "",
+          "title": "Source",
+          "type": "string"
+        },
+        "value": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "integer"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Value"
+        }
+      },
+      "required": [
+        "claim",
+        "kind"
+      ],
+      "title": "Fact",
+      "type": "object"
+    },
+    "Permission": {
+      "additionalProperties": false,
+      "properties": {
+        "justification": {
+          "default": "",
+          "title": "Justification",
+          "type": "string"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "title": "Permission",
+      "type": "object"
+    },
+    "Screenshot": {
+      "additionalProperties": false,
+      "properties": {
+        "caption": {
+          "title": "Caption",
+          "type": "string"
+        },
+        "page": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Page"
+        }
+      },
+      "required": [
+        "caption"
+      ],
+      "title": "Screenshot",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "analytics": {
+      "default": false,
+      "title": "Analytics",
+      "type": "boolean"
+    },
+    "changelog": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/Change"
+      },
+      "title": "Changelog",
+      "type": "array"
+    },
+    "cta_text": {
+      "title": "Cta Text",
+      "type": "string"
+    },
+    "cta_url": {
+      "title": "Cta Url",
+      "type": "string"
+    },
+    "data_collected": {
+      "default": [],
+      "items": {
+        "type": "string"
+      },
+      "title": "Data Collected",
+      "type": "array"
+    },
+    "dependencies": {
+      "additionalProperties": {
+        "type": "string"
+      },
+      "default": {},
+      "title": "Dependencies",
+      "type": "object"
+    },
+    "dev_dependencies": {
+      "additionalProperties": {
+        "type": "string"
+      },
+      "default": {},
+      "title": "Dev Dependencies",
+      "type": "object"
+    },
+    "host_permissions": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/Permission"
+      },
+      "title": "Host Permissions",
+      "type": "array"
+    },
+    "idea_id": {
+      "default": "",
+      "title": "Idea Id",
+      "type": "string"
+    },
+    "landing_page_url": {
+      "default": "",
+      "title": "Landing Page Url",
+      "type": "string"
+    },
+    "landing_path": {
+      "default": "",
+      "title": "Landing Path",
+      "type": "string"
+    },
+    "name": {
+      "title": "Name",
+      "type": "string"
+    },
+    "optional_permissions": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/Permission"
+      },
+      "title": "Optional Permissions",
+      "type": "array"
+    },
+    "permissions": {
+      "items": {
+        "$ref": "#/$defs/Permission"
+      },
+      "minItems": 1,
+      "title": "Permissions",
+      "type": "array"
+    },
+    "portfolio_site": {
+      "title": "Portfolio Site",
+      "type": "string"
+    },
+    "privacy_line": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Privacy Line"
+    },
+    "provenance": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/Fact"
+      },
+      "title": "Provenance",
+      "type": "array"
+    },
+    "recipe_revision": {
+      "default": 1,
+      "minimum": 1,
+      "title": "Recipe Revision",
+      "type": "integer"
+    },
+    "remote_code": {
+      "const": false,
+      "default": false,
+      "title": "Remote Code",
+      "type": "boolean"
+    },
+    "restricted_pages": {
+      "default": "",
+      "title": "Restricted Pages",
+      "type": "string"
+    },
+    "schema_version": {
+      "default": 1,
+      "enum": [
+        1,
+        2
+      ],
+      "title": "Schema Version",
+      "type": "integer"
+    },
+    "screenshots": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/Screenshot"
+      },
+      "maxItems": 5,
+      "title": "Screenshots",
+      "type": "array"
+    },
+    "single_purpose": {
+      "title": "Single Purpose",
+      "type": "string"
+    },
+    "slug": {
+      "title": "Slug",
+      "type": "string"
+    },
+    "store_category": {
+      "title": "Store Category",
+      "type": "string"
+    },
+    "summary": {
+      "title": "Summary",
+      "type": "string"
+    },
+    "target": {
+      "const": "chrome-mv3",
+      "default": "chrome-mv3",
+      "title": "Target",
+      "type": "string"
+    },
+    "target_keywords": {
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1,
+      "title": "Target Keywords",
+      "type": "array"
+    },
+    "template": {
+      "enum": [
+        "popup",
+        "side-panel",
+        "maps-overlay",
+        "page-overlay"
+      ],
+      "title": "Template",
+      "type": "string"
+    },
+    "theme": {
+      "additionalProperties": {
+        "type": "string"
+      },
+      "default": {},
+      "title": "Theme",
+      "type": "object"
+    },
+    "trigger": {
+      "default": "toolbar",
+      "enum": [
+        "toolbar",
+        "shortcut",
+        "context_menu",
+        "side_panel"
+      ],
+      "title": "Trigger",
+      "type": "string"
+    },
+    "utm_campaign": {
+      "title": "Utm Campaign",
+      "type": "string"
+    },
+    "version": {
+      "pattern": "^\\d+\\.\\d+\\.\\d+$",
+      "title": "Version",
+      "type": "string"
+    }
+  },
+  "required": [
+    "name",
+    "slug",
+    "version",
+    "summary",
+    "single_purpose",
+    "template",
+    "permissions",
+    "portfolio_site",
+    "target_keywords",
+    "cta_text",
+    "cta_url",
+    "utm_campaign",
+    "store_category"
+  ],
+  "title": "Recipe",
+  "type": "object"
+}

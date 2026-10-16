@@ -1,4 +1,8 @@
 # Recipe: source of truth for the generated extension (ADR-0008).
+schema_version: 2  # recipe schema (D-040)
+target: chrome-mv3
+recipe_revision: 1  # bump to change frozen fields after `tabmill approve`
+trigger: toolbar
 name: Save Page as Markdown or PDF
 slug: save-page-pdf-md
 version: 0.1.0

@@ -56,7 +56,7 @@ def test_create_refuses_registered_slug(tool: Path, cfg: Config) -> None:
 
 
 @pytest.mark.parametrize(
-    ("template", "msg"), [("toolbar", "unknown"), ("devtools", "isn't implemented")]
+    ("template", "msg"), [("toolbar", "unknown"), ("page-overlay", "isn't implemented")]
 )
 def test_create_refuses_bad_template(tool: Path, cfg: Config, template: str, msg: str) -> None:
     with pytest.raises(catalog.CreateError, match=msg):
