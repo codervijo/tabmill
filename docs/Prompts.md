@@ -186,3 +186,11 @@ The dated H2 is what `lamill project status` parses. Append-only.
 ## 2026-10-16 — v2.H closed
 
 > "close it. i will test some when i can." → v2.H done without real runs; steps carried.
+
+## 2026-10-16 — v4.A started
+
+> "start v4.A, learning about approval process etc as well" → wordpress.org guidelines, FAQ,
+> readme, assets, Plugin Check + 2FA, release confirmation read; spikes 1–4 in NOTES.md;
+> 7 decisions for the operator in PRD § v4.
+> "only thing is to make you dont install node on my host - keep it all inside a docker
+> container." → recommendations accepted, D-043; v4.A done.

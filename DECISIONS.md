@@ -394,3 +394,20 @@ Operator: "merge PLAN.md into the PRD too". PLAN.md held only a pointer to the P
 the carried items (already in the work queue), the idea candidates and v4.A notes — all moved
 to `docs/prd.md`; the "extract, don't design upfront" principle is in the PRD header. Shipped
 phase plans stay in `docs/shipping-history.md`. Supersedes D-004's PLAN.md split.
+
+## D-043 — WordPress plugins (v4): decisions locked (Accepted, 2026-10-16)
+
+From the v4.A spikes (`NOTES.md` § v4.A spikes); operator accepted the recommendations with one
+constraint: "make sure you dont install node on my host - keep it all inside a docker container."
+1. Publisher: a Lamill-named wordpress.org account; 2FA, SVN password, release confirmation on.
+2. Funnel: credit/CTA in the plugin's admin screen, readme and directory page; front-end credit
+   opt-in, default off (guideline 10). Tabmill's "Built by Lamill everywhere" rule is
+   Chrome-only.
+3. License: plugin recipes and everything they ship are GPLv2-or-later.
+4. Build/test: official `wordpress`, `mariadb`, `wordpress:cli`, `php:cli` + composer images via
+   the workspace Makefile. Nothing on the host — no Node, PHP, composer or svn (ADR-0003 scope
+   extended to every plugin tool).
+5. Layout: `plugins/<slug>/` beside `extensions/<slug>/` in the same workspace repo.
+6. Slots per target: chrome-mv3 limit 2; wordpress-plugin = one submission in review.
+7. Release: `ship` builds zip + SVN tree; `publish` (attended) commits to SVN from a container.
+Open: which plugin is first (v4.C).

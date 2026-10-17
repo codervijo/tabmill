@@ -450,15 +450,40 @@ Same funnel in a second channel (D-037): single-purpose free WordPress plugins g
 recipes, each with "Built by Lamill" and a CTA to a portfolio site, tracked in the same
 registry / hub / landing flow. Distribution: the wordpress.org plugin directory. §§ 1–3 and 6 are Chrome-only until v4.A rewrites them. Renumbered v2 → v3 (D-039) → v4 (D-040).
 
-v4.A plan: not started. Spikes: plugin directory rules + submission flow, PHP build/test in
-docker, how recipes carry a platform (the v2.G target seam is the hook). Open: which plugin
-is first (v4.C).
+v4.A (done 2026-10-16): spikes 1–4 done, findings in `NOTES.md` § v4.A spikes. What wordpress.org
+changes for tabmill:
+- **Review gate:** one pending submission per account; initial review within 4 weeks, approval
+  ~2 weeks later for a small correct plugin; Plugin Check *Plugin repo* errors block upload.
+- **Slug is permanent** after approval; no slug may begin with another product's term.
+- **GPL** for all plugin code and assets.
+- **Credit links default off** on the public site → the "Built by Lamill" footer rule can't
+  hold for plugins as written.
+- **Release** = SVN tag (+ optional emailed release confirmation), not an API upload.
+- **No PHP in the builder**; wp-env needs host Node.
+
+Decisions locked 2026-10-16 (operator: recommendations accepted; D-043):
+1. **Publisher account:** a wordpress.org account named for Lamill (Contributors are public;
+   personal identity stays off listings), 2FA on, SVN password, release confirmation on.
+2. **Funnel rule for plugins:** credit/CTA only in the plugin's admin screen, readme and
+   directory page; front-end credit opt-in, default off (guideline 10).
+3. **License:** plugin recipes and anything they ship are GPLv2-or-later.
+4. **Build/test:** official `wordpress`, `mariadb`, `wordpress:cli`, `php:cli`+composer images
+   driven by the workspace Makefile (tabmill-managed). **Nothing installed on the host** — no
+   Node, no PHP, no composer, no svn; every tool runs inside a container (ADR-0003 extended).
+5. **Workspace layout:** plugins under `plugins/<slug>/` beside `extensions/<slug>/` in the same
+   workspace repo.
+6. **Slots:** wordpress.org has no slot limit but one review at a time → `portfolio.yaml` slots
+   per target (chrome-mv3 limit 2; wordpress-plugin: one in review).
+7. **Release automation:** `ship` builds the zip/SVN tree; `publish` (attended) commits to SVN
+   from a container, like the Chrome flow.
+
+Open (v4.C): which plugin is first.
 
 #### Phases
 
 | Phase | Status | Title |
 |---|---|---|
-| v4.A | ⏳ planned | Planning / decisions lock — spikes: wordpress.org plugin rules + submission, PHP build/test in docker, how recipes carry a platform |
+| v4.A | ✅ done | Planning / decisions lock — spikes: wordpress.org plugin rules + submission, PHP build/test in docker, how recipes carry a platform |
 | v4.B | ⏳ planned | Platform field in the recipe schema; first WordPress template; generate + build a plugin zip |
 | v4.C | ⏳ planned | First plugin recipe (plugin not chosen yet); tried in a WordPress container |
 | v4.D | ⏳ planned | WordPress lint rules; release folder with `readme.txt` + assets; manual first submission to wordpress.org |

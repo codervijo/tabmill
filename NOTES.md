@@ -203,3 +203,72 @@ Source: https://code.claude.com/docs/en/skills.md
   parent up to the repo root; nested dirs load on first edit there.
 - Supporting files beside SKILL.md, linked relatively. Docs suggest ≤ ~500 lines; Tabmill's
   own rule is ≤ ~150.
+
+## v4.A spikes — WordPress plugins (2026-10-16)
+
+Sources read 2026-10-16: [Detailed plugin guidelines](https://developer.wordpress.org/plugins/wordpress-org/detailed-plugin-guidelines/)
+(last modified 2026-03-11), [Plugin developer FAQ](https://developer.wordpress.org/plugins/wordpress-org/plugin-developer-faq/),
+[readme.txt](https://developer.wordpress.org/plugins/wordpress-org/how-your-readme-txt-works/),
+[plugin assets](https://developer.wordpress.org/plugins/wordpress-org/plugin-assets/),
+[Plugin Check + 2FA mandatory](https://make.wordpress.org/plugins/2024/10/01/plugin-check-and-2fa-now-mandatory-for-new-plugin-submissions/),
+[Release confirmation](https://developer.wordpress.org/plugins/wordpress-org/release-confirmation-emails/),
+[Plugin Check](https://wordpress.org/plugins/plugin-check/) (v2.1.0). Not verified first-hand:
+anything about rejection-reason frequency (third-party / older posts).
+
+### Spike 1 — Approval process (wordpress.org plugin directory)
+
+- **Account:** 2FA required on every plugin owner/committer account (since 2024-10-01); SVN uses
+  a separate SVN password. `Contributors:` in readme.txt shows wordpress.org usernames publicly.
+- **Submit:** upload a complete, production-ready .zip (< 10 MB) at wordpress.org/plugins/developers/add.
+  No placeholders; names can't be reserved (guideline 16).
+- **Automatic gate:** the submission is scanned with Plugin Check's *Plugin repo* category; any
+  error blocks submission (warnings don't). Examples it catches: plugin-header vs readme version
+  mismatch, wrong text domain, wrong "Tested up to". Security category planned, no date.
+- **Manual review:** "all plugins get an initial review within four weeks"; small correct plugins
+  "should be approved within fourteen days of initial review"; replies within 10 business days;
+  no progress for 3 months → rejected. "More than 3500 people mid-review" at any time.
+- **One pending submission per account** ("Generally, just one"; 10 only above 1M installs).
+  Second accounts to get round it are suspended. → plugins go through review one at a time.
+- **Slug:** can be changed once after submitting, never after approval. Display name can change.
+- **After approval:** SVN repo with `trunk/`, `tags/<version>/`, `assets/`. Pushing to SVN
+  makes it live. Release Confirmation (opt-in): tag in SVN, then confirm by emailed tokenised
+  link — the de-facto 2FA for releases. Tags can't be altered after release.
+
+### Spike 2 — Rules that differ from the Chrome Web Store (and from tabmill's rules)
+
+- **GPL:** all code, data and images GPL or GPL-compatible (GPLv2+ recommended) — plugin
+  recipes and any shared code they ship must be GPL. Chrome extensions have no such rule.
+- **Credit links (guideline 10):** must be optional and *default off* on the front-end site.
+  Tabmill's "Built by Lamill mark + footer everywhere" can't apply to a site's public pages;
+  admin screens may link to your own sites (guideline 11, limited, dismissible notices).
+- **No tracking / external calls without explicit consent (7); no remote code or third-party
+  CDN assets except fonts (8); no trialware (5); use WordPress's bundled libraries (13);
+  readable source + build tools public (4).** Lamill's privacy posture already fits.
+- **Trademarks (17):** a slug may not *begin* with another product's term (e.g. "wordpress",
+  "woo"); "-press" suffixes are common and accepted.
+- **Spam (12):** ≤ 5 tags, no competitor tags, no keyword stuffing.
+- **Versioning (15):** each release bumps the version; trunk readme matches.
+- **readme.txt:** header — Contributors, Tags (1–5), Tested up to, Stable tag, License (+
+  Requires PHP / Requires at least now read from the main PHP file); short description ≤ 150
+  chars; readme > 10 KB may error. Stable tag picks `tags/<version>/`.
+- **Assets (SVN `assets/`):** banner 772×250 (+ 1544×500), icon 128×128 (+ 256×256, SVG needs a
+  PNG fallback), `screenshot-N.png` captioned from readme lines; banner ≤ 4 MB, icon ≤ 1 MB.
+
+### Spike 3 — PHP build/test in docker (no Node on the host)
+
+- The builder has no PHP stack (react, tauri, python, go, rust, bash, expo, playwright).
+- `wp-env` (WordPress's own dev env) needs Node on the host → ruled out by ADR-0003 unless run
+  inside a container.
+- Node-free option: official images driven by the workspace Makefile — `wordpress` +
+  `mariadb` (try it), `wordpress:cli` (run `wp plugin check <slug>` — Plugin Check's WP-CLI
+  command; static checks by default), `php:cli` + composer (PHPCS with WordPress Coding
+  Standards, PHPUnit), `svn` client for releases. Not tried yet — a v4.B spike.
+
+### Spike 4 — How a recipe carries a platform
+
+- Recipe schema v2 already has `target` (only `chrome-mv3`); v2.G added the target adapter
+  (`cli/tabmill/targets/`) with limits, store images, manifest and build paths per target. A
+  `wordpress-plugin` target slots in there: limits (short description 150, tags 5), assets
+  (banner/icon/screenshot sizes above), "manifest" = main plugin file header + readme.txt.
+- Surfaces differ: an admin settings page, a shortcode / block, a widget — WordPress
+  templates, not Chrome surfaces.
