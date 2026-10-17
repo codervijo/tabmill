@@ -14,7 +14,7 @@ from typing import Any
 
 import httpx
 
-from . import extension, generate, hub, listing, privacy, rules
+from . import extension, generate, hub, listing, privacy, rules, targets
 from .rules import Finding, Severity, similarity
 
 __all__ = ["Finding", "Severity", "lint", "similarity"]
@@ -131,7 +131,7 @@ def lint(tool_dir: Path, workspace: Path | None, slug: str, *, release: bool) ->
             for word, n in listing.keyword_repeats(draft.read_text()).items():
                 add("keyword-repeat", f"`{word}` appears {n}× in listing.md (store limit: 5)")
 
-    built = workspace / "extensions" / slug / ".output" / "chrome-mv3" if workspace else None
+    built = targets.for_recipe(ext).built_dir(workspace, slug) if workspace else None
     if built is None or not (built / "manifest.json").exists():
         add("not-built", "no build to inspect — run `tabmill try` (bundle rules skipped)")
         return out

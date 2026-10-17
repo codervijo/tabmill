@@ -10,7 +10,7 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from ... import ai, brief, catalog, extension, generate, registry, rules, surfaces
+from ... import ai, brief, catalog, extension, generate, registry, rules, surfaces, targets
 from ...schema import Trigger
 from ..engine import Context, Result, StageKind
 
@@ -84,8 +84,8 @@ def values(ctx: Context) -> dict[str, str]:
         "templates": _templates(),
         "allowlist": ", ".join(rs.permission_allowlist),
         "existing": existing_purposes(ctx),
-        "name_max": str(rs.limits.name),
-        "summary_max": str(rs.limits.summary),
+        "name_max": str(targets.get().limits.name),
+        "summary_max": str(targets.get().limits.summary),
     }
 
 

@@ -18,6 +18,7 @@ Two repos, related by a computed relative layout (ADR-0007):
 │   ├── schemas/                     JSON Schemas generated from the pydantic models (D-040)
 │   ├── prompts/<purpose>_vN.md      versioned idea-stage prompts (D-040)
 │   ├── rules/lamill.yaml            policy rules data, shared by idea check + lint (D-040)
+│   ├── targets/chrome_mv3/target.yaml  target data: limits, store images, build dirs (D-040)
 │   ├── ideas/<id>/                  idea sessions (committed; raw/ gitignored)
 │   ├── templates/extension/<tpl>/   generic surface code (popup today)
 │   ├── templates/workspace/  ci/    rendered into the workspace by `tabmill init`
@@ -211,6 +212,15 @@ Two repos, related by a computed relative layout (ADR-0007):
   stage `verdict` with `tabmill approve <id>`.
 - **ideas** (`engine.summary`): `ideas [list]`, `ideas show <id>` (idea.md, else stage
   summaries), `ideas compare <id> <id>…` (verdict, score, rubric, evidence mix, errors).
+- **Targets** (`cli/tabmill/targets/`, D-040): a `Target` protocol — id, limits, store image
+  rules, templates + templates dir, `manifest(ext)`, `built_dir()` — and a registry
+  (`targets.get(id)`, `for_recipe(ext)` reads the recipe's `target`). Only `chrome_mv3` exists;
+  its data is `targets/chrome_mv3/target.yaml`. `extension` (limits, `to_manifest`),
+  `generate` (template dirs, manifest incl. the toolbar `action` for panel templates),
+  `catalog`, `listing` (image sizes), `lint` (build dir) and `rules` (length limits) go
+  through it. Surface templates stay at `templates/extension/` (the target points there; CI,
+  skills and docs use that path). Generator output for the 3 recipes was byte-identical
+  before/after (100 files). WordPress (v4) adds the second target.
 - **Tabmill brief v1** (`brief.py`, `schemas/brief_v1.schema.json`): front matter
   (`tabmill_brief: 1`, idea, author, created) + `## Idea · Answers · Proposal · Evidence
   (### Demand, ### Store competition tables) · Risks · Open questions`. Parsed section by
@@ -258,7 +268,8 @@ Two repos, related by a computed relative layout (ADR-0007):
 `extension` (YAML load/validate/manifest fields), `generate` (template + recipe), `registry`,
 `catalog` (list rows, starter recipes), `lifecycle` (stage + next step per extension),
 `surfaces` (template registry), `provenance` (Fact), `recipe_v2` (migration, JSON Schema),
-`portfolio` (portfolio.yaml, slots), `ai` (claude -p runner), `brief` (brief v1 parser),
+`portfolio` (portfolio.yaml, slots), `targets` (target adapters), `ai` (claude -p runner),
+`brief` (brief v1 parser),
 `rules` (shared rules engine), `idea/engine` (sessions,
 stages), `idea/stages/` (clarify; later stages per `docs/prd.md` § v2). Planned packages: brand, funnel, messaging, analytics, policy (extracted in v1.E/v1.H).
 

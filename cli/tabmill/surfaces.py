@@ -8,7 +8,7 @@ from dataclasses import dataclass
 from typing import Literal
 
 Status = Literal["implemented", "stub"]
-TARGET = "chrome-mv3"  # the only target until the v2.G adapter seam
+TARGET = "chrome-mv3"  # surfaces are chrome-mv3 templates (cli/tabmill/targets/)
 
 
 @dataclass(frozen=True)

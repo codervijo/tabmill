@@ -165,3 +165,9 @@ The dated H2 is what `lamill project status` parses. Append-only.
 ## 2026-10-16 — v2.F done, v2.G started
 
 > "commit, call 2f done and start 2g"
+> → `targets/` (Target protocol, chrome_mv3 + target.yaml); limits, manifest, template
+> dirs, image rules, build dir go through it. Generator output byte-identical (100 files).
+
+## 2026-10-16 — v2.G done, v2.H started
+
+> "commit, call 2g done and start 2h"

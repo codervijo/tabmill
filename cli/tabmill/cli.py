@@ -42,6 +42,7 @@ from . import (
     rules,
     surfaces,
     sync,
+    targets,
     workspace,
 )
 from .constants import ENV_WORKSPACE
@@ -1545,7 +1546,7 @@ def templates_cmd() -> None:
             s.use_for,
         )
     output.console.print(table)
-    output.console.print(f"  target: {surfaces.TARGET} (the only one until v2.G)")
+    output.console.print(f"  target: {surfaces.TARGET} (cli/tabmill/targets/; WordPress: v4)")
 
 
 @app.command()
@@ -1567,6 +1568,12 @@ def doctor(
         else:
             output.skip(f"{tool}: not on PATH — needed for {why}")
     cfg, ws = _config_and_workspace()
+    try:
+        t = targets.get()
+        output.ok(f"target {t.id}: {targets.chrome_mv3.DATA_FILE} loads")
+    except Exception as e:  # noqa: BLE001 — report any broken target data as a doctor failure
+        output.fail(f"target data: {e}")
+        failed = True
     try:
         rs = rules.load(cfg.tool_dir)
         output.ok(f"{rules.RULES_FILE}: {len(rs.rules)} rules, in step with rules.py")

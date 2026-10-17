@@ -14,7 +14,7 @@ from typing import Any, Literal
 import yaml
 from pydantic import BaseModel, ConfigDict, ValidationError
 
-from . import catalog, extension, generate, portfolio, privacy, surfaces
+from . import catalog, extension, generate, portfolio, privacy, surfaces, targets
 
 RULES_FILE = "rules/lamill.yaml"
 Severity = Literal["error", "warn"]
@@ -38,12 +38,6 @@ class Levels(BaseModel):
     release: Level
 
 
-class Limits(BaseModel):
-    model_config = ConfigDict(extra="forbid")
-    name: int
-    summary: int
-
-
 class VerdictConfig(BaseModel):
     model_config = ConfigDict(extra="forbid")
     weights: dict[str, int]
@@ -56,7 +50,6 @@ class RuleSet(BaseModel):
     version: int
     permission_allowlist: list[str]
     broad_hosts: list[str]
-    limits: Limits
     brand_denylist: list[str]
     rules: dict[str, Levels]
     verdict: VerdictConfig
@@ -211,13 +204,13 @@ def _brand(s: Subject, rs: RuleSet) -> list[Hit]:
 
 
 def _name_length(s: Subject, rs: RuleSet) -> list[Hit]:
-    n = len(str(s.ext.get("name", "")))
-    return [(f"`name` is {n} chars (max {rs.limits.name})", None)] if n > rs.limits.name else []
+    n, limit = len(str(s.ext.get("name", ""))), targets.for_recipe(s.ext).limits.name
+    return [(f"`name` is {n} chars (max {limit})", None)] if n > limit else []
 
 
 def _summary_length(s: Subject, rs: RuleSet) -> list[Hit]:
     n = len(str(s.ext.get("summary", "")))
-    limit = rs.limits.summary
+    limit = targets.for_recipe(s.ext).limits.summary
     return [(f"`summary` is {n} chars (max {limit})", None)] if n > limit else []
 
 

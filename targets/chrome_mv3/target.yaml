@@ -1,0 +1,20 @@
+# Target: Chrome Manifest V3 (D-040). Data the chrome_mv3 adapter reads; code in
+# cli/tabmill/targets/chrome_mv3.py. Values are from the Chrome docs cited per key.
+id: chrome-mv3
+limits:
+  name: 75        # developer.chrome.com/docs/extensions/reference/manifest/name
+  summary: 132    # developer.chrome.com/docs/extensions/reference/manifest/description
+store_images:     # developer.chrome.com/docs/webstore/images
+  icon: [128, 128]
+  promo: [440, 280]
+  screenshots: [[1280, 800], [640, 400]]
+  screenshot_count: [1, 5]
+build:
+  dir: .output/chrome-mv3          # WXT output for the chrome-mv3 target
+  dev_dir: .output/chrome-mv3-dev
+  package_make_target: zip         # `make in-docker-zip` → wxt zip
+templates:
+  dir: templates/extension         # surface templates (see `tabmill templates`)
+  shared: _shared
+  # Templates without a popup get a toolbar `action` so the button exists to open them.
+  action_without_popup: [side-panel, maps-overlay]

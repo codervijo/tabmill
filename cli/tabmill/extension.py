@@ -12,11 +12,9 @@ from urllib.parse import urlparse
 
 import yaml
 
-from . import schema, surfaces
+from . import schema, surfaces, targets
 
 GENERATED_MANIFEST = "manifest.gen.json"
-NAME_MAX = 75  # developer.chrome.com/docs/extensions/reference/manifest/name
-SUMMARY_MAX = 132  # .../manifest/description
 REQUIRED = (
     "name",
     "slug",
@@ -67,10 +65,11 @@ def validate(ext: dict[str, Any], slug: str) -> list[str]:
         return errors
     if ext["slug"] != slug:
         errors.append(f"`slug` is {ext['slug']!r} but the directory is {slug!r}")
-    if len(str(ext["name"])) > NAME_MAX:
-        errors.append(f"`name` is {len(str(ext['name']))} chars (max {NAME_MAX})")
-    if len(str(ext["summary"])) > SUMMARY_MAX:
-        errors.append(f"`summary` is {len(str(ext['summary']))} chars (max {SUMMARY_MAX})")
+    limits = targets.for_recipe(ext).limits
+    if len(str(ext["name"])) > limits.name:
+        errors.append(f"`name` is {len(str(ext['name']))} chars (max {limits.name})")
+    if len(str(ext["summary"])) > limits.summary:
+        errors.append(f"`summary` is {len(str(ext['summary']))} chars (max {limits.summary})")
     if ext["template"] not in TEMPLATES:
         errors.append(f"`template` must be one of {', '.join(TEMPLATES)}")
     if ext.get("analytics", False) is not False:
@@ -96,13 +95,5 @@ def placeholder_fields(ext: dict[str, Any]) -> list[str]:
 
 
 def to_manifest(ext: dict[str, Any]) -> dict[str, Any]:
-    manifest: dict[str, Any] = {
-        "name": ext["name"],
-        "description": ext["summary"],
-        "version": str(ext["version"]),
-        "permissions": [p["name"] for p in ext["permissions"]],
-    }
-    for key in ("optional_permissions", "host_permissions"):
-        if ext.get(key):
-            manifest[key] = [p["name"] for p in ext[key]]
-    return manifest
+    """The target's manifest fields for this recipe (chrome-mv3: see targets/chrome_mv3.py)."""
+    return targets.for_recipe(ext).manifest(ext)

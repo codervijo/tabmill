@@ -11,6 +11,14 @@ tradeoffs, and links to commits / ADRs.
 
 ---
 
+## v2.G — Target-adapter seam (shipped 2026-10-16, D-040)
+
+`cli/tabmill/targets/` (Target protocol + registry) with `chrome_mv3` and its data in
+`targets/chrome_mv3/target.yaml`; limits, manifest (incl. the panel `action`), template dirs,
+store image rules and build dir go through it; length limits left `rules/lamill.yaml`. Templates
+stay at `templates/extension/` (operator-visible decision). Generator output byte-identical for
+the 3 recipes (100 files). 232 tests.
+
 ## v2.F — Verdict, write, approve, ideas (shipped 2026-10-16, D-040)
 
 verdict_v1 with code-side score, bands and evidence cap (config in `rules/lamill.yaml`); write

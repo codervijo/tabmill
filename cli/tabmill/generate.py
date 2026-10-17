@@ -17,13 +17,11 @@ from typing import Any
 from urllib.parse import urlencode, urlsplit, urlunsplit
 from xml.sax.saxutils import escape
 
-from . import extension
+from . import extension, targets
 from .templates import render
 
 RECIPES_DIR = "recipes"
-EXT_TEMPLATES_DIR = "templates/extension"
 RECIPE_FILE = "extension.yaml"
-SHARED_TEMPLATE = "_shared"  # overlaid first, under every surface template
 TEMPLATE_SUFFIX = ".tmpl"
 LAMILL_URL = "https://lamill.io"
 DEFAULT_PRIVACY = "Runs locally — page content never leaves your browser."
@@ -215,18 +213,17 @@ def _tree(
 
 def extension_files(tool_dir: Path, slug: str) -> dict[str, bytes]:
     ext = load_recipe(tool_dir, slug)
-    template_root = tool_dir / EXT_TEMPLATES_DIR / str(ext["template"])
+    target = targets.for_recipe(ext)
+    template_root = target.templates_dir(tool_dir) / str(ext["template"])
     if not template_root.exists():
         raise RecipeError(f"template `{ext['template']}` not implemented yet ({template_root})")
     values = {"name": str(ext["name"]), "slug": slug}
-    files = _tree(tool_dir / EXT_TEMPLATES_DIR / SHARED_TEMPLATE, values)
+    # the shared template is overlaid first, under every surface template
+    files = _tree(target.templates_dir(tool_dir) / target.shared_template, values)
     files.update(_tree(template_root, values))
     files["assets/icon.svg"] = _icon_svg(ext).encode()  # a recipe's own icon replaces this
     files.update(_tree(recipe_dir(tool_dir, slug), values, skip=frozenset({RECIPE_FILE})))
-    manifest = extension.to_manifest(ext)
-    if ext["template"] in ("side-panel", "maps-overlay"):
-        # No popup → WXT emits no `action`; the toolbar button must exist to open the panel.
-        manifest["action"] = {"default_title": ext["name"]}
+    manifest = target.manifest(ext)
     files[extension.GENERATED_MANIFEST] = (json.dumps(manifest, indent=2) + "\n").encode()
     files["package.json"] = _package_json(ext).encode()
     files["src/generated/config.ts"] = _config_ts(ext).encode()

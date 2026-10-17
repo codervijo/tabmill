@@ -17,10 +17,7 @@ permission_allowlist:
 
 broad_hosts: ["<all_urls>", "*://*/*", "https://*/*", "http://*/*"]
 
-# Chrome Web Store / manifest limits (developer.chrome.com manifest name, description).
-limits:
-  name: 75
-  summary: 132
+# Name / summary length limits come from the target (targets/chrome_mv3/target.yaml).
 
 # Third-party brand names a store name must not lead with or imply (impersonation policy).
 # Matched as whole words, case-insensitive.

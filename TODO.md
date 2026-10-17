@@ -18,6 +18,20 @@ blocker to `NOTES.md`, mark it BLOCKED, move on.
 
 ## v1.B — Tool + generator ✅ (2026-10-03; details in docs/shipping-history.md)
 
+## v2.G — Target-adapter seam ✅ (2026-10-16; D-040, `docs/prd.md` § v2)
+
+1. [x] `targets/chrome_mv3/target.yaml` (limits, store images, build dirs, templates dir,
+       packaging) + `cli/tabmill/targets/` (`Target` protocol, registry, `chrome_mv3.py`:
+       manifest, limits, templates, image rules, build paths).
+2. [x] Callers go through the target: `extension` (limits, manifest), `generate` (template
+       dirs, manifest incl. the toolbar `action` for panel templates), `catalog`, `listing`
+       (image sizes), `lint` (build dir), `rules` (length limits come from the target, not
+       `rules/lamill.yaml`), `surfaces.TARGET`, `doctor`.
+3. [x] Templates stay at `templates/extension/` — the target points at them (no file move:
+       workspace CI, skills and docs reference that path).
+4. [x] Byte-identical generator output for the 3 recipes (snapshot before/after + a test).
+5. [x] HUMAN: review v2.G (operator, 2026-10-16: "call 2g done").
+
 ## v2.F — Verdict, write, approve, ideas ✅ (2026-10-16; D-040, `docs/prd.md` § v2)
 
 1. [x] `prompts/verdict_v1.md` + `idea/stages/verdict.py`: AI scores reach / out-rate /

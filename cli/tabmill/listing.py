@@ -13,11 +13,10 @@ from collections import Counter
 from pathlib import Path
 from typing import Any
 
-from . import generate, hub
+from . import generate, hub, targets
 
 STORE_DIR = ".output/store"
 LISTING_FILE = "listing.md"
-SCREENSHOT_SIZES = {(1280, 800), (640, 400)}  # developer.chrome.com/docs/webstore/images
 KEYWORD_LIMIT = 5  # pp/listing-requirements: a keyword repeated "more than 5 times"
 STOPWORDS = {
     "the",
@@ -69,17 +68,23 @@ def image_problems(workspace: Path, slug: str) -> list[str] | None:
     if not d.exists():
         return None
     problems: list[str] = []
-    expect = {"icon-128.png": (128, 128), "promo-440x280.png": (440, 280)}
+    images = targets.get().store_images
+    expect = {
+        f"icon-{images.icon[0]}.png": images.icon,
+        f"promo-{images.promo[0]}x{images.promo[1]}.png": images.promo,
+    }
     for name, size in expect.items():
         got = png_size(d / name) if (d / name).exists() else None
         if got != size:
             problems.append(f"{name}: expected {size[0]}×{size[1]}, got {got or 'missing'}")
     shots = sorted(d.glob("screenshot-*.png"))
-    if not 1 <= len(shots) <= 5:
-        problems.append(f"{len(shots)} screenshots (store needs 1–5)")
+    low, high = images.screenshot_count
+    if not low <= len(shots) <= high:
+        problems.append(f"{len(shots)} screenshots (store needs {low}–{high})")
+    sizes = " or ".join(f"{w}×{h}" for w, h in images.screenshots)
     for s in shots:
-        if png_size(s) not in SCREENSHOT_SIZES:
-            problems.append(f"{s.name}: {png_size(s)} — must be 1280×800 or 640×400")
+        if png_size(s) not in {tuple(x) for x in images.screenshots}:
+            problems.append(f"{s.name}: {png_size(s)} — must be {sizes}")
     return problems
 
 

@@ -7,13 +7,12 @@ from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any
 
-from . import extension, generate, registry, surfaces
+from . import extension, generate, registry, surfaces, targets
 from .templates import render
 
 RECIPE_TEMPLATE = "templates/recipe/extension.yaml.tmpl"
 SLUG_RE = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 SLUG_MAX = 40
-BUILT_MANIFEST = ".output/chrome-mv3/manifest.json"
 # Manifest-facing fields: `new` / `build` refuse while these hold ‹FILL›.
 MANIFEST_FIELDS = ("name", "summary", "single_purpose")
 
@@ -93,7 +92,7 @@ def rows(tool_dir: Path, workspace: Path | None) -> list[Row]:
         if slug in reg:
             built = (
                 workspace is not None
-                and (workspace / "extensions" / slug / BUILT_MANIFEST).exists()
+                and (targets.get().built_dir(workspace, slug) / "manifest.json").exists()
             )
             row.status = "built" if built else "generated"
         out.append(row)
@@ -101,7 +100,7 @@ def rows(tool_dir: Path, workspace: Path | None) -> list[Row]:
 
 
 def implemented_templates(tool_dir: Path) -> list[str]:
-    root = tool_dir / generate.EXT_TEMPLATES_DIR
+    root = targets.get().templates_dir(tool_dir)
     return [t for t in surfaces.IMPLEMENTED if (root / t).is_dir()]
 
 
@@ -114,7 +113,7 @@ def create(tool_dir: Path, workspace: Path | None, slug: str, template: str) -> 
         )
     if template not in extension.TEMPLATES:
         raise CreateError(f"unknown template `{template}` ({', '.join(extension.TEMPLATES)})")
-    if not (tool_dir / generate.EXT_TEMPLATES_DIR / template).exists():
+    if not (targets.get().templates_dir(tool_dir) / template).exists():
         have = ", ".join(implemented_templates(tool_dir)) or "none"
         raise CreateError(f"template `{template}` isn't implemented yet (available: {have})")
     target = generate.recipe_dir(tool_dir, slug)
