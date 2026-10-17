@@ -11,6 +11,7 @@ from typer.testing import CliRunner
 
 from tabmill import ai, brief, cli
 from tabmill.config import TOOL_DIR, Config
+from tabmill.idea import stages as idea_stages
 from tabmill.idea.stages import clarify
 
 runner = CliRunner()
@@ -152,6 +153,8 @@ def test_detection() -> None:
 def app_cfg(cfg: Config, monkeypatch: pytest.MonkeyPatch) -> Config:
     cfg.workspace.mkdir(parents=True)
     monkeypatch.setattr(cli, "_load", lambda *_: cfg)
+    # these tests cover clarify; shape/check (v2.D) have their own tests
+    monkeypatch.setattr(idea_stages, "REGISTERED", (clarify.Clarify(),))
     monkeypatch.setenv(ai.ENV_AI, f"replay:{cfg.tool_dir / 'fx'}")
     return cfg
 

@@ -22,7 +22,7 @@ IDEAS_DIR = "ideas"
 SESSION_FILE = "session.json"
 BRIEF_FILE = "brief.md"
 ORDER = ("clarify", "shape", "evidence", "check", "verdict", "write")
-ARRIVES = {"shape": "v2.D", "evidence": "v2.E", "check": "v2.D", "verdict": "v2.F", "write": "v2.F"}
+ARRIVES = {"evidence": "v2.E", "verdict": "v2.F", "write": "v2.F"}
 _ID_WORDS = 4
 
 StageKind = Literal["ai", "data", "rule", "gen"]
@@ -73,6 +73,7 @@ class Context:
     ask_user: AskUser | None  # None = non-interactive
     ai_model: str = ""
     today: str = ""
+    workspace: Path | None = None  # for slots and registry slugs; None = recipes only
 
     @property
     def dir(self) -> Path:

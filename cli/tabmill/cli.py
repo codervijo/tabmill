@@ -37,6 +37,7 @@ from . import (
     privacy,
     recipe_v2,
     registry,
+    rules,
     surfaces,
     sync,
     workspace,
@@ -169,7 +170,11 @@ def _run_idea(
     if not non_interactive and not interactive:
         output.skip("no terminal to ask in — questions are recorded as open")
     ctx = engine.Context(
-        cfg.tool_dir, session, _ask_user if interactive else None, ai_model=cfg.ai_model
+        cfg.tool_dir,
+        session,
+        _ask_user if interactive else None,
+        ai_model=cfg.ai_model,
+        workspace=cfg.workspace if cfg.workspace.exists() else None,
     )
 
     def step(name: str, what: str) -> None:
@@ -190,15 +195,45 @@ def _run_idea(
     finally:
         output.console.print(f"  {ai.spent()}")
     for rec in records:
-        if rec.stage == "clarify":
-            out = rec.output
-            answered = len(out["qa"]) - len(out["open"])
-            line = f"clarify: {answered} answered, {len(out['open'])} open"
-            (output.skip if out["open"] else output.ok)(
-                line + (" — carried as assumptions" if out["open"] else "")
-            )
+        if only is None or rec.stage == only:
+            _stage_summary(rec)
+    stale = [r.stage for r in records if r.stale]
+    if stale:
+        output.skip(f"stale: {', '.join(stale)} — `tabmill new --resume {session.id}` re-runs them")
     output.console.print(f"  idea: {engine.IDEAS_DIR}/{session.id}/")
-    output.console.print(f"  next: shape arrives in {engine.ARRIVES['shape']}")
+    later = [n for n in engine.ORDER if n in engine.ARRIVES]
+    if later:
+        output.console.print(f"  next: {later[0]} arrives in {engine.ARRIVES[later[0]]}")
+
+
+def _stage_summary(rec: engine.StageRecord) -> None:
+    out = rec.output
+    if rec.stage == "clarify":
+        answered = len(out["qa"]) - len(out["open"])
+        line = f"clarify: {answered} answered, {len(out['open'])} open"
+        (output.skip if out["open"] else output.ok)(
+            line + (" — carried as assumptions" if out["open"] else "")
+        )
+    elif rec.stage == "shape":
+        d = out["draft"]
+        perms = ", ".join(p["name"] for p in d["permissions"])
+        output.ok(f"shape: {d['slug']} · {d['template']} · {d['name']!r} · {perms}")
+        output.console.print(f"    {d['single_purpose']}")
+        for note in out["notes"]:
+            output.skip(f"shape: {note}")
+        for r in out["slug_rejected"]:
+            output.skip(f"shape: slug {r}")
+    elif rec.stage == "check":
+        for f in out["findings"]:
+            (output.fail if f["severity"] == "error" else output.skip)(
+                f"check: {f['rule']}: {f['message']}"
+            )
+        s = out["slots"]
+        line = (
+            f"check: {out['errors']} error(s), {out['warnings']} warning(s) · "
+            f"slots {s['free']} free of {s['limit']}"
+        )
+        (output.fail if out["errors"] else output.ok)(line)
 
 
 @app.command()
@@ -1198,6 +1233,12 @@ def doctor(
         else:
             output.skip(f"{tool}: not on PATH — needed for {why}")
     cfg, ws = _config_and_workspace()
+    try:
+        rs = rules.load(cfg.tool_dir)
+        output.ok(f"{rules.RULES_FILE}: {len(rs.rules)} rules, in step with rules.py")
+    except rules.RulesError as e:
+        output.fail(str(e))
+        failed = True
     for purpose, version in idea_stages.PROMPTS:
         try:
             ai.load_prompt(cfg.tool_dir, purpose, version)

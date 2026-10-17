@@ -19,10 +19,10 @@ page on a Lamill portfolio site.
 ## Commands
 
 ```
-uv run tabmill new "<rough idea>" [--non-interactive]  # idea stage: clarify (shape… from v2.D)
+uv run tabmill new "<rough idea>" [--non-interactive]  # idea stage: clarify → shape → check
 uv run tabmill new --brief <file> | new - | new --paste  # a Tabmill brief: gap-only questions
 uv run tabmill brief check <file>                      # validate a brief (line + section)
-uv run tabmill new --resume <id> | new clarify [id]    # continue / re-run a stage
+uv run tabmill new --resume <id> | new clarify|shape [id]  # continue / re-run a stage
 uv run tabmill bootstrap <slug>     # first run: starter recipe; after filling it: generate
 uv run tabmill try <slug> [--url URL] [--dev]  # build + Chromium in docker, window on your desktop
 uv run tabmill check [slug]         # typecheck + unit + smoke + store-policy lint (no slug = all)
@@ -33,7 +33,7 @@ uv run tabmill slots | templates | doctor [--fix]  # store slots · surface temp
 ```
 
 v2 (D-040, `docs/prd.md` § v2) puts an idea stage in front: `tabmill new "<rough idea>"` or a
-pasted Tabmill brief → clarify → shape → evidence → check → verdict → `approve`. Built so far: clarify (v2.B), brief input (v2.C);
+pasted Tabmill brief → clarify → shape → evidence → check → verdict → `approve`. Built so far: clarify (v2.B), brief input (v2.C), shape + rules check (v2.D);
 sessions in `ideas/<id>/`. Uses `claude -p` (no tools; `ai_model` in `tabmill.config.json`).
 `tabmill new <slug>` still works through v2 as a deprecated alias for `bootstrap`.
 

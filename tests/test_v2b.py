@@ -15,6 +15,7 @@ from typer.testing import CliRunner
 from tabmill import ai, cli
 from tabmill.config import TOOL_DIR, Config
 from tabmill.idea import engine
+from tabmill.idea import stages as idea_stages
 from tabmill.idea.stages import clarify
 
 runner = CliRunner()
@@ -247,8 +248,8 @@ def test_engine_resume_replays_and_rerun_marks_downstream_stale(
 
 
 def test_engine_rejects_an_unbuilt_stage(tool_dir: Path) -> None:
-    with pytest.raises(engine.IdeaError, match="v2.D"):
-        engine.run(_ctx(tool_dir, None), [clarify.Clarify()], only="shape")
+    with pytest.raises(engine.IdeaError, match="v2.F"):
+        engine.run(_ctx(tool_dir, None), [clarify.Clarify()], only="verdict")
 
 
 def test_ids_are_dated_and_unique(tool_dir: Path) -> None:
@@ -266,6 +267,8 @@ def test_ids_are_dated_and_unique(tool_dir: Path) -> None:
 def app_cfg(cfg: Config, monkeypatch: pytest.MonkeyPatch) -> Config:
     cfg.workspace.mkdir(parents=True)
     monkeypatch.setattr(cli, "_load", lambda *_: cfg)
+    # these tests cover clarify; shape/check (v2.D) have their own tests
+    monkeypatch.setattr(idea_stages, "REGISTERED", (clarify.Clarify(),))
     return cfg
 
 
@@ -277,7 +280,7 @@ def test_cli_rough_idea_interactive(app_cfg: Config, monkeypatch: pytest.MonkeyP
     monkeypatch.setattr(cli, "_tty", lambda: True)
     result = runner.invoke(cli.app, ["new", *IDEA.split()], input="1\n")
     assert result.exit_code == 0, result.stdout
-    assert "1 answered, 0 open" in result.stdout and "v2.D" in result.stdout
+    assert "1 answered, 0 open" in result.stdout and "v2.E" in result.stdout
     (idea,) = (app_cfg.tool_dir / "ideas").iterdir()
     rec = json.loads((idea / "stages" / "01-clarify.json").read_text())
     assert rec["output"]["qa"][0]["answer"] == "toolbar"  # choice 1, saved verbatim

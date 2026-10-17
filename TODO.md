@@ -18,6 +18,26 @@ blocker to `NOTES.md`, mark it BLOCKED, move on.
 
 ## v1.B — Tool + generator ✅ (2026-10-03; details in docs/shipping-history.md)
 
+## v2.D — Shape, rules engine, template fit, overlap (in progress; D-040, `docs/prd.md` § v2)
+
+1. [x] `rules/lamill.yaml` (allowlist, broad hosts, limits, brand denylist, severity per
+       idea/dev/release) + `cli/tabmill/rules.py` (predicates by rule id, `evaluate(subject,
+       context)`). Recipe-level lint rules move in (perm-broad-host, fill-placeholder,
+       cta-placeholder, portfolio-similarity, privacy-coverage) with the same ids, severities
+       and messages; bundle + live-URL rules stay in `lint.py`. New: perm-not-allowlisted,
+       perm-justification, store-name-brand, name/summary length + single-purpose (idea only;
+       `extension.validate` covers dev/release), template-implemented, slot-free (idea only).
+2. [x] `prompts/shape_v1.md` + `idea/stages/shape.py`: AI proposes single purpose, template or
+       `none-fits` + reason, permissions with reasons, trigger, restricted pages, slug
+       candidates, store name, summary, keywords, site, CTA, assumptions; brief Proposal seeds
+       it. Code: first valid unused slug, template's own permissions added, draft recipe dict.
+3. [x] `idea/stages/check.py` (kind rule, no AI): `rules.evaluate(draft, "idea")` + slots.
+4. [x] CLI: `new shape [id]`; stage summaries; Context gets the workspace (slots).
+5. [x] Tests: `<all_urls>` unjustified fails at idea and in `check`/lint; lint suite unchanged;
+       shape replay (slug pick, template perms added, none-fits); check findings; rules file ↔
+       predicates in step. Docs.
+6. [ ] HUMAN: review v2.D.
+
 ## v2.C — Brief input ✅ (2026-10-16; D-040, `docs/prd.md` § v2)
 
 1. [x] `cli/tabmill/brief.py`: Tabmill brief v1 pydantic models → `schemas/brief_v1.schema.json`;

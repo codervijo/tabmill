@@ -1,0 +1,61 @@
+# Lamill policy rules (D-040). Data here, predicates in cli/tabmill/rules.py, keyed by rule id.
+# The idea stage's `check` and the build `check` / `advanced lint` both call
+# rules.evaluate(), so they can't disagree — only the severity column differs by context.
+# Severity: error | warn | skip (not checked in that context). Bundle and live-URL rules stay in lint.py.
+version: 1
+
+# Permissions a Lamill extension may ask for without special review; anything else warns.
+permission_allowlist:
+  - activeTab
+  - scripting
+  - storage
+  - sidePanel
+  - downloads
+  - contextMenus
+  - alarms
+  - notifications
+
+broad_hosts: ["<all_urls>", "*://*/*", "https://*/*", "http://*/*"]
+
+# Chrome Web Store / manifest limits (developer.chrome.com manifest name, description).
+limits:
+  name: 75
+  summary: 132
+
+# Third-party brand names a store name must not lead with or imply (impersonation policy).
+# Matched as whole words, case-insensitive.
+brand_denylist:
+  - google
+  - chrome
+  - youtube
+  - gmail
+  - facebook
+  - instagram
+  - whatsapp
+  - tiktok
+  - twitter
+  - linkedin
+  - reddit
+  - amazon
+  - microsoft
+  - apple
+  - openai
+  - chatgpt
+  - notion
+
+rules:
+  # moved from lint.py — same severities as before
+  perm-broad-host:      {idea: error, dev: error, release: error}
+  fill-placeholder:     {idea: skip,  dev: warn,  release: error}  # idea drafts keep ‹FILL› for human decisions
+  cta-placeholder:      {idea: skip,  dev: warn,  release: error}
+  portfolio-similarity: {idea: warn,  dev: warn,  release: warn}   # ≥ 90% similar → error in every context
+  privacy-coverage:     {idea: warn,  dev: warn,  release: error}
+  # new in v2.D
+  perm-justification:   {idea: error, dev: skip,  release: skip}    # dev/release: extension.validate (schema)
+  perm-not-allowlisted: {idea: warn,  dev: warn,  release: warn}
+  store-name-brand:     {idea: warn,  dev: warn,  release: warn}
+  name-length:          {idea: error, dev: skip,  release: skip}    # dev/release: extension.validate
+  summary-length:       {idea: error, dev: skip,  release: skip}    # dev/release: extension.validate
+  single-purpose:       {idea: error, dev: skip,  release: skip}    # dev/release: schema + fill-placeholder
+  template-implemented: {idea: warn,  dev: skip,  release: skip}    # dev/release: bootstrap refuses a stub
+  slot-free:            {idea: warn,  dev: skip,  release: skip}

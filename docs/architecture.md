@@ -17,6 +17,7 @@ Two repos, related by a computed relative layout (ADR-0007):
 │   ├── portfolio.yaml               slot limit + approval per extension (D-040)
 │   ├── schemas/                     JSON Schemas generated from the pydantic models (D-040)
 │   ├── prompts/<purpose>_vN.md      versioned idea-stage prompts (D-040)
+│   ├── rules/lamill.yaml            policy rules data, shared by idea check + lint (D-040)
 │   ├── ideas/<id>/                  idea sessions (committed; raw/ gitignored)
 │   ├── templates/extension/<tpl>/   generic surface code (popup today)
 │   ├── templates/workspace/  ci/    rendered into the workspace by `tabmill init`
@@ -158,6 +159,24 @@ Two repos, related by a computed relative layout (ADR-0007):
   For a brief (gap-only): its Answers pre-fill `known` and win over the AI's reading; its Open
   questions (verbatim) and any section that failed to parse are asked by code; all five fields
   filled → no AI call. Same `clarify_v1` prompt.
+- **Rules engine** (`rules.py` + `rules/lamill.yaml`, D-040): data (permission allowlist, broad
+  hosts, name/summary limits, store-name brand denylist) and a severity per context
+  (`idea | dev | release`, `skip` = not checked there); predicates in code, keyed by rule id —
+  `rules.load` fails if the two drift. Recipe-level rules (perm-broad-host, fill-placeholder,
+  cta-placeholder, portfolio-similarity, privacy-coverage, plus v2.D's perm-justification,
+  perm-not-allowlisted, store-name-brand, name/summary length, single-purpose,
+  template-implemented, slot-free) run through `rules.evaluate()` from both the idea `check`
+  stage and `lint.py`; schema, bundle and live-URL rules stay in `lint.py`. Rules that
+  `extension.validate` already enforces in dev/release are `skip` there.
+- **shape_v1** (`idea/stages/shape.py`): AI proposes single purpose, template or `none-fits` +
+  reason, permissions with justifications, trigger, restricted pages, slug candidates, store
+  name, summary, keywords, site, CTA, assumptions (brief Proposal passed as a suggestion).
+  Code: first valid unused slug (else one from the store name), operator `--template` wins,
+  the template's own permissions are added; result = recipe-shaped `draft`.
+- **check stage** (`idea/stages/check.py`, kind rule, no AI): `rules.evaluate(draft, "idea")` +
+  slots. Its input hash includes the rules, the recipe list and the slot view, so resume re-runs
+  it when any of those change. `new <stage> <id>` re-runs one stage and prints the stale ones
+  with the `--resume` hint (no auto-continue: later stages may cost AI calls).
 - **Tabmill brief v1** (`brief.py`, `schemas/brief_v1.schema.json`): front matter
   (`tabmill_brief: 1`, idea, author, created) + `## Idea · Answers · Proposal · Evidence
   (### Demand, ### Store competition tables) · Risks · Open questions`. Parsed section by
@@ -205,7 +224,8 @@ Two repos, related by a computed relative layout (ADR-0007):
 `extension` (YAML load/validate/manifest fields), `generate` (template + recipe), `registry`,
 `catalog` (list rows, starter recipes), `lifecycle` (stage + next step per extension),
 `surfaces` (template registry), `provenance` (Fact), `recipe_v2` (migration, JSON Schema),
-`portfolio` (portfolio.yaml, slots), `ai` (claude -p runner), `brief` (brief v1 parser), `idea/engine` (sessions,
+`portfolio` (portfolio.yaml, slots), `ai` (claude -p runner), `brief` (brief v1 parser),
+`rules` (shared rules engine), `idea/engine` (sessions,
 stages), `idea/stages/` (clarify; later stages per `docs/prd.md` § v2). Planned packages: brand, funnel, messaging, analytics, policy (extracted in v1.E/v1.H).
 
 ## 5. CLI / UX surface

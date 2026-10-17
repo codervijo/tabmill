@@ -10,14 +10,15 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Literal
+from typing import Any
 
 import httpx
 
-from . import catalog, extension, generate, hub, listing, privacy
+from . import extension, generate, hub, listing, privacy, rules
+from .rules import Finding, Severity, similarity
 
-Severity = Literal["error", "warn"]
-BROAD_HOSTS = {"<all_urls>", "*://*/*", "https://*/*", "http://*/*"}
+__all__ = ["Finding", "Severity", "lint", "similarity"]
+
 # Permission → token that must appear in the bundle when the API is used (perm-unused).
 API_TOKENS = {
     "scripting": "scripting",
@@ -33,25 +34,6 @@ EVAL_RE = re.compile(r"(?<![\w.$])eval\(|new Function\(")
 REMOTE_SCRIPT_RE = re.compile(
     r"<script[^>]+src=[\"']https?://|import\([\"']https?://|importScripts\([\"']https?://"
 )
-SIMILARITY_WARN, SIMILARITY_ERROR = 0.6, 0.9
-STOPWORDS = {
-    "the",
-    "a",
-    "an",
-    "of",
-    "on",
-    "for",
-    "to",
-    "and",
-    "or",
-    "as",
-    "in",
-    "you",
-    "are",
-    "page",
-    "current",
-    "web",
-}
 
 
 @dataclass(frozen=True)
@@ -61,40 +43,22 @@ class Rule:
     release: Severity
 
 
+# Rules that need the schema, a build, or the network. Recipe-level policy rules live in
+# rules/lamill.yaml + rules.py (D-040), shared with the idea stage.
 RULES = {
     r.id: r
     for r in (
         Rule("schema", "error", "error"),
-        Rule("perm-broad-host", "error", "error"),
         Rule("perm-unused", "warn", "error"),
-        Rule("fill-placeholder", "warn", "error"),
-        Rule("cta-placeholder", "warn", "error"),
         Rule("mv3-no-eval", "error", "error"),
         Rule("mv3-no-remote-script", "error", "error"),
         Rule("not-built", "warn", "error"),
-        Rule("portfolio-similarity", "warn", "warn"),
         Rule("store-images", "warn", "error"),
         Rule("keyword-repeat", "warn", "error"),
         Rule("hub-urls", "warn", "error"),
-        Rule("privacy-coverage", "warn", "error"),
+        Rule("fill-placeholder", "warn", "error"),  # listing.md ‹FILL› (recipe ‹FILL›: rules.py)
     )
 }
-
-
-@dataclass(frozen=True)
-class Finding:
-    rule: str
-    severity: Severity
-    message: str
-
-
-def _words(text: str) -> set[str]:
-    return {w for w in re.findall(r"[a-z0-9]+", text.lower()) if w not in STOPWORDS}
-
-
-def similarity(a: str, b: str) -> float:
-    wa, wb = _words(a), _words(b)
-    return len(wa & wb) / len(wa | wb) if wa | wb else 0.0
 
 
 def _fetch(url: str) -> tuple[int | None, str]:
@@ -122,43 +86,17 @@ def lint(tool_dir: Path, workspace: Path | None, slug: str, *, release: bool) ->
     for err in extension.validate(ext, slug):
         add("schema", err)
 
-    for key in ("permissions", "optional_permissions", "host_permissions"):
-        for p in ext.get(key) or []:
-            if isinstance(p, dict) and p.get("name") in BROAD_HOSTS:
-                add("perm-broad-host", f"`{p['name']}` in {key} — prefer activeTab (longer review)")
+    try:
+        out += rules.evaluate(
+            rules.Subject(ext, slug, tool_dir, workspace), "release" if release else "dev"
+        )
+    except rules.RulesError as e:
+        add("schema", str(e), "error")
     policy: privacy.Policy | None = None
     try:
         policy = privacy.load(tool_dir)
-    except privacy.PolicyError as e:
-        add("privacy-coverage", str(e), "error")
-    if policy is not None:
-        for gap in privacy.coverage(ext, policy):
-            add(
-                "privacy-coverage",
-                f"{gap} — the shared policy doesn't cover it: update {privacy.POLICY_FILE} "
-                "(bump version), `tabmill ship`, deploy lamill.io (D-036)",
-            )
-    for field in catalog.fill_fields(ext):
-        add("fill-placeholder", f"`{field}` is still ‹FILL›")
-    for field in extension.placeholder_fields(ext):
-        if field not in catalog.fill_fields(ext):
-            add("cta-placeholder", f"`{field}` = {ext.get(field)!r} is a placeholder URL")
-
-    for other in catalog.recipe_slugs(tool_dir):
-        if other == slug:
-            continue
-        try:
-            o = extension.load_file(generate.recipe_dir(tool_dir, other) / generate.RECIPE_FILE)
-        except extension.ExtensionError:
-            continue
-        sim = similarity(str(ext.get("single_purpose", "")), str(o.get("single_purpose", "")))
-        if sim >= SIMILARITY_WARN:
-            sev: Severity = "error" if sim >= SIMILARITY_ERROR else "warn"
-            add(
-                "portfolio-similarity",
-                f"single purpose {sim:.0%} similar to `{other}` (duplicate-functionality policy)",
-                sev,
-            )
+    except privacy.PolicyError:
+        policy = None  # reported by the privacy-coverage rule
 
     if workspace is not None:
         problems = listing.image_problems(workspace, slug)

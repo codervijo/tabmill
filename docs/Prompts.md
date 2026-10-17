@@ -145,3 +145,5 @@ The dated H2 is what `lamill project status` parses. Append-only.
 ## 2026-10-16 — v2.C done, v2.D started
 
 > "commit, call 2c done and start 2d"
+> → `rules.py` + `rules/lamill.yaml` (lint recipe rules moved in), shape_v1, check stage.
+> Live run: page-word-count · popup · activeTab+scripting, 0 errors, $0.45 for 2 calls.

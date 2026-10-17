@@ -154,8 +154,8 @@ def test_new_slug_is_a_deprecated_alias_for_bootstrap(app_cfg: Config) -> None:
 
 
 def test_new_with_a_later_stage_name_says_when_it_arrives(app_cfg: Config) -> None:
-    result = runner.invoke(cli.app, ["new", "shape"])
-    assert result.exit_code == 1 and "v2.D" in result.stdout
+    result = runner.invoke(cli.app, ["new", "verdict"])
+    assert result.exit_code == 1 and "v2.F" in result.stdout
 
 
 def test_bootstrap_refuses_a_stub_template(app_cfg: Config) -> None:
