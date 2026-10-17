@@ -18,6 +18,20 @@ blocker to `NOTES.md`, mark it BLOCKED, move on.
 
 ## v1.B — Tool + generator ✅ (2026-10-03; details in docs/shipping-history.md)
 
+## v2.H — First real runs (in progress; D-040, `docs/prd.md` § v2)
+
+1. [ ] HUMAN: paste the two Tabmill briefs (word counter, page ruler) — `uv run tabmill brief
+       check <file>` first.
+2. [ ] `tabmill new --brief <file>` for each (interactive) → `tabmill ideas compare <a> <b>`.
+3. [ ] HUMAN: pick the winner; fill its ‹FILL›; `tabmill approve <id>` (terminal).
+       Page ruler needs the `page-overlay` template, which is a stub — winning means building
+       it first (tabmill template work, planned here before code).
+4. [ ] `bootstrap` → `try` → `check` → `ship` on the winner.
+5. [ ] Retro (what the prompts / rules / thresholds got wrong) → prompts tuned to `_v2`,
+       verdict thresholds revisited with the two real runs as data.
+6. [ ] "Done when" (`docs/prd.md` § v2) checked; v2.I–v2.Z only for fixes found here.
+7. [ ] HUMAN: review v2.H.
+
 ## v2.G — Target-adapter seam ✅ (2026-10-16; D-040, `docs/prd.md` § v2)
 
 1. [x] `targets/chrome_mv3/target.yaml` (limits, store images, build dirs, templates dir,
