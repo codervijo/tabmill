@@ -28,7 +28,7 @@ it — and say which two in the commit/PLAN entry.
 
 1. Is it in the current phase (`docs/prd.md` § 5, `PLAN.md`)? If it's a new feature not in the
    PRD, stop and ask the operator where it slots.
-2. Over ~20 lines? Add a planned item to `TODO.md` first.
+2. Over ~20 lines? Add a planned item to the work queue in `docs/prd.md` first.
 3. New dependency? Add a row to `DECISIONS.md` § Dependency register *before* installing:
    runtime vs dev, why a platform API won't do, size/maintenance.
    `@tabmill/*` packages ship in extension bundles → **zero third-party runtime deps** by default.

@@ -399,6 +399,37 @@ Each phase stops for operator review. Commits only when asked. Subjects start wi
    `advanced publish`, built in v2.A); `ship --publish` fails with `✗ use tabmill publish <slug>`.
 4. `ideas/` is committed except `ideas/*/raw/` (gitignored).
 
+#### Work queue
+
+The open work for the current phase, plus HUMAN items carried from earlier phases. Plans
+before patches: a change over ~20 lines gets its items here first. Done items are checked
+off; when a phase ships its list moves to `docs/shipping-history.md`.
+
+**v2.H — First real runs**
+
+1. [ ] HUMAN: paste the two Tabmill briefs (word counter, page ruler) — `uv run tabmill brief
+       check <file>` first.
+2. [ ] `tabmill new --brief <file>` for each (interactive) → `tabmill ideas compare <a> <b>`.
+3. [ ] HUMAN: pick the winner; fill its ‹FILL›; `tabmill approve <id>` (terminal).
+       Page ruler needs the `page-overlay` template, which is a stub — winning means building
+       it first (tabmill template work, planned here before code).
+4. [ ] `bootstrap` → `try` → `check` → `ship` on the winner.
+5. [ ] Retro (what the prompts / rules / thresholds got wrong) → prompts tuned to `_v2`,
+       verdict thresholds revisited with the two real runs as data.
+6. [ ] "Done when" (`docs/prd.md` § v2) checked; v2.I–v2.Z only for fixes found here.
+7. [ ] HUMAN: review v2.H.
+
+**Carried (HUMAN)**
+
+- [ ] `TABMILL_PAT` for workspace CI: fine-grained PAT, repo access tabmill only, Contents
+      read-only — https://github.com/settings/personal-access-tokens/new — saved as secret
+      `TABMILL_PAT` in `codervijo/chrome-extension-projects` (Settings → Secrets and variables
+      → Actions).
+- [ ] Real-use check of the top-level build commands on a real extension: `uv run tabmill
+      check`, `uv run tabmill ship <slug>`.
+- [ ] First real CWS API upload + publish (#1's first update): `uv run tabmill ship
+      save-page-pdf-md`, then `uv run tabmill publish save-page-pdf-md` (attended).
+
 #### Done when (end of v2.H)
 
 - `tabmill new "rough idea"`, `new --paste`, `new -` and `new --brief` all work, both

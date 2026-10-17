@@ -43,8 +43,7 @@ Both sets exist; each fact has one home:
   `docs/CLAUDE.md` — Lamill-standard ADR workflow, heading hygiene, code-shape rules.
 - `DECISIONS.md` (this) — log; ADRs for accepted load-bearing decisions.
 - `NOTES.md` — spike findings, blockers, time-to-first-build.
-- `TODO.md` — work queue. **New convention:** Lamill sites track todos in `lamill.toml [[todo]]`,
-  but Tabmill isn't a site and the kickoff asks for TODO.md.
+- ~~`TODO.md` — work queue~~ → retired by D-041: the work queue lives in `docs/prd.md`.
 
 ## D-005 — Framework: WXT (Accepted, 2026-10-03) → ADR-0004
 
@@ -381,3 +380,11 @@ renders icons/screenshots for `tabmill assets`.
 | @mozilla/readability ^0.6.0 | save-page-pdf-md | **yes** | article extraction; Apache-2.0, 0 deps, 155 kB unpacked, ships types (npm 2026-10-03) | Accepted (operator), in v1.C |
 | turndown ^7.2.4 (+ @types/turndown) | save-page-pdf-md | **yes** | HTML→Markdown; MIT, published 2026-04; one dep (`@mixmark-io/domino`, Node-only — verified absent from the browser bundle 2026-10-03) | Accepted (operator), in v1.C |
 | **extension bundles** | shipped | **yes** | template adds **none**; per-extension runtime deps come from the recipe's `dependencies:` and need a row above. `@tabmill/*` packages must have zero third-party runtime deps | — |
+
+## D-041 — Work queue lives in the PRD; TODO.md retired (Accepted, 2026-10-16)
+
+Operator: "merge TODO.md into PRD, avoid an extra file use PRD" (after D-040's plan file was
+folded into the PRD the same day). Open items → `docs/prd.md` § v2 Work queue (current phase +
+carried HUMAN items); completed checklists → `docs/shipping-history.md` § Archived work queue.
+"Plans before patches" now means the PRD's work queue. The workspace's own `TODO.md` (HUMAN
+publish lines written by tabmill) is unchanged.

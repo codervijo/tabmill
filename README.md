@@ -53,5 +53,5 @@ Planned: analytics.
 
 ## Docs
 
-`PLAN.md` phases · `TODO.md` queue · `DECISIONS.md` decisions + dependency register ·
+`PLAN.md` phases · work queue in `docs/prd.md` · `DECISIONS.md` decisions + dependency register ·
 `NOTES.md` findings + time-to-first-build · `CLAUDE.md` rules · `docs/` Lamill-standard docs.

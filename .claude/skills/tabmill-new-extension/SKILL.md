@@ -32,7 +32,7 @@ sentences → two extensions, or one is out of scope. Confirm with the user.
 
 `uv run tabmill templates` is the live list (`cli/tabmill/surfaces.py`). A stub must be built
 in `templates/extension/` first (it's a tabmill change —
-plan it in TODO.md).
+plan it in the PRD's work queue).
 
 ## 4. Permissions (minimal)
 
@@ -45,7 +45,7 @@ Broad hosts (`<all_urls>`) need explicit user sign-off.
 `portfolio_site`, `cta_text`, `cta_url`, `utm_campaign`, `target_keywords` (tool queries,
 e.g. "webpage to pdf"), `store_category` (‹FILL› — picked in the dashboard; no official list).
 No real CTA destination yet → reserved placeholder host (`https://<name>.example/<path>`) and a
-`HUMAN: set real <name> CTA URL` line in this repo's TODO.md; dev builds warn, release blocks (D-015).
+`HUMAN: set real <name> CTA URL` line in the PRD's work queue (`docs/prd.md`); dev builds warn, release blocks (D-015).
 
 ## 6. Analytics
 

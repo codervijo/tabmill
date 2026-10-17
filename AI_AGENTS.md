@@ -53,7 +53,8 @@ Makefile (Python stack) with `Makefile.local` overrides (D-018). Workspace (`$TA
 - Extract, don't design upfront.
 - `✓ ↷ ✗` step markers in CLI output.
 - Plans live in `docs/prd.md` (per-version section) — no separate plan file per version; avoid
-  creating new doc files when an existing one fits (operator, 2026-10-16).
+  creating new doc files when an existing one fits; the work queue is in the PRD too —
+  `TODO.md` is retired (operator, 2026-10-16).
 - Tests never run paid tools for real (`claude -p`, `lamill new validate`); `tests/conftest.py`
   guards both — inject fakes or replay fixtures (2026-10-16, after a test spent SerpAPI quota).
 - Every command that makes AI calls ends with a cost line — `AI: N call(s) · $X · model`,

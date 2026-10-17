@@ -4,7 +4,7 @@ Tabmill = CLI + templates + shared packages + Claude Code skills that create, re
 track Lamill's portfolio of single-purpose Chrome MV3 extensions.
 
 Read first: `AI_AGENTS.md` (orientation, versioning), `docs/prd.md` (scope, phase status,
-open questions), `PLAN.md` (current phase), `TODO.md` (queue), `DECISIONS.md`.
+open questions), `PLAN.md` (current phase), `DECISIONS.md`. The work queue is in `docs/prd.md`.
 Lamill doc conventions (ADRs, heading hygiene, code shape): `docs/CLAUDE.md`.
 Working on Tabmill itself → the `tabmill-dev` skill; new extension → `tabmill-new-extension`
 (both in `.claude/skills/`, tool-repo only).
@@ -44,11 +44,11 @@ commit it, never print values). `uv run tabmill settings preflight` checks the w
 - `publish` NEVER runs unattended. In unattended sessions, stop at "zip built + checks
   passing + listing drafted" and add `HUMAN: publish <slug>` to WORKSPACE_DIR/TODO.md.
 - Don't extract a shared package until two extensions need it (generic surface code goes in templates).
-- Plans before patches: for any change over ~20 lines, plan in TODO.md first.
+- Plans before patches: for any change over ~20 lines, plan it in the PRD's work queue first.
 - Git: TOOL_DIR and WORKSPACE_DIR are separate repos. Small commits per TODO item — **only
   when the operator asks** (global never-auto-commit rule wins). Never force-push, never
   commit `.env` or credentials.
-- Continuation: when a TODO item is done, check it off, take the next. If blocked, write the
+- Continuation: when a work-queue item is done, check it off, take the next. If blocked, write the
   blocker to NOTES.md, mark it BLOCKED, move on.
 - Skills: edit sources in `skills/`, then `tabmill settings skills sync`. Never edit installed copies.
   Write skills from verified findings; SKILL.md ≤ ~150 lines.

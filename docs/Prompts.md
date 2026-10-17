@@ -171,3 +171,8 @@ The dated H2 is what `lamill project status` parses. Append-only.
 ## 2026-10-16 — v2.G done, v2.H started
 
 > "commit, call 2g done and start 2h"
+
+## 2026-10-16 — TODO.md merged into the PRD
+
+> "commit the v2.H plan and merge ToDO.md into PRD, avoid an extra file use PRD" → v2.H plan
+> committed; open items → PRD § v2 Work queue; done checklists → shipping-history; D-041.
