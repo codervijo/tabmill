@@ -4,7 +4,7 @@ Tabmill = CLI + templates + shared packages + Claude Code skills that create, re
 track Lamill's portfolio of single-purpose Chrome MV3 extensions.
 
 Read first: `AI_AGENTS.md` (orientation, versioning), `docs/prd.md` (scope, phase status,
-open questions), `PLAN.md` (current phase), `DECISIONS.md`. The work queue is in `docs/prd.md`.
+open questions, phase plans, work queue), `DECISIONS.md`.
 Lamill doc conventions (ADRs, heading hygiene, code shape): `docs/CLAUDE.md`.
 Working on Tabmill itself → the `tabmill-dev` skill; new extension → `tabmill-new-extension`
 (both in `.claude/skills/`, tool-repo only).

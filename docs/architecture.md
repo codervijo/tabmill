@@ -305,7 +305,7 @@ Top level (D-034, D-038, D-040): `new "<idea>" | - | --paste | --brief <file>
 
 ## 8. Active implementation plans
 
-See `PLAN.md`.
+See `docs/prd.md` § 5 (phase plans + work queue).
 
 ## 9. Risks
 

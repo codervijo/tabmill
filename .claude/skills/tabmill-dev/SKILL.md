@@ -26,7 +26,7 @@ it — and say which two in the commit/PLAN entry.
 
 ## Before changing code
 
-1. Is it in the current phase (`docs/prd.md` § 5, `PLAN.md`)? If it's a new feature not in the
+1. Is it in the current phase (`docs/prd.md` § 5)? If it's a new feature not in the
    PRD, stop and ask the operator where it slots.
 2. Over ~20 lines? Add a planned item to the work queue in `docs/prd.md` first.
 3. New dependency? Add a row to `DECISIONS.md` § Dependency register *before* installing:
@@ -63,7 +63,7 @@ CLI: `uv run pytest` (+ `ruff`, `mypy`). Browser packages: Vitest via the builde
 
 ## Docs to update in the same change
 
-Phase status → `docs/prd.md`; scope/done → `PLAN.md`; mechanisms/schemas → `docs/architecture.md`;
+Phase status → `docs/prd.md`; scope/done + work queue → `docs/prd.md`; mechanisms/schemas → `docs/architecture.md`;
 decisions/deps → `DECISIONS.md` (+ ADR if load-bearing and accepted); findings/blockers/timings
 → `NOTES.md`; prompts → `docs/Prompts.md` (dated H2).
 

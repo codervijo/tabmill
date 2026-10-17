@@ -1,7 +1,9 @@
 # PRD — tabmill
 
 The canonical source of truth for purpose, scope, phases, and conformance. Code that
-contradicts this doc is drift, not feature. Per-phase scope and done criteria: `PLAN.md`.
+contradicts this doc is drift, not feature. Per-phase scope, done criteria and the work
+queue live here too (§ 5; D-041, D-042). Core principle: **extract, don't design upfront** —
+packages and CLI commands move into the tool only when a second extension needs them.
 Original brief: `docs/kickoff.md`.
 
 ## 1. Purpose
@@ -71,7 +73,7 @@ v2.A; v1.M dropped; new v2 = idea stage (D-040); WordPress renumbered v2 → v3 
 
 #### Design notes
 
-See `PLAN.md` (per-phase scope + done criteria) and `NOTES.md` (v1.A spike findings).
+v1 phase plans at close: `docs/shipping-history.md`. Spike findings: `NOTES.md`.
 
 ### v2 — Idea stage
 
@@ -419,6 +421,8 @@ off; when a phase ships its list moves to `docs/shipping-history.md`.
 6. [ ] "Done when" (`docs/prd.md` § v2) checked; v2.I–v2.Z only for fixes found here.
 7. [ ] HUMAN: review v2.H.
 
+Idea candidates (from dropped v1.M): local-schema-generator, jwt-inspector.
+
 **Carried (HUMAN)**
 
 - [ ] `TABMILL_PAT` for workspace CI: fine-grained PAT, repo access tabmill only, Contents
@@ -449,6 +453,10 @@ slotted when v2.H's retro lands.
 Same funnel in a second channel (D-037): single-purpose free WordPress plugins generated from
 recipes, each with "Built by Lamill" and a CTA to a portfolio site, tracked in the same
 registry / hub / landing flow. Distribution: the wordpress.org plugin directory. §§ 1–3 and 6 are Chrome-only until v4.A rewrites them. Renumbered v2 → v3 (D-039) → v4 (D-040).
+
+v4.A plan: not started. Spikes: plugin directory rules + submission flow, PHP build/test in
+docker, how recipes carry a platform (the v2.G target seam is the hook). Open: which plugin
+is first (v4.C).
 
 #### Phases
 
@@ -502,6 +510,6 @@ registry / hub / landing flow. Distribution: the wordpress.org plugin directory.
 
 ## Spec discipline
 
-All canonical doc surfaces (this file, `PLAN.md`, `docs/architecture.md`,
+All canonical doc surfaces (this file, `docs/architecture.md`,
 `docs/shipping-history.md`, ADRs, `CLAUDE.md`, `docs/CLAUDE.md`) must match reality and code.
 Drift is fixed in the same commit as the change that caused it.

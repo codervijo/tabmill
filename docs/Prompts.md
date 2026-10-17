@@ -176,3 +176,9 @@ The dated H2 is what `lamill project status` parses. Append-only.
 
 > "commit the v2.H plan and merge ToDO.md into PRD, avoid an extra file use PRD" → v2.H plan
 > committed; open items → PRD § v2 Work queue; done checklists → shipping-history; D-041.
+
+## 2026-10-16 — PLAN.md merged into the PRD; minimal-files rule
+
+> "merge PLAN.md into the PRD too and push" + "note this in AGENTS file so that you dont keep
+> creating a whole bunch of new files, keep new files to minimum except when code requires it"
+> → PLAN.md retired (D-042); rule in AI_AGENTS.md.

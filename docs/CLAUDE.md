@@ -6,12 +6,11 @@ this file holds doc workflow, ADR workflow, and code-shape conventions.
 ## Project
 
 CLI + templates + skills for Lamill's Chrome extension portfolio. `docs/prd.md` is the
-canonical spec, `PLAN.md` the phase plan, `docs/Prompts.md` the prompt log.
+canonical spec (phases, plans and the work queue), `docs/Prompts.md` the prompt log.
 
 ## Canonical doc surfaces
 
 - `docs/prd.md` — WHY / WHAT / WHEN (purpose, non-goals, goals, phases, conformance, open questions)
-- `PLAN.md` — per-phase scope + done criteria (D-004)
 - `docs/architecture.md` — HOW (layout, mechanisms, schemas, integrations, risks, tracked refactors)
 - `docs/shipping-history.md` — archived rationale for shipped phases (append-only, newest first)
 - `docs/decisions/` — ADRs for accepted load-bearing decisions; `DECISIONS.md` is the running log
@@ -24,7 +23,7 @@ canonical spec, `PLAN.md` the phase plan, `docs/Prompts.md` the prompt log.
 |---|---|---|
 | A mechanism, schema, or module | `docs/architecture.md` | yes |
 | Phase status | `docs/prd.md` § 5 row | yes |
-| A phase shipped | move its `PLAN.md` section → `docs/shipping-history.md` | yes |
+| A phase shipped | move its PRD plan notes + work-queue list → `docs/shipping-history.md` | yes |
 | A dependency | `DECISIONS.md` § Dependency register | yes |
 | A load-bearing decision (accepted / reversed) | new ADR in `docs/decisions/` + `DECISIONS.md` link | yes |
 | A skill | `skills/<name>/` then sync | yes |

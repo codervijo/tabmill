@@ -52,9 +52,11 @@ Makefile (Python stack) with `Makefile.local` overrides (D-018). Workspace (`$TA
 - TOOL_DIR / WORKSPACE_DIR boundary is absolute (`CLAUDE.md` § Rules).
 - Extract, don't design upfront.
 - `✓ ↷ ✗` step markers in CLI output.
-- Plans live in `docs/prd.md` (per-version section) — no separate plan file per version; avoid
-  creating new doc files when an existing one fits; the work queue is in the PRD too —
-  `TODO.md` is retired (operator, 2026-10-16).
+- **Keep new files to a minimum.** Create a file only when code requires it (a module, a
+  template, a test, a data file code reads). Docs, plans, notes and queues go into an existing
+  file: phases, plans and the work queue in `docs/prd.md` (`TODO.md`, `PLAN.md` and per-version
+  plan files are retired), mechanisms in `docs/architecture.md`, decisions in `DECISIONS.md`
+  (operator, 2026-10-16).
 - Tests never run paid tools for real (`claude -p`, `lamill new validate`); `tests/conftest.py`
   guards both — inject fakes or replay fixtures (2026-10-16, after a test spent SerpAPI quota).
 - Every command that makes AI calls ends with a cost line — `AI: N call(s) · $X · model`,

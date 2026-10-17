@@ -37,8 +37,7 @@ retier when real friction says so.
 
 Both sets exist; each fact has one home:
 - `docs/prd.md` — purpose, non-goals, phase **status table**, conformance rules, open questions.
-- `PLAN.md` — per-phase scope + done criteria (the prd's "design notes"; moves to
-  `docs/shipping-history.md` when a phase ships).
+- ~~`PLAN.md` — per-phase scope + done criteria~~ → retired by D-042: in `docs/prd.md`.
 - `CLAUDE.md` (root, auto-loaded by Claude Code) — the operative Rules.
   `docs/CLAUDE.md` — Lamill-standard ADR workflow, heading hygiene, code-shape rules.
 - `DECISIONS.md` (this) — log; ADRs for accepted load-bearing decisions.
@@ -388,3 +387,10 @@ folded into the PRD the same day). Open items → `docs/prd.md` § v2 Work queue
 carried HUMAN items); completed checklists → `docs/shipping-history.md` § Archived work queue.
 "Plans before patches" now means the PRD's work queue. The workspace's own `TODO.md` (HUMAN
 publish lines written by tabmill) is unchanged.
+
+## D-042 — Phase plans live in the PRD; PLAN.md retired (Accepted, 2026-10-16)
+
+Operator: "merge PLAN.md into the PRD too". PLAN.md held only a pointer to the PRD's v2 plan,
+the carried items (already in the work queue), the idea candidates and v4.A notes — all moved
+to `docs/prd.md`; the "extract, don't design upfront" principle is in the PRD header. Shipped
+phase plans stay in `docs/shipping-history.md`. Supersedes D-004's PLAN.md split.
