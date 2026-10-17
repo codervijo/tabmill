@@ -410,4 +410,8 @@ constraint: "make sure you dont install node on my host - keep it all inside a d
 5. Layout: `plugins/<slug>/` beside `extensions/<slug>/` in the same workspace repo.
 6. Slots per target: chrome-mv3 limit 2; wordpress-plugin = one submission in review.
 7. Release: `ship` builds zip + SVN tree; `publish` (attended) commits to SVN from a container.
+8. SCM (operator, 2026-10-16: "public repo per plugin"): GitHub stays primary, SVN gets releases
+   only. Each plugin has a public GPL repo under a Lamill GitHub org with its readable source
+   (guideline 4), linked from `readme.txt`; tabmill creates it at first submission and syncs it
+   on `publish`. Generated output, never hand-edited.
 Open: which plugin is first (v4.C).

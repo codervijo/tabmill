@@ -476,17 +476,45 @@ Decisions locked 2026-10-16 (operator: recommendations accepted; D-043):
    per target (chrome-mv3 limit 2; wordpress-plugin: one in review).
 7. **Release automation:** `ship` builds the zip/SVN tree; `publish` (attended) commits to SVN
    from a container, like the Chrome flow.
+8. **SCM:** GitHub stays primary; wordpress.org SVN only receives releases. Each plugin also gets
+   a **public GitHub repo** (`<lamill-org>/<slug>`, GPL) holding its readable source and build
+   files (guideline 4); `readme.txt` links it. tabmill pushes the generated plugin tree there —
+   it is output, never hand-edited (ADR-0008). Created at first submission (v4.D), synced on
+   every `publish`. The private workspace repo stays the working copy.
 
 Open (v4.C): which plugin is first.
+
+Accounts and credentials (HUMAN; none paid):
+- [ ] wordpress.org account named for Lamill — https://login.wordpress.org/register — with an
+      email that reaches a person directly (release confirmations can't go to a shared inbox).
+- [ ] 2FA on it (required to submit) — https://profiles.wordpress.org/me/profile/security —
+      backup codes stored safely.
+- [ ] SVN password (commits after approval) —
+      https://profiles.wordpress.org/me/profile/edit/group/3/?screen=svn-password — saved with
+      `uv run tabmill settings apikeys set WPORG_SVN_PASSWORD` (+ `WPORG_USERNAME`).
+- [ ] Release confirmation turned on for each plugin once approved.
+- [ ] GitHub organization named for Lamill (free) — https://github.com/account/organizations/new —
+      owner of the public plugin repos, so `codervijo` stays off listings; `TABMILL_PAT` needs
+      repo-create + push on it.
+- Existing and reused: GitHub workspace repo, lamill.io hub/landing. Docker images are pulled
+  anonymously (no Docker Hub account).
+
+Preflight for plugins (v4.B; `settings preflight` and `doctor`): ✓/↷/✗ per check —
+`WPORG_USERNAME` set and its profile exists (profiles.wordpress.org/<user> → 200);
+`WPORG_SVN_PASSWORD` set (probed with an authenticated `svn info` from a container once the
+plugin's SVN repo exists, ↷ before approval); 2FA can't be read from outside → ↷ reminder
+until the operator confirms it once (recorded); the plugin docker images pull; Plugin Check runs
+in the `wordpress:cli` container; the Lamill GitHub org exists and `TABMILL_PAT` can create and
+push repos in it. `publish` for plugins refuses until every check passes.
 
 #### Phases
 
 | Phase | Status | Title |
 |---|---|---|
 | v4.A | ✅ done | Planning / decisions lock — spikes: wordpress.org plugin rules + submission, PHP build/test in docker, how recipes carry a platform |
-| v4.B | ⏳ planned | Platform field in the recipe schema; first WordPress template; generate + build a plugin zip |
+| v4.B | ⏳ planned | `wordpress-plugin` target; first WordPress template; generate + build a plugin zip in docker; wordpress.org account preflight (`WPORG_*` keys, profile, SVN probe, 2FA reminder, images) |
 | v4.C | ⏳ planned | First plugin recipe (plugin not chosen yet); tried in a WordPress container |
-| v4.D | ⏳ planned | WordPress lint rules; release folder with `readme.txt` + assets; manual first submission to wordpress.org |
+| v4.D | ⏳ planned | WordPress lint rules; release folder with `readme.txt` + assets; public source repo per plugin (created + linked from `readme.txt`); manual first submission to wordpress.org |
 | v4.E | ⏳ planned | Registry, `status`, `hub`, `landing`, privacy policy cover plugins |
 
 ## 6. Conformance rules

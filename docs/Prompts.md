@@ -194,3 +194,13 @@ The dated H2 is what `lamill project status` parses. Append-only.
 > 7 decisions for the operator in PRD § v4.
 > "only thing is to make you dont install node on my host - keep it all inside a docker
 > container." → recommendations accepted, D-043; v4.A done.
+
+## 2026-10-16 — v4.A done; WordPress accounts + preflight planned
+
+> "commit, call 4a done. tell me all account required, add to build plan preflight check for
+> WP accounts etc" → v4.A committed; accounts list + plugin preflight added to PRD § v4 / v4.B.
+
+## 2026-10-16 — Plugins: GitHub primary, SVN for releases, public repo per plugin
+
+> "public repo per plugin, add that to the plan" → D-043 item 8; PRD § v4 (decision 8, Lamill
+> GitHub org account item, preflight check, v4.D row).
