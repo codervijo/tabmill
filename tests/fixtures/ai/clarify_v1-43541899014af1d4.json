@@ -1,0 +1,6 @@
+{
+  "model": "claude-opus-5-5[1m]",
+  "replies": [
+    "{\"known\":{\"target_user\":\"\",\"core_action\":\"count words on a page\",\"trigger\":\"\",\"pages\":\"any page\",\"done_looks_like\":\"\"},\"questions\":[{\"about\":\"target_user\",\"text\":\"Who will use this most?\",\"choices\":[\"Writers and editors\",\"Students\",\"SEO and content marketers\",\"Anyone reading online\"]},{\"about\":\"trigger\",\"text\":\"How should the user start the count?\",\"choices\":[\"Click the toolbar button\",\"Keyboard shortcut\",\"Right-click menu\",\"Side panel that stays open\"]},{\"about\":\"done_looks_like\",\"text\":\"What should the user see when it works?\",\"choices\":[\"Word count for the whole page\",\"Word count for selected text only\",\"Whole page, or the selection if text is selected\",\"Word count plus reading time and character count\"]}]}"
+  ]
+}

@@ -18,11 +18,47 @@ blocker to `NOTES.md`, mark it BLOCKED, move on.
 
 ## v1.B — Tool + generator ✅ (2026-10-03; details in docs/shipping-history.md)
 
+## v2.B — Stage engine, AI runner, clarify ✅ (2026-10-16; D-040, `docs/prd.md` § v2)
+
+1. [x] `cli/tabmill/ai.py`: prompt registry (`prompts/<purpose>_v<N>.md`, front matter
+       `purpose, version, output_schema`; `{{var}}` body via `templates.render`, `{{schema}}` =
+       the pydantic model's JSON Schema); `claude -p … --output-format json --allowedTools ""
+       --max-budget-usd` (+ `--model` from `tabmill.config.json` `ai_model`); reply → one JSON
+       object → pydantic; one repair call with the errors; second failure → ✗ + raw saved to
+       `ideas/<id>/raw/<purpose>-<ts>.txt`; call record `{purpose, prompt_version, model,
+       started, finished, cost_usd, input_hash, repaired}` (model/cost from the envelope, else
+       unknown). `TABMILL_AI=replay:<dir>|record:<dir>`; fixture `<purpose>_v<N>-<hash>.json` =
+       ordered replies (first + repair). `claude` missing → ✗; timeout → ↷ retry hint.
+2. [x] `cli/tabmill/idea/engine.py`: `ideas/<id>/session.json` (id `YYYYMMDD-<slug-ish>`,
+       input text verbatim, flags); stages in fixed order (clarify, shape, evidence, check,
+       verdict, write — only clarify registered now); `stages/NN-<stage>.json` = input hash +
+       calls + output; resume = first stage missing / stale / hash changed; re-running a stage
+       marks downstream stale.
+3. [x] `cli/tabmill/idea/stages/clarify.py` + `prompts/clarify_v1.md`: asks only about missing
+       fields (target user, core action, trigger, pages touched, done looks like); multiple
+       choice where possible; ≤ 2 rounds enforced in code; answers verbatim as `user` facts;
+       blank answer / `--non-interactive` → open questions carried as assumptions.
+4. [x] CLI: `new "idea"`, `--resume <id>`, `--non-interactive`, `new clarify [id]`; later stage
+       names → "arrives in v2.D/E/F". `doctor` checks prompts load.
+5. [x] Tests: replay hit / miss, repair success, repair failure saves raw, claude missing,
+       timeout; engine resume / staleness; clarify 2-round cap, non-interactive opens, Q&A
+       saved; CLI rough idea end to end on replay. `test_new_with_an_idea_waits_for_v2b`
+       replaced (intended).
+6. [x] One live `--non-interactive` run (real `claude -p`) recorded as the golden fixture
+       (`tests/fixtures/ai/`; 3 open questions; $0.23 on the default model).
+7. [x] Docs: architecture (ai.py, engine, ideas/ layout), README, PRD, Prompts.md.
+8. [x] AI cost line after every command that calls AI (operator 2026-10-16, slotted v2.B).
+9. [x] Fix: `check` hung silently when the builder container lost DNS — every smoke/try ran
+       `playwright install --with-deps` → `apt-get update`. Now apt runs once per container
+       (marker `/root/.tabmill-playwright-deps`); browsers target shared by build/smoke/try.
+10. [-] HUMAN: one interactive run — not confirmed; operator called v2.B done (2026-10-16).
+11. [x] HUMAN: review v2.B (operator, 2026-10-16: "call 2b done").
+
 ## v2.A — Plan, recipe schema v2, portfolio.yaml, bootstrap ✅ (2026-10-16; D-040)
 
-Plan: `docs/v2-plan.md` (accepted 2026-10-15).
+Plan: `docs/prd.md` § v2 (accepted 2026-10-15).
 
-1. [x] `docs/v2-plan.md`: keep / change / migrate, architecture, phases v2.A–v2.H, open decisions.
+1. [x] v2 plan (now `docs/prd.md` § v2): keep / change / migrate, architecture, phases v2.A–v2.H, open decisions.
 2. [x] Recipe schema v2 (`schema_version`, `target`, `recipe_revision`, `idea_id`, `trigger`,
        `restricted_pages`, `provenance`) + comment-preserving v1→v2 migration; loader accepts v1;
        `schemas/recipe_v2.schema.json`. 3 recipes migrated (12 added lines, nothing else).

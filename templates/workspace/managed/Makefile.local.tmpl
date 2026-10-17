@@ -51,8 +51,15 @@ deps: require-docker
 	@echo "✓ Dependencies installed"
 
 # Playwright's Chromium (container only) renders icons/store images and runs smoke/try.
+# System libraries come from apt once per container (marker file), not on every run — a
+# container without network/DNS would otherwise hang every build silently in `apt-get update`.
+PW_DEPS_MARK = /root/.tabmill-playwright-deps
 browsers: deps
-	@pnpm --filter "./extensions/$(or $(EXT),*)" exec playwright install --with-deps --no-shell chromium >/dev/null
+	@[ -f $(PW_DEPS_MARK) ] || { \
+		echo "↷ Chromium system libraries: installing via apt (once per container)"; \
+		pnpm --filter "./extensions/$(or $(EXT),*)" exec playwright install-deps chromium >/dev/null \
+		&& touch $(PW_DEPS_MARK); }
+	@pnpm --filter "./extensions/$(or $(EXT),*)" exec playwright install --no-shell chromium >/dev/null
 
 build: browsers
 	@pnpm -r --filter "./extensions/$(or $(EXT),*)" assets:icons >/dev/null
@@ -63,9 +70,8 @@ test: deps
 	@pnpm -r --if-present --filter "./extensions/$(or $(EXT),*)" test
 	@echo "✓ Tests complete"
 
-# Playwright's bundled Chromium is installed inside the container only (never on the host).
+# Chromium comes from `browsers` (via build), inside the container only (never on the host).
 smoke: build
-	@pnpm --filter "./extensions/$(or $(EXT),*)" exec playwright install --with-deps --no-shell chromium
 	@pnpm -r --if-present --filter "./extensions/$(or $(EXT),*)" smoke
 	@echo "✓ Smoke tests complete"
 
@@ -75,11 +81,10 @@ assets: build
 
 # Manual testing: headed Chromium in the container, window on the host via X11 (v1.F).
 TRY_PROFILE = /root/.tabmill-try/$(EXT)
-try: deps
+try: browsers
 	@if [ -z "$(EXT)" ]; then echo "✗ set EXT=<slug>"; exit 1; fi
 	@if [ -z "$$DISPLAY" ] || [ ! -S /tmp/.X11-unix/X$${DISPLAY#:} ]; then \
 		echo "✗ no X11 display in the container — recreate it from a desktop session: docker rm -f $(CONTAINER_NAME), then make in-docker-try EXT=$(EXT)"; exit 1; fi
-	@pnpm --filter "./extensions/$(EXT)" exec playwright install --with-deps --no-shell chromium >/dev/null
 	@if [ -n "$(DEV)" ]; then \
 		rm -rf "extensions/$(EXT)/.output/chrome-mv3-dev"; \
 		pnpm --filter "./extensions/$(EXT)" dev > /tmp/tabmill-dev-$(EXT).log 2>&1 & dev=$$!; \

@@ -9,8 +9,8 @@ tooling; packages and CLI commands move into TOOL_DIR only when #2 needs them.
 
 ## v2 — Idea stage (D-039, D-040)
 
-Full plan, phases v2.A–v2.H, open decisions: `docs/v2-plan.md` (accepted 2026-10-15).
-Build one phase at a time; stop for review after each. v2.A ✅ 2026-10-16; v2.B in progress.
+Full plan, phases v2.A–v2.H, open decisions: `docs/prd.md` § v2 (accepted 2026-10-15).
+Build one phase at a time; stop for review after each. v2.A ✅, v2.B ✅ 2026-10-16; v2.C in progress.
 
 Carried from v1: first real CWS API upload + publish (#1's first update); v1.L real-use
 validation. Idea candidates: local-schema-generator, jwt-inspector.

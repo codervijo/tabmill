@@ -18,6 +18,7 @@ import typer
 from rich.table import Table
 
 from . import (
+    ai,
     apikeys,
     catalog,
     config,
@@ -40,6 +41,8 @@ from . import (
     workspace,
 )
 from .constants import ENV_WORKSPACE
+from .idea import engine
+from .idea import stages as idea_stages
 
 app = typer.Typer(
     help="Create, release, and track Lamill's Chrome MV3 extensions.",
@@ -137,18 +140,105 @@ def _recipe(cfg: config.Config, slug: str) -> dict[str, object]:
     return ext
 
 
+STAGE_WORDS = ("clarify", "shape", "evidence", "verdict", "validate", "trends")
+
+
+def _tty() -> bool:
+    return sys.stdin.isatty()
+
+
+def _ask_user(q: engine.Question) -> str:
+    output.console.print(f"\n[bold]{q.text}[/bold]")
+    for i, choice in enumerate(q.choices, 1):
+        output.console.print(f"  {i}. {choice}")
+    hint = "number or your own words" if q.choices else "your answer"
+    raw: str = typer.prompt(f"  {hint} (Enter = skip)", default="", show_default=False)
+    raw = raw.strip()
+    if raw.isdigit() and 1 <= int(raw) <= len(q.choices):
+        return q.choices[int(raw) - 1]
+    return raw
+
+
+def _run_idea(
+    cfg: config.Config, session: engine.Session, *, only: str | None, non_interactive: bool
+) -> None:
+    interactive = not non_interactive and _tty()
+    if not non_interactive and not interactive:
+        output.skip("no terminal to ask in — questions are recorded as open")
+    ctx = engine.Context(
+        cfg.tool_dir, session, _ask_user if interactive else None, ai_model=cfg.ai_model
+    )
+
+    def step(name: str, what: str) -> None:
+        if what == "recorded":
+            output.ok(f"{name}: recorded, skipping (re-run: `tabmill new {name} {session.id}`)")
+        else:
+            output.ok(f"{name}: {what}")
+
+    ai.LEDGER.clear()
+    try:
+        records = engine.run(ctx, idea_stages.REGISTERED, only=only, on_step=step)
+    except ai.AITransient as e:
+        output.skip(str(e))
+        raise typer.Exit(1) from e
+    except (ai.AIError, engine.IdeaError) as e:
+        output.fail(str(e))
+        raise typer.Exit(1) from e
+    finally:
+        output.console.print(f"  {ai.spent()}")
+    for rec in records:
+        if rec.stage == "clarify":
+            out = rec.output
+            answered = len(out["qa"]) - len(out["open"])
+            line = f"clarify: {answered} answered, {len(out['open'])} open"
+            (output.skip if out["open"] else output.ok)(
+                line + (" — carried as assumptions" if out["open"] else "")
+            )
+    output.console.print(f"  idea: {engine.IDEAS_DIR}/{session.id}/")
+    output.console.print(f"  next: shape arrives in {engine.ARRIVES['shape']}")
+
+
 @app.command()
 def new(
     idea: list[str] = typer.Argument(  # noqa: B008 — typer's documented idiom
-        None, help="A rough idea in words (idea stage: v2.B on)."
+        None,
+        help='A rough idea in words, e.g. "count words on any page"; or a stage name '
+        "(clarify) and an idea id to re-run it.",
+    ),
+    resume: str = typer.Option(
+        "", "--resume", help="Continue an idea from its first missing or stale stage."
+    ),
+    non_interactive: bool = typer.Option(
+        False, "--non-interactive", help="Ask nothing; questions are recorded as open."
     ),
     template: str = typer.Option(
-        "", "--template", "-t", help="Surface template for a new recipe (default: popup)."
+        "", "--template", "-t", help="Surface template hint (or for a new recipe: popup)."
     ),
     force: bool = typer.Option(False, "--force", help="Discard edits to managed files."),
 ) -> None:
-    """Start from an idea. (`new <slug>` is a deprecated alias for `bootstrap <slug>`.)"""
+    """Start from a rough idea: clarify → … → approve (D-040). `new <slug>` = old alias."""
     words = idea or []
+    cfg = _load()
+    if words and words[0] in STAGE_WORDS:
+        name, rest = words[0], words[1:]
+        if name not in {s.name for s in idea_stages.REGISTERED}:
+            output.skip(f"`new {name}` arrives in {engine.ARRIVES.get(name, 'v2.E')}")
+            raise typer.Exit(1)
+        try:
+            session = engine.load(cfg.tool_dir, rest[0] if rest else engine.latest(cfg.tool_dir))
+        except engine.IdeaError as e:
+            output.fail(str(e))
+            raise typer.Exit(1) from e
+        _run_idea(cfg, session, only=name, non_interactive=non_interactive)
+        return
+    if resume:
+        try:
+            session = engine.load(cfg.tool_dir, resume)
+        except engine.IdeaError as e:
+            output.fail(str(e))
+            raise typer.Exit(1) from e
+        _run_idea(cfg, session, only=None, non_interactive=non_interactive)
+        return
     if len(words) == 1 and catalog.SLUG_RE.match(words[0]):
         # Through v2 a single slug keeps today's path (D-040); removed in v3.A.
         output.skip(
@@ -157,8 +247,21 @@ def new(
         )
         _bootstrap(words[0], template, force)
         return
-    output.skip("the idea stage arrives in v2.B — for now: `tabmill bootstrap <slug>`")
-    raise typer.Exit(1)
+    if not words:
+        output.fail(
+            'describe the idea: tabmill new "count words on any page" '
+            "(pasting a brief arrives in v2.C)"
+        )
+        raise typer.Exit(1)
+    try:
+        session = engine.create(
+            cfg.tool_dir, " ".join(words), non_interactive=non_interactive, template=template
+        )
+    except engine.IdeaError as e:
+        output.fail(str(e))
+        raise typer.Exit(1) from e
+    output.ok(f"idea {session.id}: saved")
+    _run_idea(cfg, session, only=None, non_interactive=non_interactive)
 
 
 @app.command()
@@ -1002,6 +1105,13 @@ def doctor(
         else:
             output.skip(f"{tool}: not on PATH — needed for {why}")
     cfg, ws = _config_and_workspace()
+    for purpose, version in idea_stages.PROMPTS:
+        try:
+            ai.load_prompt(cfg.tool_dir, purpose, version)
+            output.ok(f"prompts/{purpose}_v{version}.md: loads")
+        except ai.AIError as e:
+            output.fail(str(e))
+            failed = True
     for slug in catalog.recipe_slugs(cfg.tool_dir):
         path = generate.recipe_dir(cfg.tool_dir, slug) / generate.RECIPE_FILE
         try:

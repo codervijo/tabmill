@@ -122,3 +122,20 @@ The dated H2 is what `lamill project status` parses. Append-only.
 
 > "Commit, call 2a done and start 2b" → v2.A committed and marked done; v2.B (stage engine,
 > AI runner, clarify) started.
+> → `ai.py` (claude -p runner, replay/record, one repair), `idea/engine.py`, clarify_v1;
+> `new "idea"`, `--resume`, `--non-interactive`, `new clarify`. One live run recorded.
+
+## 2026-10-16 — AI cost after every command
+
+> "Add to prd: after every command that includes ai calls show me the cost" → slotted in v2.B
+> (operator pick); `AI: N call(s) · $X · model` line.
+
+## 2026-10-16 — plans live in the PRD
+
+> "dont create separate files for each version plans, it should all be in PRD. Agent should
+> avoid proliferation of files" → `docs/v2-plan.md` folded into `docs/prd.md` § v2 and deleted;
+> rule added to AI_AGENTS.md.
+
+## 2026-10-16 — v2.B done, v2.C started
+
+> "commit, call 2b done and start 2c"

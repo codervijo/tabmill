@@ -329,7 +329,7 @@ research) → stage engine clarify → shape → evidence → check → verdict 
 gate) freezes the recipe and reserves a slot; today's `new <slug>` becomes `bootstrap` (alias
 through v2, removed in v3.A). AI proposes, code decides (allowlist, limits, slots, verdict cap);
 every fact carries provenance; synthesis-only demand/competition caps the verdict at GO-IF.
-Phases v2.A–v2.H, v2.I–v2.Z reserved. Plan: `docs/v2-plan.md`. Operator resolved § 9 there
+Phases v2.A–v2.H, v2.I–v2.Z reserved. Plan: `docs/prd.md` § v2. Operator resolved its Decisions
 ("1a, 2a, 3a, 4 ok"): v2.A stays as specified (plan + build, an explicit exception to "vN.A is
 planning only"); v3 = v2 follow-ups, WordPress → v4; `ship` never uploads — the attended upload
 is top-level `tabmill publish <slug>` (amends D-038), `ship --publish` errors with that hint;

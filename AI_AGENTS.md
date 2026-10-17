@@ -52,6 +52,11 @@ Makefile (Python stack) with `Makefile.local` overrides (D-018). Workspace (`$TA
 - TOOL_DIR / WORKSPACE_DIR boundary is absolute (`CLAUDE.md` § Rules).
 - Extract, don't design upfront.
 - `✓ ↷ ✗` step markers in CLI output.
+- Plans live in `docs/prd.md` (per-version section) — no separate plan file per version; avoid
+  creating new doc files when an existing one fits (operator, 2026-10-16).
+- Every command that makes AI calls ends with a cost line — `AI: N call(s) · $X · model`,
+  failed runs included, unknown cost shown as unknown (`ai.spent()`). Applies to every new
+  AI-calling command or stage (operator, 2026-10-16).
 
 ## Out of scope / don't touch
 - Never edit installed skill copies in the workspace.

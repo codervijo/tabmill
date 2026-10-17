@@ -16,6 +16,8 @@ Two repos, related by a computed relative layout (ADR-0007):
 │   ├── recipes/<slug>/              extension source: extension.yaml + feature code (ADR-0008)
 │   ├── portfolio.yaml               slot limit + approval per extension (D-040)
 │   ├── schemas/                     JSON Schemas generated from the pydantic models (D-040)
+│   ├── prompts/<purpose>_vN.md      versioned idea-stage prompts (D-040)
+│   ├── ideas/<id>/                  idea sessions (committed; raw/ gitignored)
 │   ├── templates/extension/<tpl>/   generic surface code (popup today)
 │   ├── templates/workspace/  ci/    rendered into the workspace by `tabmill init`
 │   ├── skills/  packages/ (v1.E)  docs/
@@ -132,6 +134,28 @@ Two repos, related by a computed relative layout (ADR-0007):
 - **Release**: build → lint --release → smoke → zip → assets → listing → `HUMAN: publish` line. Publish
   (attended) = CWS API v2 upload + publish on an existing item.
 
+- **AI runner** (`ai.py`, D-040): `claude -p <prompt> --output-format json --allowedTools ""
+  --max-budget-usd 0.50` (+ `--model` from `tabmill.config.json` `ai_model`). Prompt =
+  `prompts/<purpose>_v<N>.md` (front matter `purpose, version, output_schema`; `{{var}}` body;
+  `{{schema}}` = the pydantic model's JSON Schema). Reply → one JSON object → pydantic; one
+  repair call with the errors; second failure → ✗ with both replies in
+  `ideas/<id>/raw/<purpose>-<ts>.txt`. Call record: purpose, prompt_version, model, start/end,
+  cost_usd (from the envelope; null = unknown), input_hash, repaired. `TABMILL_AI=replay:<dir>`
+  serves `<purpose>_v<N>-<input_hash>.json` (`{model, replies[]}`, first + repair);
+  `record:<dir>` writes them. Every command that runs AI ends with `AI: N call(s) · $X · model`
+  (`ai.LEDGER`, failed runs included; unknown cost shown as unknown). Tests replay only; `tests/fixtures/ai/` holds a recorded live run.
+- **Stage engine** (`idea/engine.py`): fixed order clarify → shape → evidence → check →
+  verdict → write; each registered stage writes `ideas/<id>/stages/NN-<stage>.json`
+  {stage, kind, input_hash, created, stale, calls[], output}. Resume (`new --resume <id>`) runs
+  every stage that is missing, stale, or whose input hash changed (session text + stage inputs
+  + upstream hashes) and replays the rest; `new <stage> [id]` forces one and marks later
+  stages stale. Session: `ideas/<id>/session.json` {id `YYYYMMDD-<4 words>`, text verbatim,
+  input_kind, non_interactive, template hint}.
+- **clarify_v1** (`idea/stages/clarify.py`): AI fills `known` (target_user, core_action,
+  trigger, pages, done_looks_like) and asks ≤ 5 questions about the empty ones; code drops
+  questions about known fields and repeats, stops after 2 rounds (≤ 2 calls). Answers →
+  `user` facts verbatim; skipped / `--non-interactive` → `open`, carried as assumptions.
+
 ## 3. Data shapes / schemas
 
 - **Recipe schema v2** (D-040, `cli/tabmill/schema.py`, `schemas/recipe_v2.schema.json`):
@@ -156,7 +180,8 @@ Two repos, related by a computed relative layout (ADR-0007):
   `data_usage {categories, limited_use}` — decide in v1.E.
 - **registry.json**: per slug — `version`, `store_id` (from dashboard "Add new item"),
   `status`, `review_state`, `metrics[] {date, report, value}` (from CSV import).
-- **tabmill.config.json** (TOOL_DIR): `builder`, `tool_repo`, optional `workspace` fallback.
+- **tabmill.config.json** (TOOL_DIR): `builder`, `tool_repo`, optional `workspace` fallback,
+  optional `ai_model` (idea-stage `claude -p --model`; empty = Claude Code's default).
   Env `TABMILL_WORKSPACE` / `TABMILL_BUILDER` win; relative paths resolve against TOOL_DIR.
 
 ## 4. Modules
@@ -166,12 +191,13 @@ Two repos, related by a computed relative layout (ADR-0007):
 `extension` (YAML load/validate/manifest fields), `generate` (template + recipe), `registry`,
 `catalog` (list rows, starter recipes), `lifecycle` (stage + next step per extension),
 `surfaces` (template registry), `provenance` (Fact), `recipe_v2` (migration, JSON Schema),
-`portfolio` (portfolio.yaml, slots). v2.B+ adds the idea-stage modules (`docs/v2-plan.md` § 4). Planned packages: brand, funnel, messaging, analytics, policy (extracted in v1.E/v1.H).
+`portfolio` (portfolio.yaml, slots), `ai` (claude -p runner), `idea/engine` (sessions,
+stages), `idea/stages/` (clarify; later stages per `docs/prd.md` § v2). Planned packages: brand, funnel, messaging, analytics, policy (extracted in v1.E/v1.H).
 
 ## 5. CLI / UX surface
 
-Top level (D-034, D-038, D-040): `new` (idea stage from v2.B; `new <slug>` = deprecated alias
-for `bootstrap` until v3.A) · `bootstrap` · `try` · `check [slug]` · `ship` (never uploads) ·
+Top level (D-034, D-038, D-040): `new "<idea>" [--non-interactive] [--resume <id>]` ·
+`new clarify [id]` (idea stage; `new <slug>` = deprecated alias for `bootstrap` until v3.A) · `bootstrap` · `try` · `check [slug]` · `ship` (never uploads) ·
 `publish` (attended upload) · `status [slug]` · `slots` · `templates` · `doctor [--fix]`.
 `settings`: `init`, `skills sync`, `preflight`, `apikeys`. `advanced` (the single steps):
 `create build dev test lint zip assets listing landing release hub list`. Output uses `✓ ↷ ✗`.
@@ -185,6 +211,9 @@ for `bootstrap` until v3.A) · `bootstrap` · `try` · `check [slug]` · `ship` 
   git push to the site repo. No IndexNow (D-016).
 - **GitHub** — tabmill is private; workspace CI checks it out with `TABMILL_PAT` (ADR-0007).
 - **Metrics** — dashboard CSV export only.
+
+- **Claude Code CLI** — `claude -p`, no tools, budget-capped per call (`ai.py`). Model and
+  cost come from its JSON envelope (`modelUsage`, `total_cost_usd`).
 
 ## 7. Stack baselines
 

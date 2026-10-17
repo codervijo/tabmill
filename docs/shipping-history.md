@@ -11,9 +11,19 @@ tradeoffs, and links to commits / ADRs.
 
 ---
 
+## v2.B — Stage engine, AI runner, clarify (shipped 2026-10-16, D-040)
+
+`ai.py` (`claude -p`, no tools, budget-capped; pydantic validation, one repair, raw saved on
+failure; `TABMILL_AI=replay|record`), `idea/engine.py` (sessions in `ideas/<id>/`, stage files
+with input hashes, resume, downstream staleness), clarify_v1 (≤ 2 rounds, answers as `user`
+facts, open questions carried). `new "idea"`, `--resume`, `--non-interactive`, `new clarify`.
+Cost line after every AI command (operator add). Fix: smoke/try no longer run apt every time
+(silent hang when the container lost DNS). One live non-interactive run: 3 good questions,
+$0.23 on the default model. Interactive loop not confirmed in real use. 172 tests.
+
 ## v2.A — Plan, recipe schema v2, portfolio.yaml, bootstrap (shipped 2026-10-16, D-040)
 
-`docs/v2-plan.md` accepted (exception to "vN.A is planning only", § 9.1). Recipe schema v2 with a
+v2 plan accepted, now in `docs/prd.md` § v2 (exception to "vN.A is planning only"). Recipe schema v2 with a
 comment-preserving text migration (3 recipes: 4 added lines each, nothing else); `portfolio.yaml`
 (3 × `migrated`, limit 2); `surfaces.py` registry (page-overlay stub; devtools / context-menu
 dropped); `bootstrap` + deprecated `new <slug>` alias; `publish` top level, `ship` never uploads;

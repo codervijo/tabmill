@@ -19,6 +19,8 @@ page on a Lamill portfolio site.
 ## Commands
 
 ```
+uv run tabmill new "<rough idea>" [--non-interactive]  # idea stage: clarify (shape… from v2.D)
+uv run tabmill new --resume <id> | new clarify [id]    # continue / re-run a stage
 uv run tabmill bootstrap <slug>     # first run: starter recipe; after filling it: generate
 uv run tabmill try <slug> [--url URL] [--dev]  # build + Chromium in docker, window on your desktop
 uv run tabmill check [slug]         # typecheck + unit + smoke + store-policy lint (no slug = all)
@@ -28,8 +30,9 @@ uv run tabmill status [slug] [--refresh]  # lifecycle stage + the next command
 uv run tabmill slots | templates | doctor [--fix]  # store slots · surface templates · full check
 ```
 
-v2 (D-040, `docs/v2-plan.md`) puts an idea stage in front: `tabmill new "<rough idea>"` or a
-pasted Tabmill brief → clarify → shape → evidence → check → verdict → `approve` (from v2.B on).
+v2 (D-040, `docs/prd.md` § v2) puts an idea stage in front: `tabmill new "<rough idea>"` or a
+pasted Tabmill brief → clarify → shape → evidence → check → verdict → `approve`. Built so far: clarify (v2.B);
+sessions in `ideas/<id>/`. Uses `claude -p` (no tools; `ai_model` in `tabmill.config.json`).
 `tabmill new <slug>` still works through v2 as a deprecated alias for `bootstrap`.
 
 Setup lives under `settings`; the single steps the commands above run live under `advanced`:

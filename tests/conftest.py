@@ -12,7 +12,7 @@ from tabmill.config import TOOL_DIR, Config
 def tool_dir(tmp_path: Path) -> Path:
     """A copy of the real skills/templates/ci so tests can mutate sources safely."""
     root = tmp_path / "projects" / "droyfun" / "tabmill"
-    for name in ("skills", "templates", "ci"):
+    for name in ("skills", "templates", "ci", "prompts"):
         shutil.copytree(TOOL_DIR / name, root / name)
     shutil.copy(TOOL_DIR / "privacy-policy.yaml", root / "privacy-policy.yaml")
     return root
