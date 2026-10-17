@@ -248,6 +248,7 @@ def test_check_reruns_when_slots_change(
 def test_cli_resume_runs_shape_and_check(cfg: Config, monkeypatch: pytest.MonkeyPatch) -> None:
     cfg.workspace.mkdir(parents=True)
     monkeypatch.setattr(cli, "_load", lambda *_: cfg)
+    monkeypatch.setattr("tabmill.idea.stages.evidence.default_providers", lambda: [])
     shutil.copytree(TOOL_DIR / "recipes", cfg.tool_dir / "recipes")
     ctx = _clarified(cfg.tool_dir, monkeypatch, workspace=cfg.workspace)
     _write_fixture(cfg.tool_dir / "fx", cfg.tool_dir, "shape", shape.values(ctx), _shape_reply())
@@ -255,11 +256,11 @@ def test_cli_resume_runs_shape_and_check(cfg: Config, monkeypatch: pytest.Monkey
     assert result.exit_code == 0, result.stdout
     out = " ".join(result.stdout.split())  # rich wraps at 80 columns
     assert "shape: word-counter · side-panel · 'Word Counter'" in out
-    assert "check: 0 error(s)" in out and "evidence arrives in v2.E" in out
+    assert "check: 0 error(s)" in out and "verdict arrives in v2.F" in out
     assert "AI: 1 call(s)" in out
     rerun = runner.invoke(cli.app, ["new", "shape", ctx.session.id, "--non-interactive"])
     again = " ".join(rerun.stdout.split())
-    assert rerun.exit_code == 0 and "shape: ran · marked stale: check" in again
-    assert "stale: check — `tabmill new --resume" in again
+    assert rerun.exit_code == 0 and "shape: ran · marked stale: evidence, check" in again
+    assert "stale: evidence, check — `tabmill new --resume" in again
     resumed = runner.invoke(cli.app, ["new", "--resume", ctx.session.id, "--non-interactive"])
     assert "check: ran" in " ".join(resumed.stdout.split())  # resume re-ran the stale stage

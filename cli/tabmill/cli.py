@@ -15,6 +15,7 @@ import sys
 from pathlib import Path
 
 import typer
+from rich.markup import escape
 from rich.table import Table
 
 from . import (
@@ -43,7 +44,7 @@ from . import (
     workspace,
 )
 from .constants import ENV_WORKSPACE
-from .idea import engine
+from .idea import engine, evidence
 from .idea import stages as idea_stages
 
 app = typer.Typer(
@@ -59,6 +60,8 @@ settings_app.add_typer(apikeys_app, name="apikeys")
 advanced_app = typer.Typer(help="Single steps the commands above run.", no_args_is_help=True)
 brief_app = typer.Typer(help="Tabmill briefs (the paste format, D-040).", no_args_is_help=True)
 app.add_typer(brief_app, name="brief")
+evidence_app = typer.Typer(help="Evidence for an idea (D-040).", no_args_is_help=True)
+app.add_typer(evidence_app, name="evidence")
 app.add_typer(settings_app, name="settings")
 app.add_typer(advanced_app, name="advanced")
 
@@ -152,9 +155,9 @@ def _tty() -> bool:
 
 
 def _ask_user(q: engine.Question) -> str:
-    output.console.print(f"\n[bold]{q.text}[/bold]")
+    output.console.print(f"\n[bold]{escape(q.text)}[/bold]")
     for i, choice in enumerate(q.choices, 1):
-        output.console.print(f"  {i}. {choice}")
+        output.console.print(f"  {i}. {escape(choice)}")
     hint = "number or your own words" if q.choices else "your answer"
     raw: str = typer.prompt(f"  {hint} (Enter = skip)", default="", show_default=False)
     raw = raw.strip()
@@ -188,12 +191,12 @@ def _run_idea(
         records = engine.run(ctx, idea_stages.REGISTERED, only=only, on_step=step)
     except ai.AITransient as e:
         output.skip(str(e))
+        output.console.print(f"  {ai.spent()}")
         raise typer.Exit(1) from e
     except (ai.AIError, engine.IdeaError) as e:
         output.fail(str(e))
-        raise typer.Exit(1) from e
-    finally:
         output.console.print(f"  {ai.spent()}")
+        raise typer.Exit(1) from e
     for rec in records:
         if only is None or rec.stage == only:
             _stage_summary(rec)
@@ -204,6 +207,65 @@ def _run_idea(
     later = [n for n in engine.ORDER if n in engine.ARRIVES]
     if later:
         output.console.print(f"  next: {later[0]} arrives in {engine.ARRIVES[later[0]]}")
+    output.console.print(f"  {ai.spent()}")  # always the last line (AI_AGENTS.md)
+
+
+def _research(kind: str, keywords: list[str]) -> None:
+    """`new validate|trends <keywords>`: demand research via lamill, printed, not saved."""
+    if not keywords:
+        output.fail(f'give keywords: tabmill new {kind} "word counter" "count words"')
+        raise typer.Exit(1)
+    lamill = evidence.Lamill()
+    ai.LEDGER.clear()
+    runs = (
+        [lamill.validate(" ".join(keywords))]
+        if kind == "validate"
+        else [lamill.trends(k) for k in keywords]
+    )
+    for r in runs:
+        (output.ok if r.status == "ok" else output.skip)(f"{r.name}: {r.status} — {r.detail}")
+        for f in r.facts:
+            _fact_line(f.model_dump())
+    output.console.print(f"  {ai.spent()}")
+    if all(r.status == "failed" for r in runs):
+        raise typer.Exit(1)
+
+
+def _fact_line(f: dict[str, object]) -> None:
+    mark = output.ok if f["kind"] in ("real", "external") else output.skip
+    when = f" · {f['date']}" if f.get("date") else ""
+    mark(f"[{f['kind']}] {f['claim']} = {f['value']} · {f['source']}{when}")
+
+
+def _add_evidence(idea_path: Path, src: Path) -> Path:
+    parsed, _ = brief.parse_evidence(src.read_text())
+    for problem in parsed.problems:
+        output.fail(f"{src.name}: {problem}")
+    if not parsed.present:
+        raise typer.Exit(1)
+    dest = evidence.add_file(idea_path, src)
+    rows = len(parsed.brief.demand) + len(parsed.brief.competition)
+    output.ok(f"evidence: {src.name} → {dest.relative_to(idea_path.parent.parent)} ({rows} rows)")
+    return dest
+
+
+@evidence_app.command("add")
+def evidence_add(
+    idea_id: str = typer.Argument(..., help="Idea id (see ideas/)."),
+    file: Path = typer.Argument(..., help="Evidence file: front matter + tables."),  # noqa: B008
+) -> None:
+    """Add an evidence file to an idea; the evidence stage re-runs on `new --resume`."""
+    cfg = _load()
+    try:
+        engine.load(cfg.tool_dir, idea_id)
+    except engine.IdeaError as e:
+        output.fail(str(e))
+        raise typer.Exit(1) from e
+    if not file.is_file():
+        output.fail(f"{file}: no such file")
+        raise typer.Exit(1)
+    _add_evidence(engine.idea_dir(cfg.tool_dir, idea_id), file)
+    output.console.print(f"  next: tabmill new --resume {idea_id}")
 
 
 def _stage_summary(rec: engine.StageRecord) -> None:
@@ -218,11 +280,23 @@ def _stage_summary(rec: engine.StageRecord) -> None:
         d = out["draft"]
         perms = ", ".join(p["name"] for p in d["permissions"])
         output.ok(f"shape: {d['slug']} · {d['template']} · {d['name']!r} · {perms}")
-        output.console.print(f"    {d['single_purpose']}")
+        output.console.print(f"    {escape(d['single_purpose'])}")
         for note in out["notes"]:
             output.skip(f"shape: {note}")
         for r in out["slug_rejected"]:
             output.skip(f"shape: slug {r}")
+    elif rec.stage == "evidence":
+        for p in out["providers"]:
+            mark = output.ok if p["status"] == "ok" else output.skip
+            mark(
+                f"evidence: {p['name']}: {p['status']}"
+                + (f" — {p['detail']}" if p["detail"] else "")
+            )
+        kinds = ", ".join(f"{n} {k}" for k, n in sorted(out["kinds"].items()))
+        output.ok(f"evidence: {len(out['facts'])} facts ({kinds})")
+        for f in out["facts"]:
+            if f["kind"] == "missing":
+                output.skip(f"evidence: missing — {f['claim']}")
     elif rec.stage == "check":
         for f in out["findings"]:
             (output.fail if f["severity"] == "error" else output.skip)(
@@ -255,6 +329,9 @@ def new(
     paste: bool = typer.Option(
         False, "--paste", help="Paste a Tabmill brief or idea; end with a line `.` or Ctrl-D."
     ),
+    evidence_files: list[Path] = typer.Option(  # noqa: B008 — typer's documented idiom
+        [], "--evidence", help="Evidence file (Demand / Store competition tables); repeatable."
+    ),
     brief_file: Path | None = typer.Option(  # noqa: B008 — typer's documented idiom
         None, "--brief", help="Read a Tabmill brief (or idea) from a file."
     ),
@@ -266,6 +343,9 @@ def new(
     cfg = _load()
     if words and words[0] in STAGE_WORDS:
         name, rest = words[0], words[1:]
+        if name in ("validate", "trends"):
+            _research(name, rest)
+            return
         if name not in {s.name for s in idea_stages.REGISTERED}:
             output.skip(f"`new {name}` arrives in {engine.ARRIVES.get(name, 'v2.E')}")
             raise typer.Exit(1)
@@ -286,7 +366,7 @@ def new(
         return
     text = _idea_input(words, paste, brief_file)
     if text is not None:
-        _start_idea(cfg, text, non_interactive, template)
+        _start_idea(cfg, text, non_interactive, template, evidence_files)
         return
     if len(words) == 1 and catalog.SLUG_RE.match(words[0]):
         # Through v2 a single slug keeps today's path (D-040); removed in v3.A.
@@ -296,7 +376,7 @@ def new(
         )
         _bootstrap(words[0], template, force)
         return
-    _start_idea(cfg, " ".join(words), non_interactive, template)
+    _start_idea(cfg, " ".join(words), non_interactive, template, evidence_files)
 
 
 def _read_pasted() -> str:
@@ -352,7 +432,17 @@ def _report_brief(text: str) -> bool:
     return bool(parsed.problems)
 
 
-def _start_idea(cfg: config.Config, text: str, non_interactive: bool, template: str) -> None:
+def _start_idea(
+    cfg: config.Config,
+    text: str,
+    non_interactive: bool,
+    template: str,
+    evidence_files: list[Path] | None = None,
+) -> None:
+    for f in evidence_files or []:
+        if not f.is_file():
+            output.fail(f"{f}: no such file")
+            raise typer.Exit(1)
     try:
         session = engine.create(
             cfg.tool_dir, text, non_interactive=non_interactive, template=template
@@ -369,6 +459,8 @@ def _start_idea(cfg: config.Config, text: str, non_interactive: bool, template: 
             output.skip("sections that failed are kept as gaps — clarify asks about them")
     else:
         output.ok(f"idea {session.id}: saved")
+    for f in evidence_files or []:
+        _add_evidence(engine.idea_dir(cfg.tool_dir, session.id), f)
     _run_idea(cfg, session, only=None, non_interactive=non_interactive)
 
 

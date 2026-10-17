@@ -22,7 +22,7 @@ IDEAS_DIR = "ideas"
 SESSION_FILE = "session.json"
 BRIEF_FILE = "brief.md"
 ORDER = ("clarify", "shape", "evidence", "check", "verdict", "write")
-ARRIVES = {"evidence": "v2.E", "verdict": "v2.F", "write": "v2.F"}
+ARRIVES = {"verdict": "v2.F", "write": "v2.F"}
 _ID_WORDS = 4
 
 StageKind = Literal["ai", "data", "rule", "gen"]

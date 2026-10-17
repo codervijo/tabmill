@@ -177,6 +177,19 @@ Two repos, related by a computed relative layout (ADR-0007):
   slots. Its input hash includes the rules, the recipe list and the slot view, so resume re-runs
   it when any of those change. `new <stage> <id>` re-runs one stage and prints the stale ones
   with the `--resume` hint (no auto-continue: later stages may cost AI calls).
+- **Evidence** (`idea/evidence.py` providers, `idea/stages/evidence.py`, kind data): providers
+  share `collect(keywords, ctx) → status + facts`. lamill: `lamill new validate <primary kw>
+  --json` (SERP top-10 domains, AI Overview, People also ask → `real` when its source is
+  SerpAPI, else `synthesis` "NOT REAL SERP DATA"; its gate-1 volume is an LLM estimate →
+  `synthesis`; its reported cost joins the AI cost line unless served from cache) and
+  `lamill new trends <kw> --json` for the first 3 keywords (relative 0–100 interest, not
+  volume → `real`). files: `ideas/<id>/evidence/*.md` (front matter `idea, collected` + the
+  brief's Demand / Store competition tables; rows without a date take `collected`). brief: its
+  Evidence rows. overlap: similarity to existing recipes (`real`, tabmill-computed). treg and
+  store competition: declared, `not available`. A failing provider soft-fails. Every keyword
+  without real/sourced demand and absent store competition become `missing` facts. Input hash
+  = keywords (via shape) + evidence-file hashes, so `evidence add` makes resume re-run it.
+  Tests never run lamill or live `claude -p` (conftest guards both).
 - **Tabmill brief v1** (`brief.py`, `schemas/brief_v1.schema.json`): front matter
   (`tabmill_brief: 1`, idea, author, created) + `## Idea · Answers · Proposal · Evidence
   (### Demand, ### Store competition tables) · Risks · Open questions`. Parsed section by
@@ -231,7 +244,8 @@ stages), `idea/stages/` (clarify; later stages per `docs/prd.md` § v2). Planned
 ## 5. CLI / UX surface
 
 Top level (D-034, D-038, D-040): `new "<idea>" | - | --paste | --brief <file>
-[--non-interactive] [--resume <id>]` · `brief check <file>` ·
+[--evidence <file>]… [--non-interactive] [--resume <id>]` · `new validate|trends <kw>…` ·
+`brief check <file>` · `evidence add <id> <file>` ·
 `new clarify [id]` (idea stage; `new <slug>` = deprecated alias for `bootstrap` until v3.A) · `bootstrap` · `try` · `check [slug]` · `ship` (never uploads) ·
 `publish` (attended upload) · `status [slug]` · `slots` · `templates` · `doctor [--fix]`.
 `settings`: `init`, `skills sync`, `preflight`, `apikeys`. `advanced` (the single steps):

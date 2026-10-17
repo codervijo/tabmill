@@ -147,3 +147,14 @@ The dated H2 is what `lamill project status` parses. Append-only.
 > "commit, call 2c done and start 2d"
 > → `rules.py` + `rules/lamill.yaml` (lint recipe rules moved in), shape_v1, check stage.
 > Live run: page-word-count · popup · activeTab+scripting, 0 errors, $0.45 for 2 calls.
+
+## 2026-10-16 — v2.D done, v2.E started
+
+> "commit" then "continue building" → v2.D done; v2.E (evidence) started.
+> → evidence providers (lamill validate/trends, files, brief, overlap; treg/store stubs),
+> evidence stage, `evidence add`, `new --evidence`, `new validate|trends`. A test ran real
+> `lamill new validate` once (5 SerpAPI queries, $0.33) → conftest now blocks paid tools.
+
+## 2026-10-16 — v2.E done, v2.F started
+
+> "commit, call 2e done and start 2f"

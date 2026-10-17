@@ -459,3 +459,53 @@ def missing(parsed: Parsed) -> list[str]:
     if "Evidence › Store competition" in parsed.present and not b.competition:
         out.append("Store competition: no rows")
     return out
+
+
+# --- evidence files (`new --evidence`, `evidence add`) -------------------------------------
+
+
+def parse_evidence(text: str) -> tuple[Parsed, str]:
+    """An evidence file: front matter `idea, collected` + the brief's Demand / Store
+    competition tables (`##` or `###` headings). Returns (parsed, collected date)."""
+    lines: Lines = list(enumerate(text.splitlines(), 1))
+    problems: list[Problem] = []
+    present: list[str] = []
+    b = Brief()
+    collected, start = "", 0
+    if lines and lines[0][1].strip() == "---":
+        end = next((n for n, x in lines if n > 1 and x.strip() == "---"), None)
+        if end is None:
+            problems.append(Problem(1, "front matter", "no closing `---`"))
+        else:
+            start = end
+            try:
+                raw = yaml.safe_load("\n".join(x for n, x in lines if 1 < n < end)) or {}
+                collected = str(raw.get("collected", "")) if isinstance(raw, dict) else ""
+            except yaml.YAMLError as e:
+                problems.append(Problem(1, "front matter", f"not valid YAML ({e})"))
+    body = [
+        (n, x.replace("### ", "## ", 1) if x.startswith("### ") else x)
+        for n, x in lines
+        if n > start
+    ]
+    _, sections = _split(body, "## ")
+    for title, _at, sec_body in sections:
+        sec = f"## {title}"
+        if title == "Demand":
+            b.demand = _table(sec_body, sec, DemandRow, problems)
+        elif title == "Store competition":
+            b.competition = _table(sec_body, sec, CompetitionRow, problems)
+        else:
+            continue  # notes around the tables are fine
+        present.append(f"Evidence › {title}")
+    if not present:
+        problems.append(Problem(1, "evidence", "no ## Demand or ## Store competition table"))
+    return Parsed(b, problems, present), collected
+
+
+def evidence_facts(parsed: Parsed, collected: str, source_name: str) -> list[Fact]:
+    """Facts from an evidence file; rows without their own date take `collected`."""
+    b = parsed.brief.model_copy(
+        update={"meta": Meta(tabmill_brief=1, idea="", author=source_name, created=collected)}
+    )
+    return facts(Parsed(b, parsed.problems, ["Evidence"]))

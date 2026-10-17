@@ -18,7 +18,25 @@ blocker to `NOTES.md`, mark it BLOCKED, move on.
 
 ## v1.B — Tool + generator ✅ (2026-10-03; details in docs/shipping-history.md)
 
-## v2.D — Shape, rules engine, template fit, overlap (in progress; D-040, `docs/prd.md` § v2)
+## v2.E — Evidence ✅ (2026-10-16; D-040, `docs/prd.md` § v2)
+
+1. [x] `idea/evidence.py` providers, one interface `collect(keywords, ctx) → (status, facts)`:
+       lamill (`lamill new validate <primary kw> --json`: SERP top-10, AI Overview, PAA as
+       `real` when source serpapi, else `synthesis`; its volume is an LLM estimate → `synthesis`;
+       `lamill new trends <kw> --json` for ≤ 3 keywords → relative 0–100 interest, `real`);
+       files (`ideas/<id>/evidence/*.md`, Demand / Store competition tables + front matter
+       `idea, collected`); brief (its Evidence section); overlap (similarity vs recipes);
+       treg + store competition: declared, `not available`. Provider failure soft-fails.
+       No demand fact for a keyword / no competition fact → recorded `missing`.
+2. [x] `idea/stages/evidence.py` (kind data): input hash covers keywords + evidence files;
+       lamill's reported cost joins the AI cost line.
+3. [x] CLI: `new --evidence <file>` (repeatable), `evidence add <idea-id> <file>`,
+       `new evidence [id]`, `new validate|trends <keywords>` (print facts, no session).
+4. [x] Tests (fake lamill output, kinds/source/date, missing recorded, files, add → re-run);
+       docs.
+5. [x] HUMAN: review v2.E (operator, 2026-10-16: "call 2e done").
+
+## v2.D — Shape, rules engine, template fit, overlap ✅ (2026-10-16; D-040, `docs/prd.md` § v2)
 
 1. [x] `rules/lamill.yaml` (allowlist, broad hosts, limits, brand denylist, severity per
        idea/dev/release) + `cli/tabmill/rules.py` (predicates by rule id, `evaluate(subject,
@@ -36,7 +54,7 @@ blocker to `NOTES.md`, mark it BLOCKED, move on.
 5. [x] Tests: `<all_urls>` unjustified fails at idea and in `check`/lint; lint suite unchanged;
        shape replay (slug pick, template perms added, none-fits); check findings; rules file ↔
        predicates in step. Docs.
-6. [ ] HUMAN: review v2.D.
+6. [x] HUMAN: review v2.D (operator, 2026-10-16: "continue building").
 
 ## v2.C — Brief input ✅ (2026-10-16; D-040, `docs/prd.md` § v2)
 

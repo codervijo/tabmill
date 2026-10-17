@@ -8,6 +8,18 @@ import pytest
 from tabmill.config import TOOL_DIR, Config
 
 
+@pytest.fixture(autouse=True)
+def _no_real_subprocess_for_paid_tools(monkeypatch: pytest.MonkeyPatch) -> None:
+    """lamill validate spends SerpAPI quota + Claude cost: tests must inject a fake runner."""
+
+    def refuse(cmd: list[str], timeout: int) -> None:
+        raise AssertionError(f"test tried to run {cmd[:3]} for real")
+
+    monkeypatch.setattr("tabmill.idea.evidence._run", refuse)
+    # live `claude -p` costs money: tests replay; one that forgets gets a clear miss
+    monkeypatch.setenv("TABMILL_AI", "replay:/nonexistent-tabmill-test-fixtures")
+
+
 @pytest.fixture
 def tool_dir(tmp_path: Path) -> Path:
     """A copy of the real skills/templates/ci so tests can mutate sources safely."""

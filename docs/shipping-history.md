@@ -11,6 +11,22 @@ tradeoffs, and links to commits / ADRs.
 
 ---
 
+## v2.E — Evidence (shipped 2026-10-16, D-040)
+
+Providers with one interface (lamill validate/trends, evidence files, brief, overlap; treg and
+store competition declared, not available); soft-fail; `missing` facts for keywords without
+real/sourced demand and for absent store competition. lamill's volume kept as `synthesis` (LLM
+estimate). `evidence add`, `new --evidence`, `new validate|trends`. Rich markup escaped in step
+output; cost line always last. A test once ran real lamill (5 SerpAPI queries, $0.33) → conftest
+blocks paid tools. Real lamill output parsed (cached run); full live idea run with evidence not
+done. 213 tests.
+
+## v2.D — Shape, rules engine (shipped 2026-10-16, D-040)
+
+`rules/lamill.yaml` + `rules.py` shared by the idea `check` stage and lint (recipe-level lint
+rules moved in unchanged); shape_v1 (code picks slug, honours --template, adds template
+permissions); check stage. Live run: page-word-count · popup, 0 errors, $0.45. 201 tests.
+
 ## v2.C — Brief input (shipped 2026-10-16, D-040)
 
 `brief.py`: Tabmill brief v1 models → `schemas/brief_v1.schema.json`; section-by-section,
