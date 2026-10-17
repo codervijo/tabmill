@@ -16,10 +16,11 @@ from typing import Any, Literal, Protocol
 
 from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
-from .. import ai
+from .. import ai, brief
 
 IDEAS_DIR = "ideas"
 SESSION_FILE = "session.json"
+BRIEF_FILE = "brief.md"
 ORDER = ("clarify", "shape", "evidence", "check", "verdict", "write")
 ARRIVES = {"shape": "v2.D", "evidence": "v2.E", "check": "v2.D", "verdict": "v2.F", "write": "v2.F"}
 _ID_WORDS = 4
@@ -136,17 +137,26 @@ def create(
     template: str = "",
     today: date | None = None,
 ) -> Session:
+    """A brief (auto-detected) is also kept verbatim as `ideas/<id>/brief.md`."""
     if not text.strip():
         raise IdeaError("the idea is empty — describe it in a sentence")
     when = today or date.today()
+    kind: Literal["idea", "brief"] = "brief" if brief.is_brief(text) else "idea"
+    name = text
+    if kind == "brief":
+        meta = brief.parse(text).brief.meta
+        name = meta.idea if meta else "brief"
     session = Session(
-        id=new_id(tool_dir, text, when),
+        id=new_id(tool_dir, name, when),
         created=datetime.now(UTC).isoformat(timespec="seconds"),
+        input_kind=kind,
         text=text,
         non_interactive=non_interactive,
         template=template,
     )
     save(tool_dir, session)
+    if kind == "brief":
+        (idea_dir(tool_dir, session.id) / BRIEF_FILE).write_text(text)
     return session
 
 

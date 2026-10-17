@@ -85,8 +85,8 @@ bootstrap → try → check → ship. Plan accepted 2026-10-15; design below the
 |---|---|---|
 | v2.A | ✅ done | v2 plan; `publish` top level (`ship` never uploads); recipe schema v2 + v1→v2 migration; `portfolio.yaml`; `status` · `slots` · `templates` · `doctor`; `new <slug>` → `bootstrap` (deprecated alias) |
 | v2.B | ✅ done | Stage engine + session storage + AI runner (prompt registry, JSON validation, repair, record/replay) + clarify for rough ideas + AI cost shown after every command that calls AI + fix: `check` no longer runs apt on every smoke run |
-| v2.C | 🔄 in progress | Brief input (`--paste`, stdin, `--brief`, auto-detect), parser + schema, `brief check`, gap-only clarify |
-| v2.D | ⏳ planned | Shape + rules engine (shared with `check`) + template fit + overlap |
+| v2.C | ✅ done | Brief input (`--paste`, stdin, `--brief`, auto-detect), parser + schema, `brief check`, gap-only clarify |
+| v2.D | 🔄 in progress | Shape + rules engine (shared with `check`) + template fit + overlap |
 | v2.E | ⏳ planned | Evidence: lamill integration, evidence files, provenance model, `evidence add` |
 | v2.F | ⏳ planned | Verdict (rubric + cap) + write (recipe v2, idea.md, slot diff) + `approve` + `ideas list/show/compare` |
 | v2.G | ⏳ planned | Target-adapter seam: chrome-mv3 behind the interface, templates migrated, page-overlay stub |

@@ -20,6 +20,7 @@ from rich.table import Table
 from . import (
     ai,
     apikeys,
+    brief,
     catalog,
     config,
     cws,
@@ -55,6 +56,8 @@ apikeys_app = typer.Typer(help="Credentials in tabmill/tabmill.env.", no_args_is
 settings_app.add_typer(skills_app, name="skills")
 settings_app.add_typer(apikeys_app, name="apikeys")
 advanced_app = typer.Typer(help="Single steps the commands above run.", no_args_is_help=True)
+brief_app = typer.Typer(help="Tabmill briefs (the paste format, D-040).", no_args_is_help=True)
+app.add_typer(brief_app, name="brief")
 app.add_typer(settings_app, name="settings")
 app.add_typer(advanced_app, name="advanced")
 
@@ -214,9 +217,16 @@ def new(
     template: str = typer.Option(
         "", "--template", "-t", help="Surface template hint (or for a new recipe: popup)."
     ),
+    paste: bool = typer.Option(
+        False, "--paste", help="Paste a Tabmill brief or idea; end with a line `.` or Ctrl-D."
+    ),
+    brief_file: Path | None = typer.Option(  # noqa: B008 — typer's documented idiom
+        None, "--brief", help="Read a Tabmill brief (or idea) from a file."
+    ),
     force: bool = typer.Option(False, "--force", help="Discard edits to managed files."),
 ) -> None:
-    """Start from a rough idea: clarify → … → approve (D-040). `new <slug>` = old alias."""
+    """Start from a rough idea or a Tabmill brief: clarify → … → approve (D-040).
+    `-` reads stdin. `new <slug>` = deprecated alias for `bootstrap`."""
     words = idea or []
     cfg = _load()
     if words and words[0] in STAGE_WORDS:
@@ -239,6 +249,10 @@ def new(
             raise typer.Exit(1) from e
         _run_idea(cfg, session, only=None, non_interactive=non_interactive)
         return
+    text = _idea_input(words, paste, brief_file)
+    if text is not None:
+        _start_idea(cfg, text, non_interactive, template)
+        return
     if len(words) == 1 and catalog.SLUG_RE.match(words[0]):
         # Through v2 a single slug keeps today's path (D-040); removed in v3.A.
         output.skip(
@@ -247,21 +261,100 @@ def new(
         )
         _bootstrap(words[0], template, force)
         return
-    if not words:
-        output.fail(
-            'describe the idea: tabmill new "count words on any page" '
-            "(pasting a brief arrives in v2.C)"
-        )
+    _start_idea(cfg, " ".join(words), non_interactive, template)
+
+
+def _read_pasted() -> str:
+    """Multi-line input until EOF or a line that is just `.`."""
+    lines = []
+    for line in sys.stdin:
+        if line.rstrip("\n") == ".":
+            break
+        lines.append(line)
+    return "".join(lines)
+
+
+def _idea_input(words: list[str], paste: bool, brief_file: Path | None) -> str | None:
+    """Text from --brief / --paste / `-` / a bare `new` on a terminal; None = use the words."""
+    sources = sum([paste, brief_file is not None, words == ["-"]])
+    if sources > 1 or (sources and words and words != ["-"]):
+        output.fail("give the idea one way: words, `-`, --paste, or --brief <file>")
         raise typer.Exit(1)
+    if brief_file is not None:
+        if not brief_file.is_file():
+            output.fail(f"{brief_file}: no such file")
+            raise typer.Exit(1)
+        return brief_file.read_text()
+    if words == ["-"]:
+        return sys.stdin.read()
+    if paste or not words:
+        if not paste and not _tty():
+            output.fail(
+                'describe the idea: tabmill new "count words on any page" '
+                "(or pipe a brief: tabmill new -)"
+            )
+            raise typer.Exit(1)
+        if _tty():
+            output.console.print(
+                "Paste a Tabmill brief or describe the idea. End with a line `.` or Ctrl-D."
+            )
+        return _read_pasted()
+    return None
+
+
+def _report_brief(text: str) -> bool:
+    """Print what parsed, what didn't and what was downgraded. True if any section failed."""
+    parsed = brief.parse(text)
+    for name in parsed.present:
+        if not any(p.section.endswith(name.split(" › ")[-1]) for p in parsed.problems):
+            output.ok(f"brief: {name}")
+    for problem in parsed.problems:
+        output.fail(f"brief: {problem}")
+    for row in brief.downgraded(parsed):
+        output.skip(f"brief: {row} has no source URL — downgraded to synthesis")
+    for gap in brief.missing(parsed):
+        output.skip(f"brief: missing {gap}")
+    return bool(parsed.problems)
+
+
+def _start_idea(cfg: config.Config, text: str, non_interactive: bool, template: str) -> None:
     try:
         session = engine.create(
-            cfg.tool_dir, " ".join(words), non_interactive=non_interactive, template=template
+            cfg.tool_dir, text, non_interactive=non_interactive, template=template
         )
     except engine.IdeaError as e:
         output.fail(str(e))
         raise typer.Exit(1) from e
-    output.ok(f"idea {session.id}: saved")
+    if session.input_kind == "brief":
+        output.ok(
+            f"idea {session.id}: brief saved verbatim to "
+            f"{engine.IDEAS_DIR}/{session.id}/{engine.BRIEF_FILE}"
+        )
+        if _report_brief(text):
+            output.skip("sections that failed are kept as gaps — clarify asks about them")
+    else:
+        output.ok(f"idea {session.id}: saved")
     _run_idea(cfg, session, only=None, non_interactive=non_interactive)
+
+
+@brief_app.command("check")
+def brief_check(
+    file: Path = typer.Argument(..., help="The brief (Markdown with tabmill_brief front matter)."),  # noqa: B008
+) -> None:
+    """Validate a Tabmill brief: what parsed, what's broken (with line), what's missing."""
+    if not file.is_file():
+        output.fail(f"{file}: no such file")
+        raise typer.Exit(1)
+    text = file.read_text()
+    if not brief.is_brief(text):
+        output.fail(
+            f"{file}: not a Tabmill brief — it starts with `---` front matter holding "
+            "`tabmill_brief: 1`"
+        )
+        raise typer.Exit(1)
+    if _report_brief(text):
+        raise typer.Exit(1)
+    output.ok(f"{file}: valid brief")
 
 
 @app.command()

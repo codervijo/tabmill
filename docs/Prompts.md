@@ -139,3 +139,9 @@ The dated H2 is what `lamill project status` parses. Append-only.
 ## 2026-10-16 — v2.B done, v2.C started
 
 > "commit, call 2b done and start 2c"
+> → `brief.py` parser + `schemas/brief_v1.schema.json`, `brief check`, `new --brief|-|--paste`,
+> gap-only clarify.
+
+## 2026-10-16 — v2.C done, v2.D started
+
+> "commit, call 2c done and start 2d"

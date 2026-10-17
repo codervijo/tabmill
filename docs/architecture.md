@@ -155,6 +155,20 @@ Two repos, related by a computed relative layout (ADR-0007):
   trigger, pages, done_looks_like) and asks ≤ 5 questions about the empty ones; code drops
   questions about known fields and repeats, stops after 2 rounds (≤ 2 calls). Answers →
   `user` facts verbatim; skipped / `--non-interactive` → `open`, carried as assumptions.
+  For a brief (gap-only): its Answers pre-fill `known` and win over the AI's reading; its Open
+  questions (verbatim) and any section that failed to parse are asked by code; all five fields
+  filled → no AI call. Same `clarify_v1` prompt.
+- **Tabmill brief v1** (`brief.py`, `schemas/brief_v1.schema.json`): front matter
+  (`tabmill_brief: 1`, idea, author, created) + `## Idea · Answers · Proposal · Evidence
+  (### Demand, ### Store competition tables) · Risks · Open questions`. Parsed section by
+  section, line-based (AI-written values contain `: `, so no YAML load for sections): problems
+  are `line N, section … : msg` and the section is dropped, everything else kept. Template
+  placeholders (`…`, `<why>`, the trigger option list) count as empty. Facts: evidence row with
+  an http(s) source → `external`, without → `synthesis` (↷ downgraded); Answers + Proposal →
+  `external_suggestion`. Input: `new --brief <file>`, `new -` (stdin), `new --paste`, bare `new`
+  on a terminal; any input is auto-detected as a brief (`---` + `tabmill_brief:`) and saved
+  verbatim to `ideas/<id>/brief.md` (id from the brief's `idea`). `brief check <file>` reports
+  without starting a session.
 
 ## 3. Data shapes / schemas
 
@@ -191,12 +205,13 @@ Two repos, related by a computed relative layout (ADR-0007):
 `extension` (YAML load/validate/manifest fields), `generate` (template + recipe), `registry`,
 `catalog` (list rows, starter recipes), `lifecycle` (stage + next step per extension),
 `surfaces` (template registry), `provenance` (Fact), `recipe_v2` (migration, JSON Schema),
-`portfolio` (portfolio.yaml, slots), `ai` (claude -p runner), `idea/engine` (sessions,
+`portfolio` (portfolio.yaml, slots), `ai` (claude -p runner), `brief` (brief v1 parser), `idea/engine` (sessions,
 stages), `idea/stages/` (clarify; later stages per `docs/prd.md` § v2). Planned packages: brand, funnel, messaging, analytics, policy (extracted in v1.E/v1.H).
 
 ## 5. CLI / UX surface
 
-Top level (D-034, D-038, D-040): `new "<idea>" [--non-interactive] [--resume <id>]` ·
+Top level (D-034, D-038, D-040): `new "<idea>" | - | --paste | --brief <file>
+[--non-interactive] [--resume <id>]` · `brief check <file>` ·
 `new clarify [id]` (idea stage; `new <slug>` = deprecated alias for `bootstrap` until v3.A) · `bootstrap` · `try` · `check [slug]` · `ship` (never uploads) ·
 `publish` (attended upload) · `status [slug]` · `slots` · `templates` · `doctor [--fix]`.
 `settings`: `init`, `skills sync`, `preflight`, `apikeys`. `advanced` (the single steps):

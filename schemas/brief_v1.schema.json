@@ -1,0 +1,324 @@
+{
+  "$defs": {
+    "Answers": {
+      "additionalProperties": false,
+      "properties": {
+        "target_user": {
+          "default": "",
+          "title": "Target User",
+          "type": "string"
+        },
+        "core_action": {
+          "default": "",
+          "title": "Core Action",
+          "type": "string"
+        },
+        "trigger": {
+          "default": "",
+          "enum": [
+            "",
+            "toolbar",
+            "shortcut",
+            "context_menu",
+            "side_panel"
+          ],
+          "title": "Trigger",
+          "type": "string"
+        },
+        "pages_touched": {
+          "default": "",
+          "title": "Pages Touched",
+          "type": "string"
+        },
+        "done_looks_like": {
+          "default": "",
+          "title": "Done Looks Like",
+          "type": "string"
+        }
+      },
+      "title": "Answers",
+      "type": "object"
+    },
+    "CompetitionRow": {
+      "additionalProperties": false,
+      "properties": {
+        "extension": {
+          "title": "Extension",
+          "type": "string"
+        },
+        "users": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Users"
+        },
+        "rating": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Rating"
+        },
+        "ratings_count": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Ratings Count"
+        },
+        "last_updated": {
+          "default": "",
+          "title": "Last Updated",
+          "type": "string"
+        },
+        "url": {
+          "default": "",
+          "title": "Url",
+          "type": "string"
+        }
+      },
+      "required": [
+        "extension"
+      ],
+      "title": "CompetitionRow",
+      "type": "object"
+    },
+    "DemandRow": {
+      "additionalProperties": false,
+      "properties": {
+        "keyword": {
+          "title": "Keyword",
+          "type": "string"
+        },
+        "monthly_us_searches": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Monthly Us Searches"
+        },
+        "difficulty": {
+          "default": "",
+          "title": "Difficulty",
+          "type": "string"
+        },
+        "source": {
+          "default": "",
+          "title": "Source",
+          "type": "string"
+        },
+        "date": {
+          "default": "",
+          "title": "Date",
+          "type": "string"
+        }
+      },
+      "required": [
+        "keyword"
+      ],
+      "title": "DemandRow",
+      "type": "object"
+    },
+    "Meta": {
+      "additionalProperties": false,
+      "properties": {
+        "tabmill_brief": {
+          "const": 1,
+          "title": "Tabmill Brief",
+          "type": "integer"
+        },
+        "idea": {
+          "title": "Idea",
+          "type": "string"
+        },
+        "author": {
+          "default": "",
+          "title": "Author",
+          "type": "string"
+        },
+        "created": {
+          "default": "",
+          "title": "Created",
+          "type": "string"
+        }
+      },
+      "required": [
+        "tabmill_brief",
+        "idea"
+      ],
+      "title": "Meta",
+      "type": "object"
+    },
+    "Permission": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "why": {
+          "default": "",
+          "title": "Why",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "title": "Permission",
+      "type": "object"
+    },
+    "Proposal": {
+      "additionalProperties": false,
+      "properties": {
+        "single_purpose": {
+          "default": "",
+          "title": "Single Purpose",
+          "type": "string"
+        },
+        "template": {
+          "default": "",
+          "title": "Template",
+          "type": "string"
+        },
+        "permissions": {
+          "items": {
+            "$ref": "#/$defs/Permission"
+          },
+          "title": "Permissions",
+          "type": "array"
+        },
+        "slug_candidates": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Slug Candidates",
+          "type": "array"
+        },
+        "store_name": {
+          "default": "",
+          "title": "Store Name",
+          "type": "string"
+        },
+        "summary": {
+          "default": "",
+          "title": "Summary",
+          "type": "string"
+        },
+        "keywords": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Keywords",
+          "type": "array"
+        },
+        "portfolio_site": {
+          "default": "",
+          "title": "Portfolio Site",
+          "type": "string"
+        },
+        "cta": {
+          "default": "",
+          "title": "Cta",
+          "type": "string"
+        }
+      },
+      "title": "Proposal",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "meta": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Meta"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "idea": {
+      "default": "",
+      "title": "Idea",
+      "type": "string"
+    },
+    "answers": {
+      "$ref": "#/$defs/Answers",
+      "default": {
+        "target_user": "",
+        "core_action": "",
+        "trigger": "",
+        "pages_touched": "",
+        "done_looks_like": ""
+      }
+    },
+    "proposal": {
+      "$ref": "#/$defs/Proposal",
+      "default": {
+        "single_purpose": "",
+        "template": "",
+        "permissions": [],
+        "slug_candidates": [],
+        "store_name": "",
+        "summary": "",
+        "keywords": [],
+        "portfolio_site": "",
+        "cta": ""
+      }
+    },
+    "demand": {
+      "items": {
+        "$ref": "#/$defs/DemandRow"
+      },
+      "title": "Demand",
+      "type": "array"
+    },
+    "competition": {
+      "items": {
+        "$ref": "#/$defs/CompetitionRow"
+      },
+      "title": "Competition",
+      "type": "array"
+    },
+    "risks": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Risks",
+      "type": "array"
+    },
+    "open_questions": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Open Questions",
+      "type": "array"
+    }
+  },
+  "title": "Brief",
+  "type": "object"
+}

@@ -10,7 +10,7 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from ... import ai
+from ... import ai, brief
 from ...provenance import Fact
 from ..engine import Context, Question, Result, StageKind
 
@@ -55,9 +55,12 @@ class QA(BaseModel):
     answer: str = ""  # verbatim; "" = open
 
 
-def values(text: str, qa: list[QA], rnd: int) -> dict[str, str]:
+def values(
+    text: str, qa: list[QA], rnd: int, given: dict[str, str] | None = None
+) -> dict[str, str]:
     """Prompt variables — also what the AI fixture key is hashed from."""
-    lines = [f"- [{q.about}] {q.question} → {q.answer or '(skipped)'}" for q in qa]
+    lines = [f"- [{k}] (from the brief) → {v}" for k, v in (given or {}).items() if v]
+    lines += [f"- [{q.about}] {q.question} → {q.answer or '(skipped)'}" for q in qa]
     return {
         "idea": text.strip(),
         "answers": "\n".join(lines) or "(none yet)",
@@ -83,22 +86,30 @@ class Clarify:
 
     def run(self, ctx: Context) -> Result:
         prompt = ai.load_prompt(ctx.tool_dir, PURPOSE, VERSION)
+        seed, idea_text, code_qs, seed_facts = _from_input(ctx)
+        given = {k: v for k, v in seed.model_dump().items() if v}
+        need_ai = any(not getattr(seed, f) for f in FIELDS)
         qa: list[QA] = []
         calls: list[ai.Call] = []
-        known = Known()
+        known = seed
         rounds = 0
         for rnd in range(1, MAX_ROUNDS + 1):
-            reply, call = ai.run(
-                prompt,
-                values(ctx.session.text, qa, rnd),
-                ClarifyReply,
-                ctx.raw_dir,
-                model=ctx.ai_model,
-            )
-            calls.append(call)
-            known = reply.known
             asked = {q.question.strip().lower() for q in qa}
-            new = [q for q in reply.questions if _keep(q, known, asked)][:MAX_QUESTIONS]
+            new: list[AIQuestion] = list(code_qs) if rnd == 1 else []
+            if need_ai:
+                reply, call = ai.run(
+                    prompt,
+                    values(idea_text, qa, rnd, given or None),
+                    ClarifyReply,
+                    ctx.raw_dir,
+                    model=ctx.ai_model,
+                )
+                calls.append(call)
+                # code decides: what the input already states wins over the AI's reading
+                known = Known.model_validate(
+                    {f: getattr(seed, f) or getattr(reply.known, f) for f in FIELDS}
+                )
+                new += [q for q in reply.questions if _keep(q, known, asked)][:MAX_QUESTIONS]
             if not new:
                 break
             rounds = rnd
@@ -119,8 +130,10 @@ class Clarify:
                 item.answer = ctx.ask_user(
                     Question(id=item.id, text=item.question, choices=item.choices)
                 ).strip()
+            if not need_ai:
+                break  # only the brief's own questions; nothing for the AI to ask
         today = ctx.today or date.today().isoformat()
-        facts = [
+        facts = seed_facts + [
             Fact(
                 claim=q.question,
                 value=q.answer,
@@ -141,3 +154,35 @@ class Clarify:
             },
             calls=calls,
         )
+
+
+def _from_input(ctx: Context) -> tuple[Known, str, list[AIQuestion], list[Fact]]:
+    """Rough idea: nothing known yet. Brief: Answers pre-fill `known`; its Open questions and
+    any section that failed to parse become questions (gap-only clarify, v2.C)."""
+    if ctx.session.input_kind != "brief":
+        return Known(), ctx.session.text, [], []
+    parsed = brief.parse(ctx.session.text)
+    b, a = parsed.brief, parsed.brief.answers
+    seed = Known(
+        target_user=a.target_user,
+        core_action=a.core_action,
+        trigger=a.trigger,
+        pages=a.pages_touched,
+        done_looks_like=a.done_looks_like,
+    )
+    text = b.idea or (b.meta.idea if b.meta else "") or ctx.session.text
+    qs = [
+        AIQuestion(about="other", text=f"Open question from the brief: {q}")
+        for q in b.open_questions
+    ]
+    for sec in parsed.broken:
+        first = next(p for p in parsed.problems if p.section == sec)
+        qs.append(
+            AIQuestion(
+                about="other",
+                text=f"The brief's {sec} didn't parse ({first}). "
+                "What should it say? (Enter leaves it as a gap)",
+            )
+        )
+    facts = [f for f in brief.facts(parsed) if f.claim in brief.ANSWER_FIELDS]
+    return seed, text, qs, facts

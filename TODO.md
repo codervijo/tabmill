@@ -18,6 +18,23 @@ blocker to `NOTES.md`, mark it BLOCKED, move on.
 
 ## v1.B — Tool + generator ✅ (2026-10-03; details in docs/shipping-history.md)
 
+## v2.C — Brief input ✅ (2026-10-16; D-040, `docs/prd.md` § v2)
+
+1. [x] `cli/tabmill/brief.py`: Tabmill brief v1 pydantic models → `schemas/brief_v1.schema.json`;
+       section-by-section parser (front matter, Idea, Answers, Proposal, Evidence › Demand /
+       Store competition tables, Risks, Open questions): problems as `line N, section … : msg`,
+       every parsed section kept; facts: sourced evidence row → `external`, unsourced →
+       `synthesis` (↷ downgraded), Proposal + Answers → `external_suggestion`.
+2. [x] `brief check <file>`: ✓ per section, ✗ problems with line, ↷ missing fields/downgrades.
+3. [x] `new --paste` · `new -` · `new --brief <file>` · no args + TTY prompt; auto-detect
+       (`---` + `tabmill_brief:`); brief saved verbatim to `ideas/<id>/brief.md`.
+4. [x] Gap-only clarify: brief answers pre-fill `known`; questions only for empty fields, the
+       brief's Open questions (verbatim) and sections that failed to parse; nothing to ask → no
+       AI call. Same `clarify_v1` prompt (rough-idea fixtures unchanged).
+5. [x] Tests (schema current, full / empty / malformed brief, detection, `brief check`, CLI
+       inputs, gap-only clarify); docs.
+6. [x] HUMAN: review v2.C (operator, 2026-10-16: "call 2c done").
+
 ## v2.B — Stage engine, AI runner, clarify ✅ (2026-10-16; D-040, `docs/prd.md` § v2)
 
 1. [x] `cli/tabmill/ai.py`: prompt registry (`prompts/<purpose>_v<N>.md`, front matter

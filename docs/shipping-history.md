@@ -11,6 +11,16 @@ tradeoffs, and links to commits / ADRs.
 
 ---
 
+## v2.C — Brief input (shipped 2026-10-16, D-040)
+
+`brief.py`: Tabmill brief v1 models → `schemas/brief_v1.schema.json`; section-by-section,
+line-based parser (AI-written values contain `: `, so no YAML for sections); problems carry line
+and section, the rest is kept. Sourced evidence rows `external`, unsourced `synthesis`; Answers
+and Proposal `external_suggestion`. `brief check`; `new --brief | - | --paste | bare new on a
+TTY`; auto-detect; `ideas/<id>/brief.md` verbatim. Gap-only clarify: brief answers win, open
+questions and broken sections asked by code, no AI call when all five answers are present.
+Real brief from claude.ai not yet run. 187 tests.
+
 ## v2.B — Stage engine, AI runner, clarify (shipped 2026-10-16, D-040)
 
 `ai.py` (`claude -p`, no tools, budget-capped; pydantic validation, one repair, raw saved on

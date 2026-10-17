@@ -39,6 +39,7 @@ def test_top_level_is_the_lifecycle() -> None:
         "slots",
         "templates",
         "doctor",
+        "brief",
         "settings",
         "advanced",
     ]
