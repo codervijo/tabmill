@@ -182,3 +182,7 @@ The dated H2 is what `lamill project status` parses. Append-only.
 > "merge PLAN.md into the PRD too and push" + "note this in AGENTS file so that you dont keep
 > creating a whole bunch of new files, keep new files to minimum except when code requires it"
 > → PLAN.md retired (D-042); rule in AI_AGENTS.md.
+
+## 2026-10-16 — v2.H closed
+
+> "close it. i will test some when i can." → v2.H done without real runs; steps carried.

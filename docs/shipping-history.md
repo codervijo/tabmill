@@ -11,6 +11,13 @@ tradeoffs, and links to commits / ADRs.
 
 ---
 
+## v2.H — closed without real runs (2026-10-16)
+
+Operator: "close it. i will test some when i can." v2's "Done when" is not met: the two real
+briefs, the interactive clarify loop, `approve` in a terminal, and approve → bootstrap → try →
+check → ship through the idea flow have not run. Those steps are carried in the PRD work queue.
+Built and suite-green: v2.A–v2.G (232 tests).
+
 ## v2.G — Target-adapter seam (shipped 2026-10-16, D-040)
 
 `cli/tabmill/targets/` (Target protocol + registry) with `chrome_mv3` and its data in

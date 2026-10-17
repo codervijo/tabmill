@@ -92,7 +92,7 @@ bootstrap → try → check → ship. Plan accepted 2026-10-15; design below the
 | v2.E | ✅ done | Evidence: lamill integration, evidence files, provenance model, `evidence add` |
 | v2.F | ✅ done | Verdict (rubric + cap) + write (recipe v2, idea.md, slot diff) + `approve` + `ideas list/show/compare` |
 | v2.G | ✅ done | Target-adapter seam: chrome-mv3 behind the interface, templates migrated, page-overlay stub |
-| v2.H | 🔄 in progress | First real runs (word counter, page ruler briefs) → winner through approve → ship; retro; prompts tuned to v2 |
+| v2.H | ✅ done | Closed by the operator 2026-10-16 without the real runs — briefs, approve → ship, retro and `_v2` prompts carried to the work queue (operator testing) |
 | v2.I–v2.Z | — | Reserved for fixes found in v2.H; work that doesn't fit v2 moves to v3.A |
 
 Versions: tabmill phases are `v2.A … v2.Z`. Extensions keep their own numeric store versions
@@ -407,19 +407,15 @@ The open work for the current phase, plus HUMAN items carried from earlier phase
 before patches: a change over ~20 lines gets its items here first. Done items are checked
 off; when a phase ships its list moves to `docs/shipping-history.md`.
 
-**v2.H — First real runs**
+**Carried from v2.H (operator real-use testing, when there's time)**
 
-1. [ ] HUMAN: paste the two Tabmill briefs (word counter, page ruler) — `uv run tabmill brief
-       check <file>` first.
-2. [ ] `tabmill new --brief <file>` for each (interactive) → `tabmill ideas compare <a> <b>`.
-3. [ ] HUMAN: pick the winner; fill its ‹FILL›; `tabmill approve <id>` (terminal).
-       Page ruler needs the `page-overlay` template, which is a stub — winning means building
-       it first (tabmill template work, planned here before code).
-4. [ ] `bootstrap` → `try` → `check` → `ship` on the winner.
-5. [ ] Retro (what the prompts / rules / thresholds got wrong) → prompts tuned to `_v2`,
-       verdict thresholds revisited with the two real runs as data.
-6. [ ] "Done when" (`docs/prd.md` § v2) checked; v2.I–v2.Z only for fixes found here.
-7. [ ] HUMAN: review v2.H.
+- [ ] HUMAN: two real briefs (word counter, page ruler) → `uv run tabmill brief check <file>`
+      → `uv run tabmill new --brief <file>` (answer the questions) → `uv run tabmill ideas
+      compare <a> <b>`.
+- [ ] HUMAN: winner → fill ‹FILL› → `uv run tabmill approve <id>` → `bootstrap` → `try` →
+      `check` → `ship`. Page ruler needs the `page-overlay` template built first.
+- [ ] Retro from those runs → prompts tuned to `_v2`, verdict thresholds revisited; fixes go in
+      v2.I–v2.Z (or v3.A if they don't fit v2).
 
 Idea candidates (from dropped v1.M): local-schema-generator, jwt-inspector.
 
