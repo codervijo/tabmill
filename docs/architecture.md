@@ -190,6 +190,27 @@ Two repos, related by a computed relative layout (ADR-0007):
   without real/sourced demand and absent store competition become `missing` facts. Input hash
   = keywords (via shape) + evidence-file hashes, so `evidence add` makes resume re-run it.
   Tests never run lamill or live `claude -p` (conftest guards both).
+- **verdict_v1** (`idea/stages/verdict.py`): AI scores reach / outrate / audience / risk /
+  effort 0–10 with reasons, risks, needs_evidence. Code (`decide`): weighted score (weights and
+  GO / GO-IF thresholds in `rules/lamill.yaml` § verdict — starting values, tuned in v2.H),
+  band, NO-GO on any check error, cap at GO-IF when no demand fact or no competition fact is
+  real/external (`capped_by`).
+- **write** (`idea/stages/write.py`, kind gen): `recipes/<slug>/extension.yaml` (schema v2,
+  JSON-quoted values, `idea_id`, provenance = clarify + evidence facts; `‹FILL›` + `# why` only
+  for cta_url, store_category and a none-fits template) + `recipes/<slug>/idea.md`. Refuses a
+  recipe another idea wrote or an approved one. The CLI prints the portfolio.yaml item
+  (`approval: proposed`) as a diff and writes it with `new --apply`.
+- **approve** (`idea/approve.py`, human gate 1, terminal only): write + verdict fresh; recipe
+  valid; no rule errors (`idea` context, on the file as edited); NO-GO needs `--override
+  "<reason>"`; a free slot unless the slug already holds one. Writes the item: approved |
+  override, idea_id, recipe_revision, `frozen_sha256` (sha256 of the parsed recipe minus
+  `portfolio.UNFROZEN`: version, changelog, landing_page_url, recipe_revision, cta_url,
+  store_category), approved_at, slot reserved. Re-approval needs a bumped revision.
+  `_recipe()` (every build command) refuses an idea recipe that isn't approved, and a frozen
+  one whose fields or revision drifted (`portfolio.drift`). `status` shows such recipes at
+  stage `verdict` with `tabmill approve <id>`.
+- **ideas** (`engine.summary`): `ideas [list]`, `ideas show <id>` (idea.md, else stage
+  summaries), `ideas compare <id> <id>…` (verdict, score, rubric, evidence mix, errors).
 - **Tabmill brief v1** (`brief.py`, `schemas/brief_v1.schema.json`): front matter
   (`tabmill_brief: 1`, idea, author, created) + `## Idea · Answers · Proposal · Evidence
   (### Demand, ### Store competition tables) · Risks · Open questions`. Parsed section by
@@ -245,7 +266,8 @@ stages), `idea/stages/` (clarify; later stages per `docs/prd.md` § v2). Planned
 
 Top level (D-034, D-038, D-040): `new "<idea>" | - | --paste | --brief <file>
 [--evidence <file>]… [--non-interactive] [--resume <id>]` · `new validate|trends <kw>…` ·
-`brief check <file>` · `evidence add <id> <file>` ·
+`brief check <file>` · `evidence add <id> <file>` · `approve <id> [--override]` ·
+`ideas [list | show | compare]` · `new … --apply` ·
 `new clarify [id]` (idea stage; `new <slug>` = deprecated alias for `bootstrap` until v3.A) · `bootstrap` · `try` · `check [slug]` · `ship` (never uploads) ·
 `publish` (attended upload) · `status [slug]` · `slots` · `templates` · `doctor [--fix]`.
 `settings`: `init`, `skills sync`, `preflight`, `apikeys`. `advanced` (the single steps):

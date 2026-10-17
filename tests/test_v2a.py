@@ -153,9 +153,9 @@ def test_new_slug_is_a_deprecated_alias_for_bootstrap(app_cfg: Config) -> None:
     assert (app_cfg.tool_dir / "recipes" / "demo" / "extension.yaml").exists()
 
 
-def test_new_with_a_later_stage_name_says_when_it_arrives(app_cfg: Config) -> None:
+def test_new_stage_rerun_without_ideas(app_cfg: Config) -> None:
     result = runner.invoke(cli.app, ["new", "verdict"])
-    assert result.exit_code == 1 and "v2.F" in result.stdout
+    assert result.exit_code == 1 and "no ideas yet" in result.stdout
 
 
 def test_bootstrap_refuses_a_stub_template(app_cfg: Config) -> None:

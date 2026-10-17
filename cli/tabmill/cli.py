@@ -13,6 +13,7 @@ import shutil
 import subprocess
 import sys
 from pathlib import Path
+from typing import Any
 
 import typer
 from rich.markup import escape
@@ -44,6 +45,7 @@ from . import (
     workspace,
 )
 from .constants import ENV_WORKSPACE
+from .idea import approve as approve_mod
 from .idea import engine, evidence
 from .idea import stages as idea_stages
 
@@ -60,6 +62,8 @@ settings_app.add_typer(apikeys_app, name="apikeys")
 advanced_app = typer.Typer(help="Single steps the commands above run.", no_args_is_help=True)
 brief_app = typer.Typer(help="Tabmill briefs (the paste format, D-040).", no_args_is_help=True)
 app.add_typer(brief_app, name="brief")
+ideas_app = typer.Typer(help="Idea sessions: list, show, compare (D-040).")
+app.add_typer(ideas_app, name="ideas")
 evidence_app = typer.Typer(help="Evidence for an idea (D-040).", no_args_is_help=True)
 app.add_typer(evidence_app, name="evidence")
 app.add_typer(settings_app, name="settings")
@@ -142,12 +146,13 @@ def _recipe(cfg: config.Config, slug: str) -> dict[str, object]:
         output.fail(str(e))
         raise typer.Exit(1) from e
     output.ok(f"recipes/{slug}/extension.yaml: valid")
+    _approval_gate(cfg, slug, ext)
     for field in extension.placeholder_fields(ext):
         output.skip(f"{field}: placeholder URL — fine for dev, blocks release (D-015)")
     return ext
 
 
-STAGE_WORDS = ("clarify", "shape", "evidence", "verdict", "validate", "trends")
+STAGE_WORDS = ("clarify", "shape", "evidence", "check", "verdict", "write", "validate", "trends")
 
 
 def _tty() -> bool:
@@ -167,7 +172,12 @@ def _ask_user(q: engine.Question) -> str:
 
 
 def _run_idea(
-    cfg: config.Config, session: engine.Session, *, only: str | None, non_interactive: bool
+    cfg: config.Config,
+    session: engine.Session,
+    *,
+    only: str | None,
+    non_interactive: bool,
+    apply: bool = False,
 ) -> None:
     interactive = not non_interactive and _tty()
     if not non_interactive and not interactive:
@@ -204,10 +214,52 @@ def _run_idea(
     if stale:
         output.skip(f"stale: {', '.join(stale)} — `tabmill new --resume {session.id}` re-runs them")
     output.console.print(f"  idea: {engine.IDEAS_DIR}/{session.id}/")
+    written = next((r for r in records if r.stage == "write" and not r.stale), None)
+    if written is not None:
+        _portfolio_item(cfg, written.output, apply)
+        _next_after_write(session.id, written.output, records)
     later = [n for n in engine.ORDER if n in engine.ARRIVES]
     if later:
         output.console.print(f"  next: {later[0]} arrives in {engine.ARRIVES[later[0]]}")
     output.console.print(f"  {ai.spent()}")  # always the last line (AI_AGENTS.md)
+
+
+def _portfolio_item(cfg: config.Config, out: dict[str, Any], apply: bool) -> None:
+    """Print the proposed portfolio.yaml item as a diff; write it only with --apply."""
+    slug, item = out["slug"], out["portfolio_item"]
+    data = _portfolio(cfg)
+    if slug in data.items:
+        output.ok(
+            f"{portfolio.PORTFOLIO_FILE}: {slug} already listed ({data.items[slug].approval})"
+        )
+        return
+    output.console.print(f"  {portfolio.PORTFOLIO_FILE}:")
+    output.console.print(f"  [green]+ {escape(slug)}: {escape(json.dumps(item))}[/green]")
+    if not apply:
+        output.skip(f"{portfolio.PORTFOLIO_FILE}: not written — add --apply (or `tabmill approve`)")
+        return
+    data.items[slug] = portfolio.Item.model_validate(item)
+    portfolio.write(cfg.tool_dir, data)
+    output.ok(f"{portfolio.PORTFOLIO_FILE}: {slug} added (proposed)")
+
+
+def _next_after_write(idea_id: str, out: dict[str, Any], records: list[engine.StageRecord]) -> None:
+    verdict = next((r.output for r in records if r.stage == "verdict"), {})
+    if out["schema_errors"]:
+        for e in out["schema_errors"]:
+            output.skip(f"write: {out['recipe']}: {e}")
+    fill = ", ".join(out["fill"])
+    if verdict.get("verdict") == "NO-GO":
+        output.console.print(
+            f'  next: NO-GO — `tabmill approve {idea_id} --override "<reason>"` '
+            "only if you disagree"
+        )
+    elif fill:
+        output.console.print(
+            f"  next: fill {fill} in {out['recipe']}, then tabmill approve {idea_id}"
+        )
+    else:
+        output.console.print(f"  next: tabmill approve {idea_id}")
 
 
 def _research(kind: str, keywords: list[str]) -> None:
@@ -294,9 +346,22 @@ def _stage_summary(rec: engine.StageRecord) -> None:
             )
         kinds = ", ".join(f"{n} {k}" for k, n in sorted(out["kinds"].items()))
         output.ok(f"evidence: {len(out['facts'])} facts ({kinds})")
-        for f in out["facts"]:
-            if f["kind"] == "missing":
-                output.skip(f"evidence: missing — {f['claim']}")
+        gaps = [str(f["claim"]) for f in out["facts"] if f["kind"] == "missing"]
+        demand = [c.split(": ", 1)[1] for c in gaps if c.startswith("demand (real or sourced): ")]
+        if demand:
+            output.skip(f"evidence: no real or sourced demand for {', '.join(demand)}")
+        others = [c for c in gaps if not c.startswith(("demand (real", "Google Trends interest:"))]
+        for c in others:
+            output.skip(f"evidence: missing — {c}")
+    elif rec.stage == "verdict":
+        line = f"verdict: {out['verdict']} · score {out['weighted']}"
+        {"GO": output.ok, "GO-IF": output.skip, "NO-GO": output.fail}[out["verdict"]](line)
+        for dim, sc in out["scores"].items():
+            output.console.print(f"    {dim} {sc['score']}/10 — {escape(sc['reason'])}")
+        for w in out["why"][1:]:
+            output.skip(f"verdict: {w}")
+    elif rec.stage == "write":
+        output.ok(f"write: {out['recipe']} + {out['idea_md']}")
     elif rec.stage == "check":
         for f in out["findings"]:
             (output.fail if f["severity"] == "error" else output.skip)(
@@ -308,6 +373,26 @@ def _stage_summary(rec: engine.StageRecord) -> None:
             f"slots {s['free']} free of {s['limit']}"
         )
         (output.fail if out["errors"] else output.ok)(line)
+
+
+def _approval_gate(cfg: config.Config, slug: str, ext: dict[str, object]) -> None:
+    """Human gate 1 (D-040): an idea-stage recipe builds only once approved, and only while
+    its frozen fields match what was approved."""
+    try:
+        idea_id = str(ext.get("idea_id") or "")
+        if idea_id and not portfolio.is_approved(cfg.tool_dir, slug):
+            output.fail(
+                f"recipes/{slug} came from idea {idea_id} and isn't approved — "
+                f"`tabmill approve {idea_id}`"
+            )
+            raise typer.Exit(1)
+        why = portfolio.drift(cfg.tool_dir, slug, ext)
+    except portfolio.PortfolioError as e:
+        output.fail(str(e))
+        raise typer.Exit(1) from e
+    if why:
+        output.fail(why)
+        raise typer.Exit(1)
 
 
 @app.command()
@@ -322,6 +407,9 @@ def new(
     ),
     non_interactive: bool = typer.Option(
         False, "--non-interactive", help="Ask nothing; questions are recorded as open."
+    ),
+    apply: bool = typer.Option(
+        False, "--apply", help="Also add the proposed item to portfolio.yaml after write."
     ),
     template: str = typer.Option(
         "", "--template", "-t", help="Surface template hint (or for a new recipe: popup)."
@@ -354,7 +442,7 @@ def new(
         except engine.IdeaError as e:
             output.fail(str(e))
             raise typer.Exit(1) from e
-        _run_idea(cfg, session, only=name, non_interactive=non_interactive)
+        _run_idea(cfg, session, only=name, non_interactive=non_interactive, apply=apply)
         return
     if resume:
         try:
@@ -362,11 +450,11 @@ def new(
         except engine.IdeaError as e:
             output.fail(str(e))
             raise typer.Exit(1) from e
-        _run_idea(cfg, session, only=None, non_interactive=non_interactive)
+        _run_idea(cfg, session, only=None, non_interactive=non_interactive, apply=apply)
         return
     text = _idea_input(words, paste, brief_file)
     if text is not None:
-        _start_idea(cfg, text, non_interactive, template, evidence_files)
+        _start_idea(cfg, text, non_interactive, template, evidence_files, apply)
         return
     if len(words) == 1 and catalog.SLUG_RE.match(words[0]):
         # Through v2 a single slug keeps today's path (D-040); removed in v3.A.
@@ -376,7 +464,7 @@ def new(
         )
         _bootstrap(words[0], template, force)
         return
-    _start_idea(cfg, " ".join(words), non_interactive, template, evidence_files)
+    _start_idea(cfg, " ".join(words), non_interactive, template, evidence_files, apply)
 
 
 def _read_pasted() -> str:
@@ -438,6 +526,7 @@ def _start_idea(
     non_interactive: bool,
     template: str,
     evidence_files: list[Path] | None = None,
+    apply: bool = False,
 ) -> None:
     for f in evidence_files or []:
         if not f.is_file():
@@ -461,7 +550,7 @@ def _start_idea(
         output.ok(f"idea {session.id}: saved")
     for f in evidence_files or []:
         _add_evidence(engine.idea_dir(cfg.tool_dir, session.id), f)
-    _run_idea(cfg, session, only=None, non_interactive=non_interactive)
+    _run_idea(cfg, session, only=None, non_interactive=non_interactive, apply=apply)
 
 
 @brief_app.command("check")
@@ -482,6 +571,141 @@ def brief_check(
     if _report_brief(text):
         raise typer.Exit(1)
     output.ok(f"{file}: valid brief")
+
+
+@app.command()
+def approve(
+    idea_id: str = typer.Argument(..., help="Idea id (see `tabmill ideas`)."),
+    override: str = typer.Option(
+        "", "--override", help="Approve a NO-GO anyway; the reason is recorded."
+    ),
+) -> None:
+    """Human gate 1: freeze the idea's recipe and reserve a store slot (terminal only)."""
+    cfg = _load()
+    ws = cfg.workspace if cfg.workspace.exists() else None
+    try:
+        plan = approve_mod.prepare(cfg.tool_dir, ws, idea_id, override)
+    except (approve_mod.ApproveError, engine.IdeaError, portfolio.PortfolioError) as e:
+        output.fail(str(e))
+        raise typer.Exit(1) from e
+    v = plan.verdict
+    mark = {"GO": output.ok, "GO-IF": output.skip, "NO-GO": output.fail}[v["verdict"]]
+    mark(f"verdict: {v['verdict']} · score {v['weighted']}")
+    for w in v["why"][1:]:
+        output.skip(w)
+    for w in plan.warnings:
+        output.skip(f"rule: {w}")
+    for f in plan.fill:
+        output.skip(f"‹FILL›: {f} — fill it before `tabmill ship`")
+    if override:
+        output.skip(f"override: {override}")
+    what = "re-approve" if plan.renewal else "approve"
+    output.console.print(
+        f"  {what} recipes/{plan.slug} at recipe_revision {plan.item.recipe_revision}: "
+        f"freeze it{' and reserve a store slot' if plan.item.slot == 'reserved' else ''}"
+    )
+    if not _tty():
+        output.fail("approve is a human gate — run it in a terminal")
+        raise typer.Exit(1)
+    if not typer.confirm("  Approve?", default=False):
+        output.skip("not approved")
+        raise typer.Exit(1)
+    approve_mod.apply(cfg.tool_dir, plan)
+    output.ok(
+        f"{portfolio.PORTFOLIO_FILE}: {plan.slug} {plan.item.approval}, frozen"
+        + (", slot reserved" if plan.item.slot == "reserved" else "")
+    )
+    output.console.print(f"  next: tabmill bootstrap {plan.slug}")
+
+
+@ideas_app.callback(invoke_without_command=True)
+def ideas_default(ctx: typer.Context) -> None:
+    """Idea sessions in ideas/: progress, verdict, evidence mix."""
+    if ctx.invoked_subcommand is None:
+        ideas_list()
+
+
+@ideas_app.command("list")
+def ideas_list() -> None:
+    """Every idea: stage reached, slug, verdict and score."""
+    cfg = _load()
+    found = engine.ids(cfg.tool_dir)
+    if not found:
+        output.skip('no ideas yet — tabmill new "<idea>"')
+        return
+    table = Table(show_edge=False, pad_edge=False, box=None, header_style="bold")
+    for col in ("idea", "input", "reached", "slug", "verdict", "score", "AI cost"):
+        table.add_column(col, overflow="fold")
+    for i in found:
+        s = engine.summary(cfg.tool_dir, i)
+        reached = s["done"][-1] if s["done"] else "—"
+        if s["stale"]:
+            reached += f" (stale: {', '.join(s['stale'])})"
+        cost = "unknown" if s["cost_usd"] is None else f"${s['cost_usd']:.2f}"
+        table.add_row(
+            i,
+            s["input"],
+            reached,
+            s["slug"] or "—",
+            s["verdict"] or "—",
+            "—" if s["score"] is None else str(s["score"]),
+            cost,
+        )
+    output.console.print(table)
+
+
+@ideas_app.command("show")
+def ideas_show(idea_id: str = typer.Argument(..., help="Idea id.")) -> None:
+    """The idea's idea.md (after write), else its stage summaries."""
+    cfg = _load()
+    try:
+        engine.load(cfg.tool_dir, idea_id)
+    except engine.IdeaError as e:
+        output.fail(str(e))
+        raise typer.Exit(1) from e
+    s = engine.summary(cfg.tool_dir, idea_id)
+    md = generate.recipe_dir(cfg.tool_dir, s["slug"]) / "idea.md" if s["slug"] else None
+    if md is not None and md.exists() and "write" in s["done"]:
+        output.console.print(escape(md.read_text()))
+        return
+    for name in engine.ORDER:
+        rec = engine.read_stage(cfg.tool_dir, idea_id, name)
+        if rec is not None:
+            _stage_summary(rec)
+
+
+@ideas_app.command("compare")
+def ideas_compare(
+    idea_ids: list[str] = typer.Argument(..., help="Two or more idea ids."),  # noqa: B008
+) -> None:
+    """Side by side: verdict, score, the five rubric scores, evidence mix, check errors."""
+    cfg = _load()
+    if len(idea_ids) < 2:
+        output.fail("compare needs two or more idea ids")
+        raise typer.Exit(1)
+    try:
+        rows = [engine.summary(cfg.tool_dir, i) for i in idea_ids]
+    except engine.IdeaError as e:
+        output.fail(str(e))
+        raise typer.Exit(1) from e
+    table = Table(show_edge=False, pad_edge=False, box=None, header_style="bold")
+    table.add_column("")
+    for r in rows:
+        table.add_column(r["slug"] or r["id"], overflow="fold")
+
+    def cell(r: dict[str, Any], key: str) -> str:
+        v = r[key]
+        return "—" if v in (None, "", {}) else str(v)
+
+    table.add_row("idea", *[r["id"] for r in rows])
+    table.add_row("verdict", *[cell(r, "verdict") for r in rows])
+    table.add_row("score", *[cell(r, "score") for r in rows])
+    for dim in ("reach", "outrate", "audience", "risk", "effort"):
+        table.add_row(dim, *[str(r["scores"].get(dim, "—")) for r in rows])
+    for kind in ("real", "external", "synthesis", "missing"):
+        table.add_row(f"facts: {kind}", *[str(r["kinds"].get(kind, 0)) for r in rows])
+    table.add_row("check errors", *[cell(r, "errors") for r in rows])
+    output.console.print(table)
 
 
 @app.command()
@@ -1203,8 +1427,18 @@ def status(
 
     steps = {r.slug: lifecycle.next_step(r, reg.get(r.slug, {}), released(r)) for r in rows}
     stages = {
-        r.slug: lifecycle.stage(r, reg.get(r.slug, {}), r.slug in items, released(r)) for r in rows
+        r.slug: lifecycle.stage(
+            r,
+            reg.get(r.slug, {}),
+            r.slug in items and items[r.slug].approval in portfolio.APPROVED,
+            released(r),
+        )
+        for r in rows
     }
+    for r in rows:  # idea-stage recipes wait for human gate 1 (D-040)
+        idea_id = _idea_of(cfg, r.slug)
+        if idea_id and stages[r.slug] == "shaped":
+            stages[r.slug], steps[r.slug] = "verdict", f"tabmill approve {idea_id}"
     if as_json:
         typer.echo(
             json.dumps(
@@ -1256,6 +1490,14 @@ STAGE_STYLE = {
     "published": "[green]✓ published[/green]",
     "maintained": "[green]✓ maintained[/green]",
 }
+
+
+def _idea_of(cfg: config.Config, slug: str) -> str:
+    try:
+        ext = extension.load_file(generate.recipe_dir(cfg.tool_dir, slug) / generate.RECIPE_FILE)
+    except (extension.ExtensionError, OSError):
+        return ""
+    return str(ext.get("idea_id") or "")
 
 
 def _portfolio(cfg: config.Config) -> portfolio.Portfolio:

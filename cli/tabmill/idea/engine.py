@@ -22,7 +22,7 @@ IDEAS_DIR = "ideas"
 SESSION_FILE = "session.json"
 BRIEF_FILE = "brief.md"
 ORDER = ("clarify", "shape", "evidence", "check", "verdict", "write")
-ARRIVES = {"verdict": "v2.F", "write": "v2.F"}
+ARRIVES: dict[str, str] = {}  # every stage is built (v2.F)
 _ID_WORDS = 4
 
 StageKind = Literal["ai", "data", "rule", "gen"]
@@ -299,4 +299,48 @@ def run(
         out.append(rec)
         if on_step:
             on_step(name, "ran" + (f" · marked stale: {', '.join(marked)}" if marked else ""))
+    return out
+
+
+# --- summaries (`tabmill ideas`) ----------------------------------------------------------
+
+
+def ids(tool_dir: Path) -> list[str]:
+    root = ideas_root(tool_dir)
+    return sorted(p.parent.name for p in root.glob(f"*/{SESSION_FILE}")) if root.exists() else []
+
+
+def summary(tool_dir: Path, idea_id: str) -> dict[str, Any]:
+    """One row for `ideas list` / `ideas compare`: progress, verdict, evidence mix."""
+    session = load(tool_dir, idea_id)
+    recs = {n: read_stage(tool_dir, idea_id, n) for n in ORDER}
+    done = [n for n, r in recs.items() if r is not None and not r.stale]
+    stale = [n for n, r in recs.items() if r is not None and r.stale]
+    out: dict[str, Any] = {
+        "id": idea_id,
+        "input": session.input_kind,
+        "created": session.created[:10],
+        "done": done,
+        "stale": stale,
+        "slug": "",
+        "verdict": "",
+        "score": None,
+        "scores": {},
+        "kinds": {},
+        "errors": None,
+        "cost_usd": None,
+    }
+    if recs["shape"] is not None:
+        out["slug"] = recs["shape"].output["draft"]["slug"]
+    if recs["evidence"] is not None:
+        out["kinds"] = recs["evidence"].output.get("kinds", {})
+    if recs["check"] is not None:
+        out["errors"] = recs["check"].output["errors"]
+    if recs["verdict"] is not None:
+        v = recs["verdict"].output
+        out["verdict"], out["score"] = v["verdict"], v["weighted"]
+        out["scores"] = {d: s["score"] for d, s in v["scores"].items()}
+    costs = [c.cost_usd for r in recs.values() if r is not None for c in r.calls]
+    if costs and None not in costs:
+        out["cost_usd"] = round(sum(c for c in costs if c is not None), 4)
     return out

@@ -11,6 +11,14 @@ tradeoffs, and links to commits / ADRs.
 
 ---
 
+## v2.F — Verdict, write, approve, ideas (shipped 2026-10-16, D-040)
+
+verdict_v1 with code-side score, bands and evidence cap (config in `rules/lamill.yaml`); write
+(recipe v2 + idea.md, no clobber); portfolio item diff + `--apply`; `approve` (terminal-only gate,
+freeze hash, slot reservation, override reason); build path refuses unapproved idea recipes and
+frozen-field drift; `ideas list/show/compare`. Live run: page-word-counter GO-IF 5.65, $0.69;
+fixed `status` pointing at bootstrap before approve. `approve` not run in a real terminal. 228 tests.
+
 ## v2.E — Evidence (shipped 2026-10-16, D-040)
 
 Providers with one interface (lamill validate/trends, evidence files, brief, overlap; treg and

@@ -18,6 +18,28 @@ blocker to `NOTES.md`, mark it BLOCKED, move on.
 
 ## v1.B — Tool + generator ✅ (2026-10-03; details in docs/shipping-history.md)
 
+## v2.F — Verdict, write, approve, ideas ✅ (2026-10-16; D-040, `docs/prd.md` § v2)
+
+1. [x] `prompts/verdict_v1.md` + `idea/stages/verdict.py`: AI scores reach / out-rate /
+       audience / risk / effort 0–10 with reasons + risks; code computes the weighted score
+       (35/25/20/10/10) and band (GO ≥ 7.0, GO-IF ≥ 5.0 — starting values, tuned in v2.H; in
+       `rules/lamill.yaml` § verdict); any check error → NO-GO; cap at GO-IF with
+       `needs evidence` when all demand or all competition facts are synthesis/missing.
+2. [x] `idea/stages/write.py` (kind gen): `recipes/<slug>/extension.yaml` (schema v2, idea_id,
+       provenance; `‹FILL›` + `# why` only for human decisions) + `recipes/<slug>/idea.md`
+       (idea, Q&A, concept, evidence table, check, verdict, risks, next command). Never
+       overwrites a recipe from another idea or an approved one.
+3. [x] Portfolio item diff printed after write; `new --apply` writes it (`approval: proposed`).
+4. [x] `approve <idea-id> [--override "<reason>"]` (TTY only): written recipe valid + no rule
+       errors + free slot; shows verdict + ‹FILL› items; confirm; NO-GO needs `--override`;
+       freezes (sha256 of frozen fields; not version / changelog / landing_page_url) and
+       reserves the slot. `bootstrap` / `check` refuse a frozen recipe whose frozen fields
+       changed until `recipe_revision` is bumped and re-approved.
+5. [x] `ideas [list] | show <id> | compare <id> <id>…`.
+6. [x] Tests (cap, sourced GO, thresholds, check-error NO-GO, write output valid, no clobber,
+       approve gates + freeze + drift refusal, ideas commands); docs.
+7. [x] HUMAN: review v2.F (operator, 2026-10-16: "call 2f done").
+
 ## v2.E — Evidence ✅ (2026-10-16; D-040, `docs/prd.md` § v2)
 
 1. [x] `idea/evidence.py` providers, one interface `collect(keywords, ctx) → (status, facts)`:

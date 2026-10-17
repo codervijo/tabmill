@@ -249,6 +249,9 @@ def test_cli_resume_runs_shape_and_check(cfg: Config, monkeypatch: pytest.Monkey
     cfg.workspace.mkdir(parents=True)
     monkeypatch.setattr(cli, "_load", lambda *_: cfg)
     monkeypatch.setattr("tabmill.idea.stages.evidence.default_providers", lambda: [])
+    from tabmill.idea import stages as idea_stages
+
+    monkeypatch.setattr(idea_stages, "REGISTERED", idea_stages.REGISTERED[:4])  # verdict: v2.F
     shutil.copytree(TOOL_DIR / "recipes", cfg.tool_dir / "recipes")
     ctx = _clarified(cfg.tool_dir, monkeypatch, workspace=cfg.workspace)
     _write_fixture(cfg.tool_dir / "fx", cfg.tool_dir, "shape", shape.values(ctx), _shape_reply())
@@ -256,7 +259,7 @@ def test_cli_resume_runs_shape_and_check(cfg: Config, monkeypatch: pytest.Monkey
     assert result.exit_code == 0, result.stdout
     out = " ".join(result.stdout.split())  # rich wraps at 80 columns
     assert "shape: word-counter · side-panel · 'Word Counter'" in out
-    assert "check: 0 error(s)" in out and "verdict arrives in v2.F" in out
+    assert "check: 0 error(s)" in out
     assert "AI: 1 call(s)" in out
     rerun = runner.invoke(cli.app, ["new", "shape", ctx.session.id, "--non-interactive"])
     again = " ".join(rerun.stdout.split())

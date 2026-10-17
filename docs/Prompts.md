@@ -158,3 +158,10 @@ The dated H2 is what `lamill project status` parses. Append-only.
 ## 2026-10-16 — v2.E done, v2.F started
 
 > "commit, call 2e done and start 2f"
+> → verdict_v1 (code score, bands, cap), write (recipe v2 + idea.md), --apply, approve
+> (freeze + slot), build-path gate, ideas list/show/compare. Live run: page-word-counter GO-IF
+> 5.65, $0.69 for 3 calls; status bug (said bootstrap before approve) fixed.
+
+## 2026-10-16 — v2.F done, v2.G started
+
+> "commit, call 2f done and start 2g"

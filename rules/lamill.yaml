@@ -59,3 +59,10 @@ rules:
   single-purpose:       {idea: error, dev: skip,  release: skip}    # dev/release: schema + fill-placeholder
   template-implemented: {idea: warn,  dev: skip,  release: skip}    # dev/release: bootstrap refuses a stub
   slot-free:            {idea: warn,  dev: skip,  release: skip}
+
+# Verdict (verdict_v1): the AI scores each dimension 0–10; code weighs them and bands the
+# result. Thresholds are starting values, not derived from data — tuned in v2.H.
+verdict:
+  weights: {reach: 35, outrate: 25, audience: 20, risk: 10, effort: 10}  # percent
+  go: 7.0
+  go_if: 5.0

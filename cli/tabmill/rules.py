@@ -44,6 +44,13 @@ class Limits(BaseModel):
     summary: int
 
 
+class VerdictConfig(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    weights: dict[str, int]
+    go: float
+    go_if: float
+
+
 class RuleSet(BaseModel):
     model_config = ConfigDict(extra="forbid")
     version: int
@@ -52,6 +59,7 @@ class RuleSet(BaseModel):
     limits: Limits
     brand_denylist: list[str]
     rules: dict[str, Levels]
+    verdict: VerdictConfig
 
 
 @dataclass(frozen=True)

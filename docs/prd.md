@@ -88,8 +88,8 @@ bootstrap → try → check → ship. Plan accepted 2026-10-15; design below the
 | v2.C | ✅ done | Brief input (`--paste`, stdin, `--brief`, auto-detect), parser + schema, `brief check`, gap-only clarify |
 | v2.D | ✅ done | Shape + rules engine (shared with `check`) + template fit + overlap |
 | v2.E | ✅ done | Evidence: lamill integration, evidence files, provenance model, `evidence add` |
-| v2.F | 🔄 in progress | Verdict (rubric + cap) + write (recipe v2, idea.md, slot diff) + `approve` + `ideas list/show/compare` |
-| v2.G | ⏳ planned | Target-adapter seam: chrome-mv3 behind the interface, templates migrated, page-overlay stub |
+| v2.F | ✅ done | Verdict (rubric + cap) + write (recipe v2, idea.md, slot diff) + `approve` + `ideas list/show/compare` |
+| v2.G | 🔄 in progress | Target-adapter seam: chrome-mv3 behind the interface, templates migrated, page-overlay stub |
 | v2.H | ⏳ planned | First real runs (word counter, page ruler briefs) → winner through approve → ship; retro; prompts tuned to v2 |
 | v2.I–v2.Z | — | Reserved for fixes found in v2.H; work that doesn't fit v2 moves to v3.A |
 

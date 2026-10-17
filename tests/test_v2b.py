@@ -248,7 +248,7 @@ def test_engine_resume_replays_and_rerun_marks_downstream_stale(
 
 
 def test_engine_rejects_an_unbuilt_stage(tool_dir: Path) -> None:
-    with pytest.raises(engine.IdeaError, match="v2.F"):
+    with pytest.raises(engine.IdeaError, match="isn't built yet"):
         engine.run(_ctx(tool_dir, None), [clarify.Clarify()], only="verdict")
 
 
@@ -280,7 +280,7 @@ def test_cli_rough_idea_interactive(app_cfg: Config, monkeypatch: pytest.MonkeyP
     monkeypatch.setattr(cli, "_tty", lambda: True)
     result = runner.invoke(cli.app, ["new", *IDEA.split()], input="1\n")
     assert result.exit_code == 0, result.stdout
-    assert "1 answered, 0 open" in result.stdout and "v2.F" in result.stdout
+    assert "1 answered, 0 open" in result.stdout and "AI: 2 call(s)" in result.stdout
     (idea,) = (app_cfg.tool_dir / "ideas").iterdir()
     rec = json.loads((idea / "stages" / "01-clarify.json").read_text())
     assert rec["output"]["qa"][0]["answer"] == "toolbar"  # choice 1, saved verbatim

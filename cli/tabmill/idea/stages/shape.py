@@ -49,7 +49,7 @@ def _templates() -> str:
     )
 
 
-def _existing(ctx: Context) -> str:
+def existing_purposes(ctx: Context) -> str:
     lines = []
     for slug in catalog.recipe_slugs(ctx.tool_dir):
         try:
@@ -83,14 +83,24 @@ def values(ctx: Context) -> dict[str, str]:
         "brief_proposal": proposal,
         "templates": _templates(),
         "allowlist": ", ".join(rs.permission_allowlist),
-        "existing": _existing(ctx),
+        "existing": existing_purposes(ctx),
         "name_max": str(rs.limits.name),
         "summary_max": str(rs.limits.summary),
     }
 
 
 def taken(ctx: Context) -> set[str]:
-    used = set(catalog.recipe_slugs(ctx.tool_dir))
+    """Slugs in use — except a recipe this same idea wrote (re-shaping keeps its slug free)."""
+    used = set()
+    for slug in catalog.recipe_slugs(ctx.tool_dir):
+        try:
+            ext = extension.load_file(
+                generate.recipe_dir(ctx.tool_dir, slug) / generate.RECIPE_FILE
+            )
+        except extension.ExtensionError:
+            ext = {}
+        if ext.get("idea_id") != ctx.session.id:
+            used.add(slug)
     if ctx.workspace is not None and ctx.workspace.exists():
         used |= set(registry.slugs(ctx.workspace))
     return used

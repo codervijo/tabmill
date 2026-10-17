@@ -4,6 +4,8 @@ published state, checked version) stays in the workspace's registry.json."""
 
 from __future__ import annotations
 
+import hashlib
+import json
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Literal
@@ -27,8 +29,9 @@ class PortfolioError(Exception):
 
 class Item(BaseModel):
     model_config = ConfigDict(extra="forbid")
-    # migrated = recipe predates the v2 approve gate (grandfathered, no verdict).
-    approval: Literal["migrated", "approved", "override"]
+    # migrated = recipe predates the v2 approve gate (grandfathered, no verdict);
+    # proposed = written by the idea stage (`new --apply`), not yet approved.
+    approval: Literal["migrated", "proposed", "approved", "override"]
     idea_id: str = ""
     recipe_revision: int = Field(default=1, ge=1)
     frozen_sha256: str = ""
@@ -46,6 +49,48 @@ class Portfolio(BaseModel):
     model_config = ConfigDict(extra="forbid")
     slots: Slots = Slots()
     items: dict[str, Item] = {}
+
+
+APPROVED = ("migrated", "approved", "override")
+# Fields tabmill itself rewrites during a release stay outside the freeze (D-040).
+# cta_url / store_category are the ‹FILL› decisions completed after approve.
+UNFROZEN = (
+    "version",
+    "changelog",
+    "landing_page_url",
+    "recipe_revision",
+    "cta_url",
+    "store_category",
+)
+
+
+def frozen_sha256(ext: dict[str, Any]) -> str:
+    """Hash of the recipe's frozen fields (parsed values, so comment edits don't count)."""
+    frozen = {k: v for k, v in ext.items() if k not in UNFROZEN}
+    blob = json.dumps(frozen, sort_keys=True, default=str, ensure_ascii=False)
+    return hashlib.sha256(blob.encode()).hexdigest()
+
+
+def is_approved(tool_dir: Path, slug: str) -> bool:
+    item = read(tool_dir).items.get(slug)
+    return item is not None and item.approval in APPROVED
+
+
+def drift(tool_dir: Path, slug: str, ext: dict[str, Any]) -> str | None:
+    """Why a frozen (approved) recipe may not be built as it is now; None = fine."""
+    item = read(tool_dir).items.get(slug)
+    if item is None or item.approval not in ("approved", "override"):
+        return None
+    revision = int(ext.get("recipe_revision", 1))
+    if frozen_sha256(ext) == item.frozen_sha256 and revision == item.recipe_revision:
+        return None
+    how = f"tabmill approve {item.idea_id}" if item.idea_id else "tabmill approve"
+    if revision == item.recipe_revision:
+        return (
+            f"frozen fields of recipes/{slug} changed since approve — bump "
+            f"recipe_revision to {revision + 1} and re-run `{how}`"
+        )
+    return f"recipe_revision {revision} isn't approved (approved: {item.recipe_revision}) — `{how}`"
 
 
 def path(tool_dir: Path) -> Path:

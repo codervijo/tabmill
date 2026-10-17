@@ -30,6 +30,7 @@ def test_top_level_is_the_lifecycle() -> None:
     assert isinstance(group, typer.core.TyperGroup)
     assert list(group.commands) == [
         "new",
+        "approve",
         "bootstrap",
         "try",
         "check",
@@ -40,6 +41,7 @@ def test_top_level_is_the_lifecycle() -> None:
         "templates",
         "doctor",
         "brief",
+        "ideas",
         "evidence",
         "settings",
         "advanced",
